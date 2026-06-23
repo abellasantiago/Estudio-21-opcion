@@ -1,0 +1,124 @@
+---
+import { Picture } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import { getPortada, getGaleria } from '../lib/images';
+import { site } from '../data/site';
+import '../styles/project-page.css';
+
+interface Props {
+  proyecto: CollectionEntry<'proyectos'>;
+}
+
+const { proyecto } = Astro.props;
+const { nombre, codigo, slug, estado, ubicacion, barrio, anio, unidades, metros } =
+  proyecto.data;
+
+const { Content } = await render(proyecto);
+const portada = getPortada(slug);
+const galeria = getGaleria(slug);
+const estadoLabel = estado === 'en-proceso' ? 'En proceso' : 'Terminado';
+
+const title = `${nombre} (${codigo}) — Estudio 21`;
+const description = `${nombre}: proyecto ${estadoLabel.toLowerCase()} de Estudio 21 en ${
+  barrio ? `${barrio}, ` : ''
+}${ubicacion} (${anio}).`;
+
+const url = new URL(Astro.url.pathname, Astro.site).href;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Residence',
+  name: nombre,
+  identifier: codigo,
+  url,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: ubicacion,
+    addressCountry: site.direccion.paisISO,
+  },
+};
+
+const ficha = [
+  { k: 'Estado', v: estadoLabel, pendiente: false },
+  { k: 'Año', v: String(anio), pendiente: false },
+  { k: 'Ubicación', v: barrio ?? ubicacion, pendiente: false },
+  { k: 'Unidades', v: unidades != null ? String(unidades) : 'Pendiente', pendiente: unidades == null },
+  { k: 'm²', v: metros != null ? String(metros) : 'Pendiente', pendiente: metros == null },
+];
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <article class="proj-hero">
+    <div class="wrap">
+      <a class="back-link" href="/#proyectos">Volver a proyectos</a>
+
+      <div class="proj-head">
+        <div>
+          <div class="proj-code">{codigo}</div>
+          <h1 class="proj-title">{nombre}</h1>
+        </div>
+        <span class={`status ${estado}`}><span class="pip"></span>{estadoLabel}</span>
+      </div>
+
+      {portada ? (
+        <div class="proj-cover">
+          <Picture
+            src={portada}
+            formats={['avif', 'webp']}
+            alt={`Portada del proyecto ${nombre}`}
+            widths={[800, 1200, 1600]}
+            sizes="(max-width: 1240px) 100vw, 1240px"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </div>
+      ) : (
+        <div class="proj-cover is-placeholder">
+          <span class="cover-code">{codigo}</span>
+          <span class="cover-ph">imagen pendiente</span>
+        </div>
+      )}
+
+      <!-- ficha técnica -->
+      <div class="ficha">
+        {ficha.map((c) => (
+          <div class="cell">
+            <div class="fk">{c.k}</div>
+            <div class={`fv${c.pendiente ? ' pendiente' : ''}`}>{c.v}</div>
+          </div>
+        ))}
+      </div>
+
+      <!-- descripción -->
+      <div class="proj-desc">
+        <Content />
+      </div>
+
+      <!-- galería -->
+      <section class="galeria" aria-label="Galería de fotos">
+        <span class="eyebrow">Galería</span>
+        {galeria.length > 0 ? (
+          <div class="galeria-grid">
+            {galeria.map((img, i) => (
+              <figure>
+                <Picture
+                  src={img}
+                  formats={['avif', 'webp']}
+                  alt={`${nombre} — foto ${i + 1}`}
+                  widths={[500, 800, 1100]}
+                  sizes="(max-width: 600px) 100vw, 50vw"
+                  loading="lazy"
+                />
+              </figure>
+            ))}
+          </div>
+        ) : (
+          <p class="galeria-empty">
+            Galería pendiente · tirá las fotos en src/assets/proyectos/{slug}/
+          </p>
+        )}
+      </section>
+    </div>
+  </article>
+</BaseLayout>

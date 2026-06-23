@@ -1,0 +1,62 @@
+/* ---------- PÁGINA DE PROYECTO (detalle) ---------- */
+.proj-hero{position:relative;padding-top:clamp(2.2rem,5vw,3.5rem);padding-bottom:clamp(2rem,4vw,3rem)}
+.back-link{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--concrete);display:inline-flex;align-items:center;gap:.5rem;transition:color .25s}
+.back-link:hover{color:var(--ink)}
+.back-link::before{content:"←";font-size:1rem}
+
+.proj-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;margin-top:1.8rem}
+.proj-code{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.12em;color:var(--petrol);text-transform:uppercase}
+h1.proj-title{font-family:var(--font-display);font-weight:500;font-size:clamp(2.2rem,5vw,4rem);line-height:1.02;letter-spacing:-.025em;margin-top:.9rem;max-width:16ch}
+
+/* portada grande */
+.proj-cover{
+  position:relative;margin-top:clamp(1.8rem,4vw,2.8rem);aspect-ratio:16/9;overflow:hidden;
+  background:var(--paper-deep);border:1px solid var(--line);
+}
+.proj-cover picture,.proj-cover img{width:100%;height:100%}
+.proj-cover img{object-fit:cover}
+.proj-cover.is-placeholder::before{
+  content:"";position:absolute;inset:0;
+  background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
+  background-size:34px 34px;opacity:.5;
+}
+.proj-cover .cover-code{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:1rem;letter-spacing:.16em;color:var(--concrete-soft)}
+.proj-cover .cover-ph{position:absolute;left:14px;bottom:12px;font-family:var(--font-mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--concrete-soft);opacity:.85}
+
+/* ficha técnica */
+.ficha{margin-top:clamp(3rem,6vw,5rem);border-top:1px solid var(--ink);display:grid;grid-template-columns:repeat(5,1fr)}
+.ficha .cell{padding:1.5rem 1.4rem 1.6rem 0;border-right:1px solid var(--line);position:relative}
+.ficha .cell:last-child{border-right:0}
+.ficha .fk{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--concrete)}
+.ficha .fv{font-family:var(--font-display);font-weight:500;font-size:clamp(1.3rem,2.4vw,1.9rem);line-height:1;letter-spacing:-.01em;margin-top:.8rem}
+.ficha .fv.pendiente{color:var(--concrete-soft);font-style:normal}
+
+/* descripción */
+.proj-desc{margin-top:clamp(3rem,6vw,5rem);max-width:62ch}
+.proj-desc :is(p){font-size:clamp(1.02rem,1.3vw,1.18rem);color:var(--ink-soft);margin-bottom:1.1rem}
+.proj-desc :is(h2,h3){font-family:var(--font-display);font-weight:500;letter-spacing:-.01em;margin:2rem 0 .8rem}
+.proj-desc :is(ul,ol){margin:0 0 1.1rem 1.2rem;color:var(--ink-soft)}
+.proj-desc li{margin-bottom:.4rem}
+
+/* galería */
+.galeria{margin-top:clamp(3rem,6vw,5rem)}
+.galeria-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(.8rem,2vw,1.4rem);margin-top:1.6rem}
+.galeria-grid figure{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--paper-deep);border:1px solid var(--line)}
+.galeria-grid picture,.galeria-grid img{width:100%;height:100%}
+.galeria-grid img{object-fit:cover;transition:transform .5s cubic-bezier(.2,.7,.3,1)}
+.galeria-grid figure:hover img{transform:scale(1.03)}
+.galeria-empty{margin-top:1.6rem;border:1px dashed var(--line);padding:2.4rem;text-align:center;font-family:var(--font-mono);font-size:.78rem;letter-spacing:.06em;color:var(--concrete-soft);text-transform:uppercase}
+
+@media(max-width:900px){
+  .ficha{grid-template-columns:repeat(2,1fr)}
+  .ficha .cell{border-bottom:1px solid var(--line)}
+  .ficha .cell:nth-child(2n){border-right:0}
+}
+@media(max-width:600px){
+  .ficha{grid-template-columns:1fr}
+  .ficha .cell{border-right:0!important;padding-right:0}
+  .galeria-grid{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  .galeria-grid figure:hover img{transform:none}
+}

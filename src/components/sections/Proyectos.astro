@@ -1,0 +1,58 @@
+---
+import '../../styles/proyectos.css';
+import { getCollection } from 'astro:content';
+import ProjectCard from '../ProjectCard.astro';
+
+// Número del código (ej. "E21·14" -> 14) para ordenar la grilla.
+const numCodigo = (codigo: string) =>
+  parseInt(codigo.split('·').pop()?.replace(/\D/g, '') ?? '0', 10) || 0;
+
+const proyectos = await getCollection('proyectos');
+proyectos.sort((a, b) => {
+  const oa = a.data.orden ?? numCodigo(a.data.codigo);
+  const ob = b.data.orden ?? numCodigo(b.data.codigo);
+  return ob - oa; // más nuevo primero
+});
+---
+
+<section class="block" id="proyectos">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow reveal">Obra construida</span>
+      <h2 class="section-title reveal" data-d="1">Quince proyectos, una misma manera de hacer.</h2>
+    </div>
+
+    <div class="proj-bar reveal" data-d="1">
+      <p class="proj-intro">Selección de obra · Montevideo</p>
+      <div class="filters" role="group" aria-label="Filtrar proyectos">
+        <button data-filter="todos" aria-pressed="true">Todos</button>
+        <button data-filter="en-proceso" aria-pressed="false">En proceso</button>
+        <button data-filter="terminado" aria-pressed="false">Terminados</button>
+      </div>
+    </div>
+
+    <div class="proj-grid" id="projGrid">
+      {proyectos.map((p, i) => <ProjectCard proyecto={p} d={(i % 3) + 1} />)}
+    </div>
+  </div>
+</section>
+
+<script>
+  // Filtro de proyectos (Todos / En proceso / Terminados). JS mínimo, sin framework.
+  const grid = document.getElementById('projGrid');
+  if (grid) {
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>('.card'));
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.filters button');
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        buttons.forEach((b) => b.setAttribute('aria-pressed', 'false'));
+        btn.setAttribute('aria-pressed', 'true');
+        const f = btn.dataset.filter;
+        cards.forEach((c) => {
+          const show = f === 'todos' || c.dataset.status === f;
+          c.style.display = show ? '' : 'none';
+        });
+      });
+    });
+  }
+</script>

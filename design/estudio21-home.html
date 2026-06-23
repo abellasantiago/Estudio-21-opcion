@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estudio 21 — Arquitectura y desarrollo · Montevideo</title>
+<meta name="description" content="Desarrolladora boutique en Montevideo. Concebimos, construimos y entregamos cada proyecto de principio a fin. Más de 15 proyectos en más de 10 años.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EAE8E2;
+    --paper-2:#F2F1EC;
+    --paper-deep:#E0DED7;
+    --ink:#1A1916;
+    --ink-soft:#3B3933;
+    --concrete:#67655D;
+    --concrete-soft:#8A8780;
+    --line:#D3D0C8;
+    --line-soft:#DEDCD5;
+    --petrol:#1E4D49;
+    --petrol-bright:#2A6B65;
+    --petrol-tint:#DEE8E5;
+    --font-display:"Space Grotesk", system-ui, sans-serif;
+    --font-body:"Inter", system-ui, sans-serif;
+    --font-mono:"IBM Plex Mono", ui-monospace, monospace;
+    --maxw:1240px;
+    --gutter:clamp(1.25rem, 4vw, 3.5rem);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font-body);
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+  ::selection{background:var(--petrol);color:var(--paper-2)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding-inline:var(--gutter)}
+
+  /* ---- shared type helpers ---- */
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--concrete);
+    display:inline-flex;
+    align-items:center;
+    gap:.6em;
+  }
+  .eyebrow::before{
+    content:"";
+    width:1.6rem;
+    height:1px;
+    background:var(--petrol);
+  }
+  h2.section-title{
+    font-family:var(--font-display);
+    font-weight:500;
+    font-size:clamp(1.9rem, 3.8vw, 3rem);
+    line-height:1.04;
+    letter-spacing:-.015em;
+    margin-top:1.1rem;
+    max-width:18ch;
+  }
+  .lead{
+    font-size:clamp(1rem, 1.25vw, 1.18rem);
+    color:var(--ink-soft);
+    max-width:54ch;
+    margin-top:1.4rem;
+  }
+
+  /* registration / crop marks */
+  .marks{position:absolute;inset:0;pointer-events:none}
+  .marks span{position:absolute;width:14px;height:14px;opacity:.55}
+  .marks span::before,.marks span::after{content:"";position:absolute;background:var(--concrete-soft)}
+  .marks span::before{width:100%;height:1px;top:0}
+  .marks span::after{width:1px;height:100%;left:0}
+  .marks .tl{top:0;left:0}
+  .marks .tr{top:0;right:0;transform:scaleX(-1)}
+  .marks .bl{bottom:0;left:0;transform:scaleY(-1)}
+  .marks .br{bottom:0;right:0;transform:scale(-1)}
+
+  /* ---------- HEADER ---------- */
+  header{
+    position:sticky;top:0;z-index:60;
+    background:color-mix(in srgb, var(--paper) 86%, transparent);
+    backdrop-filter:saturate(120%) blur(8px);
+    border-bottom:1px solid transparent;
+    transition:border-color .35s ease, background .35s ease;
+  }
+  header.scrolled{border-bottom-color:var(--line);background:color-mix(in srgb, var(--paper) 94%, transparent)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:74px}
+  .brand{display:flex;align-items:center;gap:.7rem;font-family:var(--font-display);font-weight:500;font-size:1.18rem;letter-spacing:-.01em}
+  .brand .mark{
+    font-family:var(--font-mono);font-weight:500;font-size:.78rem;
+    border:1px solid var(--ink);border-radius:2px;padding:.18rem .42rem;line-height:1;
+    letter-spacing:.04em;
+  }
+  .nav-links{display:flex;align-items:center;gap:2.2rem}
+  .nav-links a{
+    font-family:var(--font-mono);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--concrete);position:relative;padding:.3rem 0;transition:color .25s ease;
+  }
+  .nav-links a::after{content:"";position:absolute;left:0;bottom:-1px;width:0;height:1px;background:var(--ink);transition:width .28s ease}
+  .nav-links a:hover{color:var(--ink)}
+  .nav-links a:hover::after{width:100%}
+  .nav-cta{
+    font-family:var(--font-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;
+    border:1px solid var(--ink);border-radius:2px;padding:.55rem .95rem;color:var(--ink);
+    transition:background .25s ease,color .25s ease;
+  }
+  .nav-cta:hover{background:var(--ink);color:var(--paper-2)}
+  .nav-cta::after{display:none}
+  .burger{display:none;background:none;border:0;cursor:pointer;width:30px;height:24px;position:relative}
+  .burger span{position:absolute;left:0;width:100%;height:1.5px;background:var(--ink);transition:.3s}
+  .burger span:nth-child(1){top:3px}
+  .burger span:nth-child(2){top:11px}
+  .burger span:nth-child(3){top:19px}
+  body.menu-open .burger span:nth-child(1){top:11px;transform:rotate(45deg)}
+  body.menu-open .burger span:nth-child(2){opacity:0}
+  body.menu-open .burger span:nth-child(3){top:11px;transform:rotate(-45deg)}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;padding-top:clamp(3rem,7vw,6rem);padding-bottom:clamp(2.5rem,5vw,4rem);overflow:hidden}
+  .hero .wrap{position:relative;z-index:2}
+  .ghost21{
+    position:absolute;z-index:0;right:-3vw;top:-2vw;
+    font-family:var(--font-display);font-weight:700;
+    font-size:min(46vw,42rem);line-height:.8;
+    color:var(--paper-deep);
+    user-select:none;pointer-events:none;letter-spacing:-.04em;
+  }
+  .hero-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:clamp(2rem,5vw,5rem);align-items:end}
+  h1.hero-title{
+    font-family:var(--font-display);font-weight:500;
+    font-size:clamp(2.4rem,5.6vw,5rem);line-height:1.0;letter-spacing:-.025em;
+    margin-top:1.6rem;max-width:14ch;
+  }
+  h1.hero-title em{font-style:normal;color:var(--petrol)}
+  .hero-lead{font-size:clamp(1rem,1.3vw,1.22rem);color:var(--ink-soft);max-width:46ch;margin-top:1.7rem}
+  .hero-side{padding-bottom:.4rem}
+  .hero-dim{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;color:var(--concrete);text-transform:uppercase;margin-bottom:1.4rem;display:flex;align-items:center;gap:.6rem}
+  .hero-dim::before{content:"";flex:0 0 auto;width:.5rem;height:.5rem;border:1px solid var(--petrol);border-radius:50%}
+
+  /* title-block / legend */
+  .legend{
+    margin-top:clamp(2.6rem,5vw,4rem);
+    border-top:1px solid var(--ink);
+    display:grid;grid-template-columns:repeat(3,1fr);
+  }
+  .legend .cell{padding:1.5rem 1.6rem 1.5rem 0;border-right:1px solid var(--line);position:relative}
+  .legend .cell:last-child{border-right:0}
+  .legend .num{font-family:var(--font-display);font-weight:500;font-size:clamp(2.6rem,5vw,4.2rem);line-height:.9;letter-spacing:-.02em}
+  .legend .lab{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--concrete);margin-top:.7rem}
+  .legend .tag{position:absolute;top:1.5rem;right:1.6rem;font-family:var(--font-mono);font-size:.66rem;color:var(--concrete-soft)}
+  .legend .cell:last-child .tag{right:0}
+
+  /* ---------- SECTION FRAME ---------- */
+  section.block{padding-block:clamp(4.5rem,9vw,8rem);position:relative}
+  section.alt{background:var(--paper-2)}
+  .sec-head{margin-bottom:clamp(2.8rem,5vw,4.5rem)}
+
+  /* ---------- MODELO / PHASES ---------- */
+  .phases{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--ink)}
+  .phase{
+    padding:2.2rem 1.6rem 2.4rem 0;border-right:1px solid var(--line);position:relative;
+  }
+  .phase:last-child{border-right:0;padding-right:0}
+  .phase .pf{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.1em;color:var(--petrol);text-transform:uppercase}
+  .phase h3{font-family:var(--font-display);font-weight:500;font-size:1.32rem;letter-spacing:-.01em;margin-top:1.4rem;line-height:1.1}
+  .phase p{color:var(--concrete);font-size:.96rem;margin-top:.7rem;max-width:24ch}
+  .phase .dot{position:absolute;top:-5px;left:0;width:9px;height:9px;background:var(--paper-2);border:1px solid var(--ink);border-radius:50%}
+  section:not(.alt) .phase .dot{background:var(--paper)}
+
+  /* ---------- PROYECTOS ---------- */
+  .proj-bar{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;margin-bottom:2.6rem}
+  .filters{display:flex;gap:.5rem}
+  .filters button{
+    font-family:var(--font-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;
+    background:none;border:1px solid var(--line);color:var(--concrete);
+    padding:.5rem .9rem;border-radius:2px;cursor:pointer;transition:.22s;
+  }
+  .filters button:hover{border-color:var(--ink);color:var(--ink)}
+  .filters button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper-2)}
+  .proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2vw,1.8rem)}
+  .card{
+    background:var(--paper-2);border:1px solid var(--line);position:relative;
+    transition:transform .4s cubic-bezier(.2,.7,.3,1), border-color .3s ease;
+    display:flex;flex-direction:column;
+  }
+  section.alt .card{background:var(--paper)}
+  .card:hover{transform:translateY(-5px);border-color:var(--ink)}
+  .card .thumb{
+    aspect-ratio:4/3;background:var(--paper-deep);position:relative;overflow:hidden;
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .card .thumb::before{
+    content:"";position:absolute;inset:0;
+    background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
+    background-size:28px 28px;opacity:.55;
+  }
+  .card .thumb .code{position:relative;font-family:var(--font-mono);font-size:.8rem;letter-spacing:.1em;color:var(--concrete-soft)}
+  .card .thumb .ph{position:absolute;left:12px;bottom:10px;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.08em;color:var(--concrete-soft);opacity:.8}
+  .card .meta{padding:1.15rem 1.25rem 1.3rem}
+  .card .meta .name{font-family:var(--font-display);font-weight:500;font-size:1.22rem;letter-spacing:-.01em;line-height:1.12}
+  .card .meta .sub{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.06em;color:var(--concrete);text-transform:uppercase;margin-top:.6rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+  .status{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--font-mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;padding:.22rem .5rem;border-radius:2px}
+  .status.en-proceso{background:var(--petrol-tint);color:var(--petrol)}
+  .status.terminado{background:transparent;color:var(--concrete);border:1px solid var(--line)}
+  .status .pip{width:6px;height:6px;border-radius:50%}
+  .status.en-proceso .pip{background:var(--petrol-bright)}
+  .status.terminado .pip{background:var(--concrete-soft)}
+
+  /* ---------- ESTUDIO / TEAM ---------- */
+  .team-grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ink)}
+  .person{
+    padding:1.8rem 1.6rem 2rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+    display:flex;flex-direction:column;gap:.45rem;
+  }
+  .team-grid .person:nth-child(3n){border-right:0}
+  .person .pname{font-family:var(--font-display);font-weight:500;font-size:1.18rem;letter-spacing:-.01em}
+  .person .prole{font-size:.92rem;color:var(--concrete)}
+  .person .ploc{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--petrol);margin-top:.5rem;display:flex;align-items:center;gap:.45rem}
+  .person .ploc::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--petrol)}
+
+  /* ---------- CONTACTO ---------- */
+  .contact{background:var(--ink);color:var(--paper-2);position:relative;overflow:hidden;padding-block:clamp(4.5rem,9vw,8rem)}
+  .contact .ghost21{color:rgba(255,255,255,.04);right:-2vw;bottom:-8vw;top:auto}
+  .contact .eyebrow{color:var(--concrete-soft)}
+  .contact .eyebrow::before{background:var(--petrol-bright)}
+  .contact h2{font-family:var(--font-display);font-weight:500;font-size:clamp(2rem,4.2vw,3.4rem);line-height:1.02;letter-spacing:-.02em;margin-top:1.2rem;max-width:20ch}
+  .contact .ctext{color:rgba(242,241,236,.72);max-width:46ch;margin-top:1.5rem;font-size:1.05rem}
+  .contact-rows{margin-top:clamp(2.6rem,5vw,4rem);border-top:1px solid rgba(255,255,255,.16);position:relative;z-index:2}
+  .crow{display:grid;grid-template-columns:11rem 1fr auto;gap:1rem;align-items:center;padding:1.4rem 0;border-bottom:1px solid rgba(255,255,255,.12)}
+  .crow .ck{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--concrete-soft)}
+  .crow .cv{font-family:var(--font-display);font-size:clamp(1.1rem,2vw,1.5rem);font-weight:500;letter-spacing:-.01em}
+  .crow .cv a{transition:color .25s}
+  .crow .cv a:hover{color:var(--petrol-bright)}
+  .crow .arrow{font-family:var(--font-mono);color:var(--concrete-soft);font-size:1.1rem;transition:transform .3s}
+  .crow:hover .arrow{transform:translateX(5px);color:var(--paper-2)}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--ink);color:var(--concrete-soft);padding-block:2.4rem;border-top:1px solid rgba(255,255,255,.1)}
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
+  .foot .brand-f{color:var(--paper-2);display:flex;align-items:center;gap:.6rem}
+  .foot .brand-f .mark{border:1px solid rgba(255,255,255,.4);border-radius:2px;padding:.16rem .4rem;font-size:.7rem}
+
+  /* ---------- reveal animation ---------- */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.3,1)}
+  .reveal.in{opacity:1;transform:none}
+  .reveal[data-d="1"]{transition-delay:.08s}
+  .reveal[data-d="2"]{transition-delay:.16s}
+  .reveal[data-d="3"]{transition-delay:.24s}
+  .reveal[data-d="4"]{transition-delay:.32s}
+
+  /* ---------- responsive ---------- */
+  @media(max-width:900px){
+    .hero-grid{grid-template-columns:1fr;gap:2.4rem;align-items:start}
+    .hero-side{order:-1}
+    .ghost21{font-size:min(70vw,30rem);right:-6vw}
+    .phases{grid-template-columns:1fr 1fr}
+    .phase{border-bottom:1px solid var(--line)}
+    .phase:nth-child(2n){border-right:0}
+    .phase:nth-child(2n) {padding-right:0}
+    .phase:nth-child(odd){padding-right:1.6rem}
+    .proj-grid{grid-template-columns:1fr 1fr}
+    .team-grid{grid-template-columns:1fr 1fr}
+    .team-grid .person:nth-child(3n){border-right:1px solid var(--line)}
+    .team-grid .person:nth-child(2n){border-right:0}
+    .crow{grid-template-columns:8rem 1fr auto}
+  }
+  @media(max-width:600px){
+    .nav-links{
+      position:fixed;inset:74px 0 auto 0;flex-direction:column;align-items:flex-start;
+      gap:0;background:var(--paper);border-bottom:1px solid var(--line);padding:1rem var(--gutter) 1.6rem;
+      transform:translateY(-120%);transition:transform .4s cubic-bezier(.2,.7,.3,1);z-index:55;
+    }
+    body.menu-open .nav-links{transform:translateY(0)}
+    .nav-links a{padding:.85rem 0;font-size:.95rem;width:100%;border-bottom:1px solid var(--line-soft)}
+    .nav-links a::after{display:none}
+    .nav-cta{margin-top:.8rem}
+    .burger{display:block}
+    .legend{grid-template-columns:1fr}
+    .legend .cell{border-right:0;border-bottom:1px solid var(--line);padding:1.3rem 0}
+    .legend .cell:last-child{border-bottom:0}
+    .phases{grid-template-columns:1fr}
+    .phase{border-right:0!important;padding-right:0!important;border-bottom:1px solid var(--line)}
+    .proj-grid{grid-template-columns:1fr}
+    .team-grid{grid-template-columns:1fr}
+    .team-grid .person{border-right:0!important}
+    .crow{grid-template-columns:1fr;gap:.3rem}
+    .crow .arrow{display:none}
+    h1.hero-title{font-size:clamp(2.2rem,11vw,3.2rem)}
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    *{scroll-behavior:auto!important}
+    .reveal{opacity:1;transform:none;transition:none}
+    .card{transition:border-color .3s ease}
+    .card:hover{transform:none}
+  }
+
+  :focus-visible{outline:2px solid var(--petrol);outline-offset:3px;border-radius:2px}
+</style>
+</head>
+<body>
+
+<header id="header">
+  <div class="wrap nav">
+    <a href="#top" class="brand"><span class="mark">21</span> Estudio&nbsp;21</a>
+    <nav class="nav-links" id="menu" aria-label="Navegación principal">
+      <a href="#modelo">Modelo</a>
+      <a href="#proyectos">Proyectos</a>
+      <a href="#estudio">Estudio</a>
+      <a href="#contacto" class="nav-cta">Contacto</a>
+    </nav>
+    <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <span class="ghost21" aria-hidden="true">21</span>
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <span class="eyebrow reveal">Desarrolladora boutique — Montevideo, UY</span>
+          <h1 class="hero-title reveal" data-d="1">De la idea a la escritura, un solo <em>estudio</em>.</h1>
+          <p class="hero-lead reveal" data-d="2">Concebimos el proyecto, conseguimos el terreno y estructuramos la inversión. Diseñamos, construimos, dirigimos la obra y vendemos. Todo el ciclo, con un mismo equipo.</p>
+        </div>
+        <div class="hero-side reveal" data-d="2">
+          <div class="hero-dim">EST21 · 21 de Setiembre 3024</div>
+        </div>
+      </div>
+
+      <div class="legend reveal" data-d="3">
+        <div class="cell">
+          <span class="tag">01</span>
+          <div class="num">+10</div>
+          <div class="lab">Años de trayectoria</div>
+        </div>
+        <div class="cell">
+          <span class="tag">02</span>
+          <div class="num">+15</div>
+          <div class="lab">Proyectos ejecutados</div>
+        </div>
+        <div class="cell">
+          <span class="tag">03</span>
+          <div class="num">06</div>
+          <div class="lab">Profesionales</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MODELO ===================== -->
+  <section class="block alt" id="modelo">
+    <span class="marks" aria-hidden="true"><span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span></span>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow reveal">Cómo operamos</span>
+        <h2 class="section-title reveal" data-d="1">Desarrollamos, no solo proyectamos.</h2>
+        <p class="lead reveal" data-d="2">Estudio 21 no trabaja a honorarios para terceros: tomamos cada proyecto como propio. Encontramos el terreno, reunimos a los inversores y nos hacemos cargo del ciclo completo —diseño, obra y venta— con un equipo chico y senior.</p>
+      </div>
+
+      <div class="phases">
+        <div class="phase reveal" data-d="1"><span class="dot"></span>
+          <div class="pf">F01 · Originación</div>
+          <h3>Detectamos la oportunidad</h3>
+          <p>Identificamos la zona, conseguimos el terreno y validamos el negocio.</p>
+        </div>
+        <div class="phase reveal" data-d="2"><span class="dot"></span>
+          <div class="pf">F02 · Estructura</div>
+          <h3>Reunimos la inversión</h3>
+          <p>Damos forma al capital, proyecto por proyecto, con reglas claras.</p>
+        </div>
+        <div class="phase reveal" data-d="3"><span class="dot"></span>
+          <div class="pf">F03 · Proyecto y obra</div>
+          <h3>Diseñamos y construimos</h3>
+          <p>Arquitectura y dirección de obra con equipo propio, sin tercerizar lo que importa.</p>
+        </div>
+        <div class="phase reveal" data-d="4"><span class="dot"></span>
+          <div class="pf">F04 · Entrega y venta</div>
+          <h3>Entregamos cada unidad</h3>
+          <p>Acompañamos la obra hasta la escritura y la colocación de las unidades.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROYECTOS ===================== -->
+  <section class="block" id="proyectos">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow reveal">Obra construida</span>
+        <h2 class="section-title reveal" data-d="1">Quince proyectos, una misma manera de hacer.</h2>
+      </div>
+
+      <div class="proj-bar reveal" data-d="1">
+        <p style="font-family:var(--font-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--concrete)">Selección de obra · Montevideo</p>
+        <div class="filters" role="group" aria-label="Filtrar proyectos">
+          <button data-filter="todos" aria-pressed="true">Todos</button>
+          <button data-filter="en-proceso" aria-pressed="false">En proceso</button>
+          <button data-filter="terminado" aria-pressed="false">Terminados</button>
+        </div>
+      </div>
+
+      <div class="proj-grid" id="projGrid">
+        <article class="card reveal" data-d="1" data-status="en-proceso">
+          <div class="thumb"><span class="code">E21·14</span><span class="ph">imagen pendiente</span></div>
+          <div class="meta">
+            <div class="name">Terrazas de Italia</div>
+            <div class="sub"><span>Montevideo · 2025</span><span class="status en-proceso"><span class="pip"></span>En proceso</span></div>
+          </div>
+        </article>
+        <article class="card reveal" data-d="2" data-status="en-proceso">
+          <div class="thumb"><span class="code">E21·13</span><span class="ph">imagen pendiente</span></div>
+          <div class="meta">
+            <div class="name">Terrazas de Cajal</div>
+            <div class="sub"><span>Montevideo · 2025</span><span class="status en-proceso"><span class="pip"></span>En proceso</span></div>
+          </div>
+        </article>
+        <article class="card reveal" data-d="3" data-status="terminado">
+          <div class="thumb"><span class="code">E21·11</span><span class="ph">imagen pendiente</span></div>
+          <div class="meta">
+            <div class="name">Patios del Regimiento</div>
+            <div class="sub"><span>Montevideo · 2023</span><span class="status terminado"><span class="pip"></span>Terminado</span></div>
+          </div>
+        </article>
+        <article class="card reveal" data-d="1" data-status="terminado">
+          <div class="thumb"><span class="code">E21·09</span><span class="ph">imagen pendiente</span></div>
+          <div class="meta">
+            <div class="name">Cavas de Haedo</div>
+            <div class="sub"><span>Montevideo · 2022</span><span class="status terminado"><span class="pip"></span>Terminado</span></div>
+          </div>
+        </article>
+        <article class="card reveal" data-d="2" data-status="terminado">
+          <div class="thumb"><span class="code">E21·08</span><span class="ph">imagen pendiente</span></div>
+          <div class="meta">
+            <div class="name">Patios del Vitraux</div>
+            <div class="sub"><span>Montevideo · 2021</span><span class="status terminado"><span class="pip"></span>Terminado</span></div>
+          </div>
+        </article>
+        <article class="card reveal" data-d="3" data-status="terminado">
+          <div class="thumb"><span class="code">E21·07</span><span class="ph">imagen pendiente</span></div>
+          <div class="meta">
+            <div class="name">Patios Maldonado</div>
+            <div class="sub"><span>Montevideo · 2020</span><span class="status terminado"><span class="pip"></span>Terminado</span></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ESTUDIO ===================== -->
+  <section class="block alt" id="estudio">
+    <span class="marks" aria-hidden="true"><span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span></span>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow reveal">El estudio</span>
+        <h2 class="section-title reveal" data-d="1">Seis personas detrás de cada proyecto.</h2>
+        <p class="lead reveal" data-d="2">Un equipo chico, senior y muy involucrado. Dos socios arquitectos con más de una década de obra, un núcleo en Montevideo y dos arquitectos en España.</p>
+      </div>
+
+      <div class="team-grid">
+        <div class="person reveal" data-d="1">
+          <div class="pname">Gustavo Abella</div>
+          <div class="prole">Socio · Arquitecto</div>
+          <div class="ploc">Montevideo</div>
+        </div>
+        <div class="person reveal" data-d="2">
+          <div class="pname">Guillermo Tosi</div>
+          <div class="prole">Socio · Arquitecto</div>
+          <div class="ploc">Montevideo</div>
+        </div>
+        <div class="person reveal" data-d="3">
+          <div class="pname">Lucía Arrieta</div>
+          <div class="prole">Arquitecta</div>
+          <div class="ploc">Montevideo</div>
+        </div>
+        <div class="person reveal" data-d="1">
+          <div class="pname">Santiago Abella</div>
+          <div class="prole">Dirección de empresas</div>
+          <div class="ploc">Montevideo</div>
+        </div>
+        <div class="person reveal" data-d="2">
+          <div class="pname">Sofía Tosi</div>
+          <div class="prole">Arquitecta</div>
+          <div class="ploc">España</div>
+        </div>
+        <div class="person reveal" data-d="3">
+          <div class="pname">Federico Cardozo</div>
+          <div class="prole">Arquitecto</div>
+          <div class="ploc">España</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTACTO ===================== -->
+  <section class="contact" id="contacto">
+    <span class="ghost21" aria-hidden="true">21</span>
+    <div class="wrap">
+      <span class="eyebrow reveal">Contacto</span>
+      <h2 class="reveal" data-d="1">El próximo proyecto empieza con una conversación.</h2>
+      <p class="ctext reveal" data-d="2">No trabajamos con formularios. Si te interesa invertir con nosotros o conocer lo que estamos desarrollando, escribinos o pasá por el estudio.</p>
+
+      <div class="contact-rows reveal" data-d="3">
+        <a class="crow" href="mailto:hola@estudio21arq.com">
+          <span class="ck">Escribinos</span>
+          <span class="cv">hola@estudio21arq.com</span>
+          <span class="arrow">→</span>
+        </a>
+        <div class="crow">
+          <span class="ck">Estudio</span>
+          <span class="cv">21 de Setiembre 3024, Montevideo</span>
+          <span class="arrow">↗</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="brand-f"><span class="mark">21</span> Estudio 21 — Arquitectura y desarrollo</span>
+    <span>Montevideo, Uruguay · © 2026</span>
+  </div>
+</footer>
+
+<script>
+  // Header shadow on scroll
+  const header = document.getElementById('header');
+  const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 8);
+  onScroll();
+  window.addEventListener('scroll', onScroll, {passive:true});
+
+  // Mobile menu
+  const burger = document.getElementById('burger');
+  burger.addEventListener('click', () => {
+    const open = document.body.classList.toggle('menu-open');
+    burger.setAttribute('aria-expanded', open);
+    burger.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+  });
+  document.querySelectorAll('#menu a').forEach(a =>
+    a.addEventListener('click', () => {
+      document.body.classList.remove('menu-open');
+      burger.setAttribute('aria-expanded', false);
+    })
+  );
+
+  // Reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Project filter
+  const grid = document.getElementById('projGrid');
+  const cards = [...grid.querySelectorAll('.card')];
+  document.querySelectorAll('.filters button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filters button').forEach(b => b.setAttribute('aria-pressed','false'));
+      btn.setAttribute('aria-pressed','true');
+      const f = btn.dataset.filter;
+      cards.forEach(c => {
+        const show = f === 'todos' || c.dataset.status === f;
+        c.style.display = show ? '' : 'none';
+      });
+    });
+  });
+</script>
+</body>
+</html>

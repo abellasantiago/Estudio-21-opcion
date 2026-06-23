@@ -1,0 +1,26 @@
+{
+  "name": "estudio21",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.2.1",
+    "@fontsource/ibm-plex-mono": "^5.1.1",
+    "@fontsource/inter": "^5.1.1",
+    "@fontsource/space-grotesk": "^5.1.1",
+    "astro": "^5.5.0",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.7.3"
+  }
+}

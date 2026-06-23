@@ -1,0 +1,43 @@
+---
+import '../../styles/contacto.css';
+import { site } from '../../data/site';
+---
+
+<section class="contact" id="contacto">
+  <span class="ghost21" aria-hidden="true">21</span>
+  <div class="wrap">
+    <span class="eyebrow reveal">Contacto</span>
+    <h2 class="reveal" data-d="1">El próximo proyecto empieza con una conversación.</h2>
+    <p class="ctext reveal" data-d="2">
+      No trabajamos con formularios. Si te interesa invertir con nosotros o
+      conocer lo que estamos desarrollando, escribinos o pasá por el estudio.
+    </p>
+
+    <div class="contact-rows reveal" data-d="3">
+      <a class="crow" href={`mailto:${site.email}`}>
+        <span class="ck">Escribinos</span>
+        <span class="cv">{site.email}</span>
+        <span class="arrow">→</span>
+      </a>
+      {site.whatsapp && (
+        <a class="crow" href={`https://wa.me/${site.whatsapp}`} target="_blank" rel="noopener">
+          <span class="ck">WhatsApp</span>
+          <span class="cv">{site.telefono ?? site.whatsapp}</span>
+          <span class="arrow">↗</span>
+        </a>
+      )}
+      {site.instagram && (
+        <a class="crow" href={site.instagram} target="_blank" rel="noopener">
+          <span class="ck">Instagram</span>
+          <span class="cv">@estudio21</span>
+          <span class="arrow">↗</span>
+        </a>
+      )}
+      <a class="crow" href={site.mapsUrl} target="_blank" rel="noopener">
+        <span class="ck">Estudio</span>
+        <span class="cv">{site.direccion.calle}, {site.direccion.ciudad}</span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+  </div>
+</section>

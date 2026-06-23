@@ -1,0 +1,26 @@
+---
+import '../../styles/estudio.css';
+import TeamMember from '../TeamMember.astro';
+import { equipo } from '../../data/equipo';
+---
+
+<section class="block alt" id="estudio">
+  <span class="marks" aria-hidden="true">
+    <span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span>
+  </span>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow reveal">El estudio</span>
+      <h2 class="section-title reveal" data-d="1">Seis personas detrás de cada proyecto.</h2>
+      <p class="lead reveal" data-d="2">
+        Un equipo chico, senior y muy involucrado. Dos socios arquitectos con
+        más de una década de obra, un núcleo en Montevideo y dos arquitectos en
+        España.
+      </p>
+    </div>
+
+    <div class="team-grid">
+      {equipo.map((p, i) => <TeamMember persona={p} d={(i % 3) + 1} />)}
+    </div>
+  </div>
+</section>

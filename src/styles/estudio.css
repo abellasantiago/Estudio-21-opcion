@@ -1,0 +1,44 @@
+/* ---------- ESTUDIO / TEAM ---------- */
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ink)}
+.person{
+  padding:1.8rem 1.6rem 2rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+  display:flex;flex-direction:column;gap:.45rem;
+}
+.team-grid .person:nth-child(3n){border-right:0}
+
+/* retrato (foto optimizada o placeholder) */
+.person .portrait{
+  position:relative;aspect-ratio:4/5;margin-bottom:1.1rem;overflow:hidden;
+  background:var(--paper-deep);border:1px solid var(--line);
+}
+.person .portrait picture,
+.person .portrait img{width:100%;height:100%}
+.person .portrait img{object-fit:cover;filter:grayscale(.18) contrast(1.02)}
+.person .portrait.is-placeholder::before{
+  content:"";position:absolute;inset:0;
+  background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
+  background-size:24px 24px;opacity:.5;
+}
+.person .portrait .initials{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:500;font-size:2.2rem;letter-spacing:.02em;
+  color:var(--concrete-soft);
+}
+.person .portrait .ptag{
+  position:absolute;left:10px;bottom:9px;font-family:var(--font-mono);font-size:.6rem;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--concrete-soft);opacity:.85;
+}
+.person .pname{font-family:var(--font-display);font-weight:500;font-size:1.18rem;letter-spacing:-.01em}
+.person .prole{font-size:.92rem;color:var(--concrete)}
+.person .ploc{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--petrol);margin-top:.5rem;display:flex;align-items:center;gap:.45rem}
+.person .ploc::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--petrol)}
+
+@media(max-width:900px){
+  .team-grid{grid-template-columns:1fr 1fr}
+  .team-grid .person:nth-child(3n){border-right:1px solid var(--line)}
+  .team-grid .person:nth-child(2n){border-right:0}
+}
+@media(max-width:600px){
+  .team-grid{grid-template-columns:1fr}
+  .team-grid .person{border-right:0!important}
+}

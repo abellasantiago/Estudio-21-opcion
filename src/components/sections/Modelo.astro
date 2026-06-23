@@ -1,0 +1,55 @@
+---
+import '../../styles/modelo.css';
+
+const fases = [
+  {
+    pf: 'F01 · Originación',
+    h: 'Detectamos la oportunidad',
+    p: 'Identificamos la zona, conseguimos el terreno y validamos el negocio.',
+  },
+  {
+    pf: 'F02 · Estructura',
+    h: 'Reunimos la inversión',
+    p: 'Damos forma al capital, proyecto por proyecto, con reglas claras.',
+  },
+  {
+    pf: 'F03 · Proyecto y obra',
+    h: 'Diseñamos y construimos',
+    p: 'Arquitectura y dirección de obra con equipo propio, sin tercerizar lo que importa.',
+  },
+  {
+    pf: 'F04 · Entrega y venta',
+    h: 'Entregamos cada unidad',
+    p: 'Acompañamos la obra hasta la escritura y la colocación de las unidades.',
+  },
+];
+---
+
+<section class="block alt" id="modelo">
+  <span class="marks" aria-hidden="true">
+    <span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span>
+  </span>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow reveal">Cómo operamos</span>
+      <h2 class="section-title reveal" data-d="1">Desarrollamos, no solo proyectamos.</h2>
+      <p class="lead reveal" data-d="2">
+        Estudio 21 no trabaja a honorarios para terceros: tomamos cada proyecto
+        como propio. Encontramos el terreno, reunimos a los inversores y nos
+        hacemos cargo del ciclo completo —diseño, obra y venta— con un equipo
+        chico y senior.
+      </p>
+    </div>
+
+    <div class="phases">
+      {fases.map((f, i) => (
+        <div class="phase reveal" data-d={i + 1}>
+          <span class="dot"></span>
+          <div class="pf">{f.pf}</div>
+          <h3>{f.h}</h3>
+          <p>{f.p}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,23 @@
+/* ---------- CONTACTO ---------- */
+.contact{background:var(--ink);color:var(--paper-2);position:relative;overflow:hidden;padding-block:clamp(4.5rem,9vw,8rem)}
+.contact .ghost21{color:rgba(255,255,255,.04);right:-2vw;bottom:-8vw;top:auto}
+.contact .eyebrow{color:var(--concrete-soft)}
+.contact .eyebrow::before{background:var(--petrol-bright)}
+.contact h2{font-family:var(--font-display);font-weight:500;font-size:clamp(2rem,4.2vw,3.4rem);line-height:1.02;letter-spacing:-.02em;margin-top:1.2rem;max-width:20ch}
+.contact .ctext{color:rgba(242,241,236,.72);max-width:46ch;margin-top:1.5rem;font-size:1.05rem}
+.contact-rows{margin-top:clamp(2.6rem,5vw,4rem);border-top:1px solid rgba(255,255,255,.16);position:relative;z-index:2}
+.crow{display:grid;grid-template-columns:11rem 1fr auto;gap:1rem;align-items:center;padding:1.4rem 0;border-bottom:1px solid rgba(255,255,255,.12)}
+.crow .ck{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--concrete-soft)}
+.crow .cv{font-family:var(--font-display);font-size:clamp(1.1rem,2vw,1.5rem);font-weight:500;letter-spacing:-.01em}
+.crow .cv a{transition:color .25s}
+.crow .cv a:hover{color:var(--petrol-bright)}
+.crow .arrow{font-family:var(--font-mono);color:var(--concrete-soft);font-size:1.1rem;transition:transform .3s}
+.crow:hover .arrow{transform:translateX(5px);color:var(--paper-2)}
+
+@media(max-width:900px){
+  .crow{grid-template-columns:8rem 1fr auto}
+}
+@media(max-width:600px){
+  .crow{grid-template-columns:1fr;gap:.3rem}
+  .crow .arrow{display:none}
+}

@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Página no encontrada — Estudio 21"
+  description="La página que buscás no existe o se movió."
+>
+  <section class="block">
+    <div class="wrap">
+      <span class="eyebrow">Error 404</span>
+      <h2 class="section-title">Esta página no existe.</h2>
+      <p class="lead">Puede que el enlace esté roto o que la página se haya movido.</p>
+      <p class="back-home"><a href="/">← Volver al inicio</a></p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .back-home {
+    margin-top: 2.4rem;
+  }
+  .back-home a {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    padding: 0.6rem 1rem;
+    display: inline-block;
+    transition:
+      background 0.25s ease,
+      color 0.25s ease;
+  }
+  .back-home a:hover {
+    background: var(--ink);
+    color: var(--paper-2);
+  }
+</style>

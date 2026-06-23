@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/sections/Hero.astro';
+import Modelo from '../components/sections/Modelo.astro';
+import Proyectos from '../components/sections/Proyectos.astro';
+import Estudio from '../components/sections/Estudio.astro';
+import Contacto from '../components/sections/Contacto.astro';
+import { site } from '../data/site';
+
+const title = 'Estudio 21 — Arquitectura y desarrollo · Montevideo';
+const description = site.descripcion;
+---
+
+<BaseLayout title={title} description={description}>
+  <Hero />
+  <Modelo />
+  <Proyectos />
+  <Estudio />
+  <Contacto />
+</BaseLayout>

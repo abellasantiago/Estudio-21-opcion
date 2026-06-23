@@ -1,0 +1,6 @@
+/* ---------- FOOTER ---------- */
+footer{background:var(--ink);color:var(--concrete-soft);padding-block:2.4rem;border-top:1px solid rgba(255,255,255,.1)}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
+.foot .brand-f{color:var(--paper-2);display:flex;align-items:center;gap:.6rem}
+.foot .brand-f .mark{border:1px solid rgba(255,255,255,.4);border-radius:2px;padding:.16rem .4rem;font-size:.7rem}
+.foot a:hover{color:var(--paper-2)}

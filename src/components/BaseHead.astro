@@ -1,0 +1,78 @@
+---
+import { site } from '../data/site';
+// Preload del peso principal de Space Grotesk (titulares). El import devuelve
+// la URL con hash del .woff2 servido localmente por Fontsource.
+import sgWoff2 from '@fontsource/space-grotesk/files/space-grotesk-latin-500-normal.woff2';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Ruta o URL de la imagen para compartir. Por defecto, la del sitio. */
+  image?: string;
+  /** JSON-LD adicional para esta página (ej. el proyecto). */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const { title, description, image = site.ogImage, jsonLd } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL(image, Astro.site).href;
+
+// JSON-LD base: Organization + LocalBusiness con la dirección real.
+const business = {
+  '@context': 'https://schema.org',
+  '@type': ['Organization', 'LocalBusiness'],
+  name: site.nombre,
+  legalName: site.nombreLargo,
+  description: site.descripcion,
+  email: site.email,
+  url: Astro.site?.href,
+  image: ogImage,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: site.direccion.calle,
+    addressLocality: site.direccion.ciudad,
+    addressCountry: site.direccion.paisISO,
+  },
+  areaServed: 'Montevideo, Uruguay',
+  ...(site.telefono ? { telephone: site.telefono } : {}),
+  ...(site.instagram ? { sameAs: [site.instagram] } : {}),
+};
+
+const jsonLdBlocks = [business, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [])];
+---
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="generator" content={Astro.generator} />
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={site.nombre} />
+<meta property="og:locale" content="es_UY" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+<!-- Iconos -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+<!-- Fuentes: preload del titular principal + sitemap -->
+<link rel="preload" href={sgWoff2} as="font" type="font/woff2" crossorigin />
+<link rel="sitemap" href="/sitemap-index.xml" />
+
+<!-- JSON-LD -->
+{jsonLdBlocks.map((block) => (
+  <script type="application/ld+json" set:html={JSON.stringify(block)} />
+))}

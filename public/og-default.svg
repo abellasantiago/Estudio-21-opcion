@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Estudio 21 — Arquitectura y desarrollo">
+  <rect width="1200" height="630" fill="#EAE8E2"/>
+  <!-- "21" sobredimensionado de fondo -->
+  <text x="1170" y="560" font-family="'Space Grotesk', system-ui, sans-serif" font-size="620" font-weight="700" letter-spacing="-20" fill="#E0DED7" text-anchor="end">21</text>
+  <!-- marcas de registro -->
+  <g stroke="#8A8780" stroke-width="2" opacity="0.55">
+    <path d="M40 40 h22 M40 40 v22"/>
+    <path d="M1160 40 h-22 M1160 40 v22"/>
+    <path d="M40 590 h22 M40 590 v-22"/>
+    <path d="M1160 590 h-22 M1160 590 v-22"/>
+  </g>
+  <!-- marca -->
+  <g transform="translate(80,150)">
+    <rect x="0" y="0" width="60" height="60" rx="4" fill="none" stroke="#1A1916" stroke-width="3"/>
+    <text x="30" y="33" font-family="'IBM Plex Mono', monospace" font-size="26" font-weight="600" fill="#1A1916" text-anchor="middle" dominant-baseline="central">21</text>
+  </g>
+  <!-- línea de acento -->
+  <rect x="84" y="252" width="48" height="3" fill="#1E4D49"/>
+  <text x="84" y="244" font-family="'IBM Plex Mono', monospace" font-size="22" letter-spacing="3" fill="#67655D">ESTUDIO 21</text>
+  <!-- título -->
+  <text x="80" y="345" font-family="'Space Grotesk', system-ui, sans-serif" font-size="68" font-weight="500" letter-spacing="-2" fill="#1A1916">Arquitectura y desarrollo</text>
+  <text x="80" y="430" font-family="'Inter', system-ui, sans-serif" font-size="32" fill="#3B3933">Desarrolladora boutique · Montevideo, Uruguay</text>
+  <text x="80" y="540" font-family="'IBM Plex Mono', monospace" font-size="22" letter-spacing="2" fill="#67655D">+15 PROYECTOS · +10 AÑOS · 21 DE SETIEMBRE 3024</text>
+</svg>

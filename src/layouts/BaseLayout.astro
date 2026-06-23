@@ -1,0 +1,86 @@
+---
+// Fuentes servidas localmente con Fontsource (sólo los pesos que usa el diseño).
+import '@fontsource/space-grotesk/400.css';
+import '@fontsource/space-grotesk/500.css';
+import '@fontsource/space-grotesk/700.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '../styles/global.css';
+
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const { title, description, image, jsonLd } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <BaseHead title={title} description={description} image={image} jsonLd={jsonLd} />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <Header />
+    <main id="contenido">
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      // ----- header con sombra al hacer scroll -----
+      const header = document.getElementById('header');
+      if (header) {
+        const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 8);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+      }
+
+      // ----- menú móvil -----
+      const burger = document.getElementById('burger');
+      if (burger) {
+        burger.addEventListener('click', () => {
+          const open = document.body.classList.toggle('menu-open');
+          burger.setAttribute('aria-expanded', String(open));
+          burger.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+        });
+        document.querySelectorAll('#menu a').forEach((a) =>
+          a.addEventListener('click', () => {
+            document.body.classList.remove('menu-open');
+            burger.setAttribute('aria-expanded', 'false');
+          }),
+        );
+      }
+
+      // ----- reveal on scroll (respeta prefers-reduced-motion) -----
+      const reveals = document.querySelectorAll('.reveal');
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) {
+        reveals.forEach((el) => el.classList.add('in'));
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add('in');
+                io.unobserve(e.target);
+              }
+            });
+          },
+          { threshold: 0.12, rootMargin: '0px 0px -8% 0px' },
+        );
+        reveals.forEach((el) => io.observe(el));
+      }
+    </script>
+  </body>
+</html>

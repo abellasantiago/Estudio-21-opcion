@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Cambiá el dominio si no es el definitivo.
+Sitemap: https://estudio21arq.com/sitemap-index.xml

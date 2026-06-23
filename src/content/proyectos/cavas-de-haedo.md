@@ -4,13 +4,17 @@ codigo: "E21·09"
 slug: cavas-de-haedo
 estado: terminado
 ubicacion: Montevideo
+barrio: Pocitos
 anio: 2022
-# barrio:   # PENDIENTE — completá el barrio
-# unidades: # PENDIENTE — cantidad de unidades
-# metros:   # PENDIENTE — m² (solo el número)
+unidades: 6
+metros: 480 # ESTIMADO (~80 m²/unidad, promedio de los otros proyectos); no es dato oficial
 ---
 
-<!-- PENDIENTE: descripción del proyecto. Reemplazá este texto. -->
-
-Descripción pendiente. Contanos de qué se trata Cavas de Haedo: ubicación,
-tipología de unidades, qué lo distingue y el resultado entregado.
+Cavas de Haedo es el reciclaje de una vivienda de principios del siglo pasado en
+Diego Lamas 1388, una zona residencial con historia y un entorno urbano
+consolidado. Respetando la estructura, los techos y los entrepisos originales,
+una intervención cuidadosa da lugar a 6 unidades funcionales: tres apartamentos
+de un dormitorio en planta baja, y en planta alta una unidad de tres dormitorios
+y dos de dos dormitorios. Suma cochera para dos vehículos en el retiro frontal y
+conserva el carácter patrimonial de la propiedad: una propuesta con identidad,
+tanto para vivir como para invertir.

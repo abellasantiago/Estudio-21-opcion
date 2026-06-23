@@ -4,13 +4,15 @@ codigo: "E21·07"
 slug: patios-maldonado
 estado: terminado
 ubicacion: Montevideo
+barrio: Palermo
 anio: 2020
-# barrio:   # PENDIENTE — completá el barrio
-# unidades: # PENDIENTE — cantidad de unidades
-# metros:   # PENDIENTE — m² (solo el número)
+unidades: 12
+metros: 1036
 ---
 
-<!-- PENDIENTE: descripción del proyecto. Reemplazá este texto. -->
-
-Descripción pendiente. Contanos de qué se trata Patios Maldonado: ubicación,
-tipología de unidades, qué lo distingue y el resultado entregado.
+Patios Maldonado está en Maldonado 1788, en el barrio Palermo, a pasos de una de
+las principales avenidas del centro de Montevideo, con excelente conectividad y
+cercanía a universidades, centros de salud y áreas comerciales. El proyecto reúne
+12 unidades: seis de un dormitorio en planta baja, y en planta alta dos de dos
+dormitorios y cuatro de tres dormitorios, varias resueltas en dúplex. Una
+ubicación céntrica y bien conectada, atractiva tanto para vivir como para invertir.

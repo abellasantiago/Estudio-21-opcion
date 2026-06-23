@@ -14,6 +14,8 @@ header.scrolled{border-bottom-color:var(--line);background:color-mix(in srgb, va
   border:1px solid var(--ink);border-radius:2px;padding:.18rem .42rem;line-height:1;
   letter-spacing:.04em;
 }
+/* ícono de marca (caja "21") en el navbar */
+.brand .mark-img{display:block;height:1.65rem;width:auto;border-radius:2px}
 .nav-links{display:flex;align-items:center;gap:2.2rem}
 .nav-links a{
   font-family:var(--font-mono);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;

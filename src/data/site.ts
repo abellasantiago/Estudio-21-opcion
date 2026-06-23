@@ -23,7 +23,7 @@ export const site = {
   whatsapp: null as string | null, // ej. '598xxxxxxxx' (sin +, para wa.me)
   instagram: null as string | null, // ej. 'https://instagram.com/...'
   // Imagen por defecto para compartir (Open Graph / Twitter).
-  // PENDIENTE: reemplazar por un PNG/JPG 1200×630 (algunos servicios no
-  // renderizan SVG). Sirve bien una foto de un proyecto.
-  ogImage: '/og-default.svg',
+  // Banner de marca 1920×1080 (negro + tagline). Para proyectos con portada,
+  // cada página usa su propia portada como imagen OG (ver ProjectLayout).
+  ogImage: '/og-default.png',
 } as const;

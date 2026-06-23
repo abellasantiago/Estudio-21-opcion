@@ -19,7 +19,7 @@ const foto = getFotoEquipo(persona.slug);
       <Picture
         src={foto}
         formats={['avif', 'webp']}
-        alt={`Retrato de ${persona.nombre}`}
+        alt={`Retrato de ${persona.nombre}, ${persona.rol}`}
         widths={[240, 360, 480]}
         sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 360px"
         loading="lazy"

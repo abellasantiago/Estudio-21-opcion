@@ -1,5 +1,7 @@
 ---
+import { Image } from 'astro:assets';
 import '../styles/header.css';
+import marca21 from '../assets/marca/icon_exp.png';
 
 const links = [
   { href: '/#modelo', label: 'Modelo' },
@@ -10,7 +12,9 @@ const links = [
 
 <header id="header">
   <div class="wrap nav">
-    <a href="/" class="brand"><span class="mark">21</span> Estudio&nbsp;21</a>
+    <a href="/" class="brand" aria-label="Estudio 21 — inicio">
+      <Image src={marca21} alt="" width={30} height={30} class="mark-img" /> Estudio&nbsp;21
+    </a>
     <nav class="nav-links" id="menu" aria-label="Navegación principal">
       {links.map((l) => <a href={l.href}>{l.label}</a>)}
       <a href="/#contacto" class="nav-cta">Contacto</a>

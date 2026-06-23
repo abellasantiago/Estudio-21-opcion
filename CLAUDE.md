@@ -29,12 +29,20 @@ registro), no rediseñar. Todo el copy va en **español rioplatense**.
 
 ## Pendientes antes de publicar
 
-- Dominio real (`site` en `astro.config.mjs` + `public/robots.txt`).
-- Por proyecto: barrio, unidades, m², descripción (año y estado ya están).
-- Fotos de proyectos y equipo; imagen OG en PNG/JPG 1200×630.
-- Esta máquina no tiene Node instalado: instalar Node 20 LTS para correr/buildear.
+- **Dominio real** en `site` (`astro.config.mjs`) + `public/robots.txt` — de ahí salen canonical, sitemap y URLs absolutas de OG.
+- **Portadas y galerías de los 6 proyectos** (faltan): tirarlas en `src/assets/proyectos/<slug>/`.
+- m² de Cavas de Haedo es **estimado** (no oficial).
+- Esta máquina no tiene Node: instalar Node 20 LTS para correr/buildear.
 
 ## Historial de cambios
+
+### 2026-06-23 — feat: carga de contenido real + marca
+- 6 proyectos con datos reales (estado, barrio, año, unidades, m²) y descripciones; m² de Cavas de Haedo estimado.
+- Fotos del equipo (6) optimizadas; `alt` con nombre + rol.
+- Marca: favicon e ícono del navbar con el "21" oficial; OG home (banner) y OG por proyecto (su portada).
+- Contacto: mail real `estudiodearquitectos21@gmail.com` en texto + JSON-LD.
+- Pendiente: portadas/galerías de proyectos y dominio real en `site`.
+- Rama mergeada: `claude/condescending-wright-3fa9ea` → `main`
 
 ### 2026-06-23 — feat: migración de WordPress a Astro
 - Scaffold Astro + TypeScript: configuración, tokens de color/tipografía y helpers.

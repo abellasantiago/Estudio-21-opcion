@@ -1,0 +1,306 @@
+---
+/*
+ * ProyectosHelicoidal — sección de proyectos como carrusel helicoidal 3D.
+ *
+ * Las cards se distribuyen en un cilindro 3D que rota alrededor de un eje
+ * vertical y desciende a medida que se scrollea la sección (sticky scrubbing),
+ * dando la sensación de bajar por una espiral. Escala y opacidad se interpolan
+ * con una curva de coseno según el ángulo de cada card respecto al frente.
+ *
+ * Capas:
+ *   1. Markup semántico: lista real de proyectos como links (accesible, SSR).
+ *   2. CSS 3D: el efecto es una capa de presentación encima de esa lista.
+ *   3. Fallback: sin JS o con prefers-reduced-motion queda una grilla accesible.
+ */
+import '../styles/proyectos-helicoidal.css';
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import { getPortada } from '../lib/images';
+
+// Mismo orden que la grilla original: más nuevo primero (por código E21·NN).
+const numCodigo = (codigo: string) =>
+  parseInt(codigo.split('·').pop()?.replace(/\D/g, '') ?? '0', 10) || 0;
+
+const proyectos = await getCollection('proyectos');
+proyectos.sort((a, b) => {
+  const oa = a.data.orden ?? numCodigo(a.data.codigo);
+  const ob = b.data.orden ?? numCodigo(b.data.codigo);
+  return ob - oa;
+});
+
+const estadoLabels = {
+  proximamente: 'Próximamente',
+  'en-proceso': 'En proceso',
+  terminado: 'Terminado',
+} as const;
+
+const items = proyectos.map((p) => ({ ...p.data, portada: getPortada(p.data.slug) }));
+const total = items.length;
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<section class="ph block" id="proyectos" style={`--ph-total:${total}`} aria-labelledby="ph-title">
+  <div class="ph-sticky">
+    <span class="ghost21" aria-hidden="true">21</span>
+    <span class="marks" aria-hidden="true">
+      <span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span>
+    </span>
+
+    <div class="wrap ph-shell">
+      <div class="ph-head">
+        <div class="sec-head ph-sechead">
+          <span class="eyebrow reveal">Obra construida</span>
+          <h2 id="ph-title" class="section-title reveal" data-d="1">
+            Quince proyectos, una misma manera de hacer.
+          </h2>
+        </div>
+
+        <div class="ph-bar reveal" data-d="2">
+          <div class="filters" id="phFilters" role="group" aria-label="Filtrar proyectos por estado">
+            <button type="button" data-filter="todos" aria-pressed="true">Todos</button>
+            <button type="button" data-filter="proximamente" aria-pressed="false">Próximamente</button>
+            <button type="button" data-filter="en-proceso" aria-pressed="false">En proceso</button>
+            <button type="button" data-filter="terminado" aria-pressed="false">Terminados</button>
+          </div>
+          <p class="ph-counter" aria-hidden="true">
+            <span class="ph-num" data-ph-current>01</span>
+            <span class="ph-sep">/</span>
+            <span class="ph-num" data-ph-total>{pad(total)}</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="ph-stage">
+        <ul class="ph-axis" id="phAxis">
+          {items.map((it, i) => (
+            <li class="ph-card" data-status={it.estado} data-index={i}>
+              <a class="ph-link" href={`/proyectos/${it.slug}/`} aria-label={`${it.nombre} — ver proyecto`}>
+                <span class="ph-thumb">
+                  {it.portada ? (
+                    <Image
+                      src={it.portada}
+                      alt={`Portada del proyecto ${it.nombre}`}
+                      widths={[220, 340, 460]}
+                      sizes="(max-width: 680px) 150px, 200px"
+                      loading={i < 3 ? 'eager' : 'lazy'}
+                    />
+                  ) : (
+                    <span class="ph-ph">imagen pendiente</span>
+                  )}
+                  <span class="ph-code">{it.codigo}</span>
+                </span>
+                <span class="ph-meta">
+                  <span class="ph-name">{it.nombre}</span>
+                  <span class="ph-sub">
+                    <span class="ph-loc">{it.barrio ?? it.ubicacion} · {it.anio}</span>
+                    <span class={`status ${it.estado}`}><span class="pip"></span>{estadoLabels[it.estado]}</span>
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <p class="ph-hint" aria-hidden="true">Scrolleá para recorrer la obra</p>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Toda la lógica corre client-side. El markup base (lista de proyectos)
+  // ya funciona sin JS; acá sólo se agrega la capa 3D si hay motion permitido.
+  type CardRef = { el: HTMLElement; status: string; baseAngle: number };
+
+  const section = document.getElementById('proyectos');
+  if (section && section.classList.contains('ph')) {
+    const axis = section.querySelector<HTMLElement>('#phAxis');
+    const cardEls = Array.from(section.querySelectorAll<HTMLElement>('.ph-card'));
+    const filterBtns = Array.from(section.querySelectorAll<HTMLButtonElement>('#phFilters button'));
+    const counterCur = section.querySelector<HTMLElement>('[data-ph-current]');
+    const counterTot = section.querySelector<HTMLElement>('[data-ph-total]');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    // ---- parámetros validados ----
+    const VERT_STEP = 38; // descenso vertical por proyecto (px)
+    const SCALE_MIN = 0.78; // escala en el dorso
+    const SCALE_MAX = 1.14; // escala al frente
+    let RADIUS = 330; // radio del cilindro (px) — se ajusta en mobile
+
+    const cards: CardRef[] = cardEls.map((el) => ({
+      el,
+      status: el.dataset.status ?? '',
+      baseAngle: 0,
+    }));
+    let active: CardRef[] = cards; // subconjunto visible según el filtro
+    let N = active.length;
+
+    let scroll = 0;
+    let targetScroll = 0;
+    let lastActiveIdx = -1;
+    let running = false;
+    let rafId = 0;
+
+    const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const calcRadius = () => (window.innerWidth < 680 ? 200 : 330);
+
+    // ---- posicionar el cilindro para el subconjunto visible ----
+    function layout() {
+      RADIUS = calcRadius();
+      N = active.length;
+      const step = 360 / Math.max(N, 1);
+      active.forEach((c, i) => {
+        c.baseAngle = i * step; // ángulo fijo de la card en el cilindro
+        c.el.style.top = `${VERT_STEP * i}px`; // slot vertical en la espiral
+      });
+      section!.style.setProperty('--ph-total', String(Math.max(N, 1)));
+      if (counterTot) counterTot.textContent = pad(Math.max(N, 1));
+    }
+
+    // ---- progreso de scroll de la sección (0..1) -> targetScroll (0..N-1) ----
+    function updateTarget() {
+      const scrollable = section!.offsetHeight - window.innerHeight;
+      const passed = -section!.getBoundingClientRect().top;
+      const progress = scrollable > 0 ? clamp(passed / scrollable, 0, 1) : 0;
+      targetScroll = progress * Math.max(N - 1, 0);
+      section!.classList.toggle('is-scrolling', progress > 0.01);
+    }
+
+    // ---- render: escala/opacidad continuas por curva de coseno ----
+    function render() {
+      const step = 360 / Math.max(N, 1);
+      const rotY = -scroll * step;
+      const transY = -scroll * VERT_STEP;
+      if (axis) axis.style.transform = `rotateY(${rotY}deg) translateY(${transY}px)`;
+
+      active.forEach((c) => {
+        const eff = (((c.baseAngle + rotY) % 360) + 360) % 360; // ángulo efectivo (0 = frente)
+        const fromFront = eff > 180 ? 360 - eff : eff; // 0=frente, 180=dorso
+        const cosT = (Math.cos((fromFront * Math.PI) / 180) + 1) / 2; // 1 frente, 0 dorso
+        const scale = SCALE_MIN + (SCALE_MAX - SCALE_MIN) * cosT;
+        // opacidad al cuadrado: cae más rápido al salir del centro → resalta el frente
+        const opacity = 0.05 + 0.95 * cosT * cosT;
+        c.el.style.opacity = opacity.toFixed(3);
+        c.el.style.transform = `rotateY(${c.baseAngle}deg) translateZ(${RADIUS}px) scale(${scale.toFixed(4)})`;
+        c.el.style.pointerEvents = cosT > 0.55 ? 'auto' : 'none'; // no clickear lo que no se ve
+      });
+
+      const idx = N ? ((Math.round(scroll) % N) + N) % N : 0;
+      if (idx !== lastActiveIdx) {
+        active.forEach((c, i) => c.el.classList.toggle('is-active', i === idx));
+        if (counterCur) counterCur.textContent = pad(idx + 1);
+        lastActiveIdx = idx;
+      }
+    }
+
+    function tick() {
+      scroll = lerp(scroll, targetScroll, 0.08);
+      if (Math.abs(scroll - targetScroll) < 0.001) scroll = targetScroll;
+      render();
+    }
+    function loop() {
+      if (!running) return;
+      tick();
+      rafId = requestAnimationFrame(loop);
+    }
+    const start = () => { if (!running) { running = true; loop(); } };
+    const stop = () => { running = false; cancelAnimationFrame(rafId); };
+
+    // ---- traer una card al frente desplazando la página (foco por teclado) ----
+    function scrollToIndex(i: number) {
+      const scrollable = section!.offsetHeight - window.innerHeight;
+      const p = N > 1 ? i / (N - 1) : 0;
+      window.scrollTo({
+        top: section!.offsetTop + p * scrollable,
+        behavior: reduce.matches ? 'auto' : 'smooth',
+      });
+    }
+
+    // ---- filtros (sirven igual en 3D y en grilla) ----
+    function applyFilter(filter: string) {
+      filterBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === filter)));
+      active = cards.filter((c) => filter === 'todos' || c.status === filter);
+      cards.forEach((c) => {
+        const show = active.includes(c);
+        c.el.style.display = show ? '' : 'none';
+        if (!show) c.el.classList.remove('is-active');
+      });
+      if (section!.classList.contains('is-3d')) {
+        scroll = 0;
+        targetScroll = 0;
+        lastActiveIdx = -1;
+        layout();
+        // reiniciar el recorrido desde el principio de la sección
+        window.scrollTo({ top: section!.offsetTop, behavior: reduce.matches ? 'auto' : 'smooth' });
+        updateTarget();
+        render();
+      } else {
+        N = active.length;
+        if (counterTot) counterTot.textContent = pad(Math.max(N, 1));
+      }
+    }
+
+    filterBtns.forEach((b) =>
+      b.addEventListener('click', () => applyFilter(b.dataset.filter ?? 'todos')),
+    );
+
+    // ---- activar la capa 3D ----
+    function enable3D() {
+      section!.classList.add('is-3d');
+      layout();
+      updateTarget();
+      lastActiveIdx = -1;
+      render();
+
+      // correr el rAF sólo mientras la sección está visible
+      const io = new IntersectionObserver(
+        (entries) => entries.forEach((e) => (e.isIntersecting ? start() : stop())),
+        { rootMargin: '0px' },
+      );
+      io.observe(section!);
+
+      window.addEventListener('scroll', updateTarget, { passive: true });
+      window.addEventListener(
+        'resize',
+        () => {
+          layout();
+          updateTarget();
+          render();
+        },
+        { passive: true },
+      );
+
+      // foco por teclado → rotar el cilindro para mostrar la card enfocada
+      cards.forEach((c) => {
+        c.el.querySelector('a')?.addEventListener('focus', () => {
+          const vi = active.indexOf(c);
+          if (vi >= 0) scrollToIndex(vi);
+        });
+      });
+    }
+
+    function disable3D() {
+      stop();
+      section!.classList.remove('is-3d', 'is-scrolling');
+      if (axis) axis.style.transform = '';
+      cards.forEach((c) => {
+        c.el.style.transform = '';
+        c.el.style.opacity = '';
+        c.el.style.top = '';
+        c.el.style.pointerEvents = '';
+        c.el.classList.remove('is-active');
+      });
+    }
+
+    // Sólo activamos el efecto si el usuario no pidió menos movimiento.
+    if (!reduce.matches) enable3D();
+
+    // Responder si la preferencia cambia en runtime.
+    reduce.addEventListener?.('change', (e) => {
+      if (e.matches) disable3D();
+      else if (!section!.classList.contains('is-3d')) enable3D();
+    });
+  }
+</script>

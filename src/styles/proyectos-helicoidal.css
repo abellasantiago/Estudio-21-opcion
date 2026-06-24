@@ -1,0 +1,172 @@
+/* ============================================================
+   PROYECTOS — carrusel helicoidal 3D
+   ------------------------------------------------------------
+   Progresión de mejora:
+   · BASE  → grilla accesible (sin JS o con prefers-reduced-motion).
+   · .is-3d → cilindro 3D atado al scroll (lo agrega el script
+              cuando hay motion permitido).
+   La card es reconociblemente la misma que en el resto del sitio.
+   Sólo usa tokens globales de global.css (paleta/tipografías/medidas).
+   ============================================================ */
+
+.ph{position:relative;background:var(--paper)}
+
+/* Contenedores neutros en modo grilla; se activan recién en .is-3d. */
+.ph-sticky{position:relative}
+.ph-shell{position:relative;z-index:1;display:flex;flex-direction:column}
+
+/* ---------- encabezado de sección (mismo tratamiento que las demás) ---------- */
+.ph-sechead{margin-bottom:clamp(1.6rem,3vw,2.4rem)}
+.ph-bar{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:1.2rem 1.5rem;flex-wrap:wrap;margin-bottom:clamp(1.8rem,3vw,2.8rem);
+}
+.ph .filters{display:flex;gap:.5rem;flex-wrap:wrap}
+.ph .filters button{
+  font-family:var(--font-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;
+  background:none;border:1px solid var(--line);color:var(--concrete);
+  padding:.5rem .9rem;border-radius:2px;cursor:pointer;transition:.22s;
+}
+.ph .filters button:hover{border-color:var(--ink);color:var(--ink)}
+.ph .filters button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper-2)}
+
+/* contador tipo cajetín de plano — sólo cobra sentido con el scrubbing 3D */
+.ph-counter{
+  display:none;align-items:baseline;gap:.45rem;
+  font-family:var(--font-mono);font-size:.78rem;letter-spacing:.12em;color:var(--concrete);
+}
+.ph-counter .ph-num[data-ph-current]{color:var(--ink)}
+.ph-counter .ph-sep{color:var(--concrete-soft)}
+
+/* ---------- escenario ---------- */
+.ph-stage{position:relative}
+
+/* En modo grilla el "axis" es una grilla normal de proyectos. */
+.ph-axis{
+  list-style:none;margin:0;padding:0;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2vw,1.8rem);
+}
+
+/* ---------- card de proyecto (lenguaje visual compartido) ---------- */
+.ph-card{position:relative}
+.ph-link{
+  position:relative;display:flex;flex-direction:column;height:100%;
+  background:var(--paper-2);border:1px solid var(--line);border-radius:8px;overflow:hidden;
+  color:inherit;transition:border-color .3s ease, transform .4s cubic-bezier(.2,.7,.3,1);
+}
+/* línea de acento petróleo (3px) en el borde inferior de la card activa */
+.ph-link::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:3px;z-index:2;
+  background:var(--petrol);transform:scaleX(0);transform-origin:left;
+  transition:transform .45s cubic-bezier(.2,.7,.3,1);
+}
+.ph-thumb{
+  position:relative;display:block;flex:0 0 auto;aspect-ratio:4/3;
+  background:var(--paper-deep);overflow:hidden;border-bottom:1px solid var(--line);
+}
+.ph-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.2,.7,.3,1)}
+.ph-ph{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-size:.62rem;letter-spacing:.08em;color:var(--concrete-soft);
+  background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
+  background-size:24px 24px;
+}
+.ph-code{
+  position:absolute;top:10px;left:10px;
+  font-family:var(--font-mono);font-size:.62rem;letter-spacing:.1em;
+  color:var(--paper-2);background:color-mix(in srgb,var(--ink) 78%,transparent);
+  padding:.2rem .42rem;border-radius:2px;
+}
+.ph-meta{display:flex;flex-direction:column;gap:.45rem;padding:.95rem 1.05rem 1.1rem}
+.ph-name{font-family:var(--font-display);font-weight:600;font-size:1.08rem;line-height:1.12;letter-spacing:-.01em}
+.ph-sub{display:flex;flex-direction:column;gap:.45rem}
+.ph-loc{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--concrete)}
+
+/* hover sólo en grilla (en 3D el transform lo maneja el script) */
+.ph:not(.is-3d) .ph-link:hover{border-color:var(--ink);transform:translateY(-5px)}
+.ph:not(.is-3d) .ph-link:hover::after{transform:scaleX(1)}
+.ph:not(.is-3d) .ph-link:hover .ph-thumb img{transform:scale(1.04)}
+
+.ph-hint{display:none}
+
+/* responsive de la grilla (igual breakpoints que la grilla original) */
+@media(max-width:900px){.ph-axis{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.ph-axis{grid-template-columns:1fr}}
+
+/* ============================================================
+   MODO 3D — cilindro helicoidal atado al scroll
+   El alto de la sección define el tramo de scrubbing; dentro,
+   un panel sticky de 100vh contiene el escenario 3D.
+   ============================================================ */
+.ph.is-3d{
+  --ph-scroll:64vh;                 /* descenso de scroll por proyecto (más alto = rota más lento) */
+  padding-block:0;
+  min-height:calc(100vh + (var(--ph-total) - 1) * var(--ph-scroll));
+}
+.ph.is-3d .ph-sticky{
+  position:sticky;top:0;height:100vh;overflow:hidden;display:flex;
+}
+.ph.is-3d .ph-shell{
+  width:100%;height:100%;
+  padding-top:calc(74px + clamp(1.2rem,4vh,2.6rem));
+  padding-bottom:clamp(.8rem,3vh,1.8rem);
+}
+.ph.is-3d .ph-sechead{margin-bottom:clamp(1rem,2.2vh,1.6rem)}
+.ph.is-3d .ph-bar{margin-bottom:0}
+.ph.is-3d .ph-counter{display:flex}
+
+/* escenario 3D */
+.ph.is-3d .ph-stage{
+  flex:1 1 auto;min-height:0;
+  perspective:var(--ph-persp,1050px);perspective-origin:50% 46%;
+}
+.ph.is-3d .ph-axis{
+  display:block;position:absolute;left:50%;top:50%;width:0;height:0;
+  transform-style:preserve-3d;will-change:transform;
+}
+.ph.is-3d .ph-card{
+  --cw:172px;--ch:230px;
+  position:absolute;left:0;top:0;width:var(--cw);height:var(--ch);
+  margin-left:calc(var(--cw) / -2);margin-top:calc(var(--ch) / -2);
+  will-change:transform,opacity;
+  /* transform/opacity los aplica el script en cada frame */
+}
+.ph.is-3d .ph-link{height:100%;box-shadow:0 18px 40px -28px rgba(26,25,22,.55)}
+.ph.is-3d .ph-thumb{aspect-ratio:auto;flex:0 0 62%}
+.ph.is-3d .ph-meta{flex:1 1 auto;padding:.6rem .72rem .7rem;gap:.32rem}
+.ph.is-3d .ph-name{
+  font-size:.95rem;
+  display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.ph.is-3d .ph-sub{gap:.3rem}
+.ph.is-3d .ph-card.is-active .ph-link::after{transform:scaleX(1)}
+
+/* pista de scroll, se desvanece apenas el usuario avanza */
+.ph.is-3d .ph-hint{
+  display:block;flex:0 0 auto;text-align:center;margin-top:.4rem;
+  font-family:var(--font-mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--concrete-soft);transition:opacity .4s ease;
+}
+.ph.is-3d.is-scrolling .ph-hint{opacity:0}
+
+/* mobile: radio (vía JS) y card más chicos para que el cilindro entre */
+@media(max-width:680px){
+  .ph.is-3d{--ph-persp:760px}
+  .ph.is-3d .ph-card{--cw:146px;--ch:198px}
+  .ph.is-3d .ph-name{font-size:.86rem}
+}
+/* pantallas bajas: que la card no choque con el encabezado */
+@media(max-height:640px){
+  .ph.is-3d .ph-card{--cw:150px;--ch:200px}
+  .ph.is-3d .ph-shell{padding-top:calc(74px + .6rem)}
+}
+
+/* ============================================================
+   prefers-reduced-motion → nunca se activa el 3D (el script lo
+   respeta). Reforzamos quitando transiciones de la card.
+   ============================================================ */
+@media(prefers-reduced-motion:reduce){
+  .ph-link,.ph-link::after,.ph-thumb img{transition:none}
+  .ph:not(.is-3d) .ph-link:hover{transform:none}
+  .ph:not(.is-3d) .ph-link:hover .ph-thumb img{transform:none}
+}

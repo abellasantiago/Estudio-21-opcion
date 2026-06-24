@@ -38,6 +38,29 @@ registro), no rediseñar. Todo el copy va en **español rioplatense**.
 
 ## Historial de cambios
 
+### 2026-06-24 — feat: sección de proyectos como carrusel helicoidal 3D
+- Nuevo componente `src/components/ProyectosHelicoidal.astro` (+ `src/styles/proyectos-helicoidal.css`):
+  las cards se distribuyen en un **cilindro 3D** (CSS 3D transforms) que rota y
+  desciende atado al **scroll** (sección alta + panel `sticky` de 100vh; el progreso
+  0→1 mapea a la rotación/descenso, sin secuestrar el scroll). Escala y opacidad se
+  interpolan con curva de coseno (frente grande/nítido → dorso chico/desvanecido).
+  Parámetros: `RADIUS 280` (168 en mobile), `VERT_STEP 30`, `SCALE 0.78→1.14`.
+- **Reemplaza** la grilla anterior como sección `#proyectos`, **conservando el filtro**
+  por estado (Todos / Próximamente / En proceso / Terminados): filtrar reconstruye el
+  cilindro sólo con los proyectos del estado elegido y reinicia el recorrido.
+- **Progresión de mejora:** el markup base es una **lista semántica** de proyectos
+  (links accesibles, navegables por teclado; el foco rota el cilindro a esa card). Sin
+  JS o con `prefers-reduced-motion` queda una **grilla estática accesible** (mismos
+  breakpoints que antes). El efecto 3D es sólo capa de presentación.
+- Performance: `rAF` activo sólo con la sección visible (`IntersectionObserver`),
+  `will-change` y sólo se tocan `transform`/`opacity`. Imágenes lazy salvo las 3 primeras.
+- Coherencia visual: usa los tokens globales, el encabezado de sección estándar
+  (eyebrow + `section-title`), contador mono `01 / NN`, fantasma "21" y marcas de
+  registro; la card es reconociblemente la misma del resto del sitio.
+- **Eliminados** (huérfanos al reemplazar la grilla): `sections/Proyectos.astro`,
+  `ProjectCard.astro`, `styles/proyectos.css`.
+- ⚠️ Sin `node` en el entorno: **falta correr `npm run build`** para validar el build.
+
 ### 2026-06-23 — feat: 4 proyectos nuevos + sección "Nuestro equipo"
 - Nuevo estado `proximamente` en el schema (`content.config.ts`), con su chip de
   estado (color petróleo) y botón de filtro propio en la grilla de proyectos.

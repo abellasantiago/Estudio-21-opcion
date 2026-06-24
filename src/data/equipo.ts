@@ -16,7 +16,7 @@ export const equipo: Integrante[] = [
   { slug: 'gustavo-abella', nombre: 'Gustavo Abella', rol: 'Socio · Arquitecto', ubicacion: 'Montevideo' },
   { slug: 'guillermo-tosi', nombre: 'Guillermo Tosi', rol: 'Socio · Arquitecto', ubicacion: 'Montevideo' },
   { slug: 'lucia-arrieta', nombre: 'Lucía Arrieta', rol: 'Arquitecta', ubicacion: 'Montevideo' },
-  { slug: 'santiago-abella', nombre: 'Santiago Abella', rol: 'Dirección de empresas', ubicacion: 'Montevideo' },
+  { slug: 'santiago-abella', nombre: 'Santiago Abella', rol: 'Dirección de Empresas', ubicacion: 'Montevideo' },
   { slug: 'sofia-tosi', nombre: 'Sofía Tosi', rol: 'Arquitecta', ubicacion: 'España' },
   { slug: 'federico-cardozo', nombre: 'Federico Cardozo', rol: 'Arquitecto', ubicacion: 'España' },
 ];

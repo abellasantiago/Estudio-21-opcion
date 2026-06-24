@@ -18,7 +18,18 @@ const { nombre, codigo, slug, estado, ubicacion, barrio, anio, unidades, metros 
 const { Content } = await render(proyecto);
 const portada = getPortada(slug);
 const galeria = getGaleria(slug);
-const estadoLabel = estado === 'en-proceso' ? 'En proceso' : 'Terminado';
+const estadoLabels = {
+  proximamente: 'Próximamente',
+  'en-proceso': 'En proceso',
+  terminado: 'Terminado',
+} as const;
+const estadoLabel = estadoLabels[estado];
+// Frase para la meta-descripción (que lea natural en cada estado).
+const estadoFrase = {
+  proximamente: 'próximo proyecto',
+  'en-proceso': 'proyecto en proceso',
+  terminado: 'proyecto terminado',
+}[estado];
 
 // Imagen OG de la página: la portada del proyecto si existe; si no, la del sitio.
 const ogImage = portada
@@ -26,7 +37,7 @@ const ogImage = portada
   : undefined;
 
 const title = `${nombre} (${codigo}) — Estudio 21`;
-const description = `${nombre}: proyecto ${estadoLabel.toLowerCase()} de Estudio 21 en ${
+const description = `${nombre}: ${estadoFrase} de Estudio 21 en ${
   barrio ? `${barrio}, ` : ''
 }${ubicacion} (${anio}).`;
 

@@ -30,11 +30,27 @@ registro), no rediseñar. Todo el copy va en **español rioplatense**.
 ## Pendientes antes de publicar
 
 - **Dominio real** en `site` (`astro.config.mjs`) + `public/robots.txt` — de ahí salen canonical, sitemap y URLs absolutas de OG.
-- **Portadas y galerías de los 6 proyectos** (faltan): tirarlas en `src/assets/proyectos/<slug>/`.
+- **Portadas y galerías de los 10 proyectos** (faltan): tirarlas en `src/assets/proyectos/<slug>/`.
+- **Códigos `E21·NN` reales** de los 4 proyectos nuevos (hoy placeholders 15–18, marcados con `# PENDIENTE` en su `.md`).
+- **Años estimados** de Villa Platero y Chana I; m² (área construida) de varios proyectos nuevos.
+- Vila Rodona: confirmar mix de dormitorios y total de unidades. Sushi WOK: ficha muestra "Unidades: Pendiente" por ser comercial.
 - m² de Cavas de Haedo es **estimado** (no oficial).
-- Esta máquina no tiene Node: instalar Node 20 LTS para correr/buildear.
 
 ## Historial de cambios
+
+### 2026-06-23 — feat: 4 proyectos nuevos + sección "Nuestro equipo"
+- Nuevo estado `proximamente` en el schema (`content.config.ts`), con su chip de
+  estado (color petróleo) y botón de filtro propio en la grilla de proyectos.
+- 4 proyectos cargados desde sus memorias: **Chana I** (Cordón, 35 unidades),
+  **Vila Rodona** (Brazo Oriental, entrega ago-2027), **Villa Platero** (Prado,
+  24 unidades) en "próximamente"; **Sushi WOK Perú** (Carrasco, 253 m², primer
+  proyecto comercial) en "en proceso".
+- Sección "El estudio" → **"Nuestro equipo"** (eyebrow, link del nav y descripción).
+- Rol "Dirección de Empresas" con mayúscula.
+- **Pendiente en los 4 nuevos:** códigos `E21·NN` reales (hoy placeholders 15–18),
+  años de Villa Platero y Chana I (estimados), m² de varios, fotos/galerías.
+  Vila Rodona: confirmar mix de dormitorios (memoria vs. web vieja) y total de unidades.
+- Rama mergeada: `claude/nervous-panini-e24bee` → `main`
 
 ### 2026-06-23 — feat: carga de contenido real + marca
 - 6 proyectos con datos reales (estado, barrio, año, unidades, m²) y descripciones; m² de Cavas de Haedo estimado.

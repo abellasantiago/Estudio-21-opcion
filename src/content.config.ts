@@ -16,7 +16,7 @@ const proyectos = defineCollection({
     nombre: z.string(),
     codigo: z.string(), // ej. "E21·14"
     slug: z.string(),
-    estado: z.enum(['en-proceso', 'terminado']),
+    estado: z.enum(['proximamente', 'en-proceso', 'terminado']),
     ubicacion: z.string(),
     barrio: z.string().optional(), // PENDIENTE en varios proyectos
     anio: z.number().int(),

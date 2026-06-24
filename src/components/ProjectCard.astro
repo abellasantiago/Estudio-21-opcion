@@ -12,7 +12,12 @@ interface Props {
 const { proyecto, d = 1 } = Astro.props;
 const { nombre, codigo, slug, estado, ubicacion, anio } = proyecto.data;
 const portada = getPortada(slug);
-const estadoLabel = estado === 'en-proceso' ? 'En proceso' : 'Terminado';
+const estadoLabels = {
+  proximamente: 'Próximamente',
+  'en-proceso': 'En proceso',
+  terminado: 'Terminado',
+} as const;
+const estadoLabel = estadoLabels[estado];
 ---
 
 <a

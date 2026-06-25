@@ -17,15 +17,17 @@ import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import { getPortada } from '../lib/images';
 
-// Mismo orden que la grilla original: más nuevo primero (por código E21·NN).
-const numCodigo = (codigo: string) =>
-  parseInt(codigo.split('·').pop()?.replace(/\D/g, '') ?? '0', 10) || 0;
+// Orden editorial: primero lo activo hoy (en proceso), después el track record
+// (terminados) y al final lo que viene (próximamente). Dentro de cada grupo,
+// por año descendente. Independiente del orden en la content collection.
+const ordenEstado = { 'en-proceso': 0, terminado: 1, proximamente: 2 } as const;
 
 const proyectos = await getCollection('proyectos');
 proyectos.sort((a, b) => {
-  const oa = a.data.orden ?? numCodigo(a.data.codigo);
-  const ob = b.data.orden ?? numCodigo(b.data.codigo);
-  return ob - oa;
+  const ea = ordenEstado[a.data.estado];
+  const eb = ordenEstado[b.data.estado];
+  if (ea !== eb) return ea - eb;
+  return b.data.anio - a.data.anio;
 });
 
 const estadoLabels = {
@@ -80,14 +82,16 @@ const pad = (n: number) => String(n).padStart(2, '0');
                     <Image
                       src={it.portada}
                       alt={`Portada del proyecto ${it.nombre}`}
-                      widths={[220, 340, 460]}
-                      sizes="(max-width: 680px) 150px, 200px"
+                      widths={[240, 360, 480, 640]}
+                      sizes="(max-width: 680px) 240px, 320px"
+                      quality={82}
                       loading={i < 3 ? 'eager' : 'lazy'}
                     />
                   ) : (
                     <span class="ph-ph">imagen pendiente</span>
                   )}
                   <span class="ph-code">{it.codigo}</span>
+                  <span class="ph-cta" aria-hidden="true">Ver proyecto →</span>
                 </span>
                 <span class="ph-meta">
                   <span class="ph-name">{it.nombre}</span>
@@ -119,13 +123,18 @@ const pad = (n: number) => String(n).padStart(2, '0');
     const filterBtns = Array.from(section.querySelectorAll<HTMLButtonElement>('#phFilters button'));
     const counterCur = section.querySelector<HTMLElement>('[data-ph-current]');
     const counterTot = section.querySelector<HTMLElement>('[data-ph-total]');
+    // elementos de fondo que reciben parallax vertical (más lento que el cilindro)
+    const ghost21 = section.querySelector<HTMLElement>('.ghost21');
+    const eyebrowEl = section.querySelector<HTMLElement>('.eyebrow');
+    const counterEl = section.querySelector<HTMLElement>('.ph-counter');
+    const marksEl = section.querySelector<HTMLElement>('.marks');
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     // ---- parámetros validados ----
-    const VERT_STEP = 38; // descenso vertical por proyecto (px)
-    const SCALE_MIN = 0.78; // escala en el dorso
-    const SCALE_MAX = 1.14; // escala al frente
-    let RADIUS = 330; // radio del cilindro (px) — se ajusta en mobile
+    const VERT_STEP = 64; // descenso vertical por proyecto (px) — más aire entre cards
+    const SCALE_MIN = 0.72; // escala en el dorso (más chico → más profundidad)
+    const SCALE_MAX = 1.0; // escala base al frente (sin agrandar de más; el pop lo da el zoom central)
+    let RADIUS = 440; // radio del cilindro (px) — círculo amplio = cards más separadas; se ajusta en mobile
 
     const cards: CardRef[] = cardEls.map((el) => ({
       el,
@@ -140,11 +149,21 @@ const pad = (n: number) => String(n).padStart(2, '0');
     let lastActiveIdx = -1;
     let running = false;
     let rafId = 0;
+    let snapTimer = 0;
 
     const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
     const pad = (n: number) => String(n).padStart(2, '0');
-    const calcRadius = () => (window.innerWidth < 680 ? 200 : 330);
+    const calcRadius = () => (window.innerWidth < 680 ? 250 : 440);
+
+    // snap: al frenar el scroll, asentar el cilindro en el proyecto más cercano
+    // (nunca entre dos). El lerp existente suaviza el movimiento hacia el entero.
+    const scheduleSnap = () => {
+      window.clearTimeout(snapTimer);
+      snapTimer = window.setTimeout(() => {
+        targetScroll = Math.round(targetScroll);
+      }, 120);
+    };
 
     // ---- posicionar el cilindro para el subconjunto visible ----
     function layout() {
@@ -166,6 +185,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       const progress = scrollable > 0 ? clamp(passed / scrollable, 0, 1) : 0;
       targetScroll = progress * Math.max(N - 1, 0);
       section!.classList.toggle('is-scrolling', progress > 0.01);
+      scheduleSnap();
     }
 
     // ---- render: escala/opacidad continuas por curva de coseno ----
@@ -175,16 +195,32 @@ const pad = (n: number) => String(n).padStart(2, '0');
       const transY = -scroll * VERT_STEP;
       if (axis) axis.style.transform = `rotateY(${rotY}deg) translateY(${transY}px)`;
 
+      // Parallax vertical: el cilindro baja scroll*VERT_STEP px; los elementos de
+      // fondo suben a fracciones de esa velocidad → capas con profundidad.
+      const bgParallax = scroll * VERT_STEP * 0.35;
+      if (ghost21) ghost21.style.transform = `translateY(${-bgParallax}px)`;
+      if (eyebrowEl) eyebrowEl.style.transform = `translateY(${-bgParallax * 0.5}px)`;
+      if (counterEl) counterEl.style.transform = `translateY(${-bgParallax * 0.5}px)`;
+      if (marksEl) marksEl.style.transform = `translateY(${-bgParallax * 0.7}px)`;
+
       active.forEach((c) => {
         const eff = (((c.baseAngle + rotY) % 360) + 360) % 360; // ángulo efectivo (0 = frente)
         const fromFront = eff > 180 ? 360 - eff : eff; // 0=frente, 180=dorso
         const cosT = (Math.cos((fromFront * Math.PI) / 180) + 1) / 2; // 1 frente, 0 dorso
-        const scale = SCALE_MIN + (SCALE_MAX - SCALE_MIN) * cosT;
-        // opacidad al cuadrado: cae más rápido al salir del centro → resalta el frente
-        const opacity = 0.05 + 0.95 * cosT * cosT;
+        // zoom extra de la card central: sólo en el último tramo hacia el frente
+        // (continuo, sin saltos): 0 en cosT=0.78, +12% en cosT=1 → protagonismo.
+        const zoomExtra = cosT > 0.78 ? Math.pow((cosT - 0.78) / 0.22, 2) * 0.12 : 0;
+        const scale = SCALE_MIN + (SCALE_MAX - SCALE_MIN) * cosT + zoomExtra;
+        // opacidad con falloff más marcado (cosT^2.6): las laterales pierden
+        // visibilidad y la central resalta.
+        const opacity = 0.05 + 0.95 * Math.pow(cosT, 2.6);
+        // difuminado de las laterales: 0 al frente, hasta 3px al dorso.
+        const blur = (1 - cosT) * 3;
         c.el.style.opacity = opacity.toFixed(3);
+        c.el.style.filter = blur > 0.25 ? `blur(${blur.toFixed(2)}px)` : 'none';
         c.el.style.transform = `rotateY(${c.baseAngle}deg) translateZ(${RADIUS}px) scale(${scale.toFixed(4)})`;
         c.el.style.pointerEvents = cosT > 0.55 ? 'auto' : 'none'; // no clickear lo que no se ve
+        c.el.classList.toggle('is-front', cosT > 0.92); // revela la info extra (vía CSS)
       });
 
       const idx = N ? ((Math.round(scroll) % N) + N) % N : 0;
@@ -262,6 +298,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       io.observe(section!);
 
       window.addEventListener('scroll', updateTarget, { passive: true });
+      window.addEventListener('touchend', scheduleSnap, { passive: true });
       window.addEventListener(
         'resize',
         () => {
@@ -283,14 +320,19 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
     function disable3D() {
       stop();
+      window.clearTimeout(snapTimer);
       section!.classList.remove('is-3d', 'is-scrolling');
       if (axis) axis.style.transform = '';
+      [ghost21, eyebrowEl, counterEl, marksEl].forEach((el) => {
+        if (el) el.style.transform = '';
+      });
       cards.forEach((c) => {
         c.el.style.transform = '';
         c.el.style.opacity = '';
+        c.el.style.filter = '';
         c.el.style.top = '';
         c.el.style.pointerEvents = '';
-        c.el.classList.remove('is-active');
+        c.el.classList.remove('is-active', 'is-front');
       });
     }
 

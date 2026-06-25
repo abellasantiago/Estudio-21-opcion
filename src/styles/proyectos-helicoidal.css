@@ -82,6 +82,13 @@
 .ph-sub{display:flex;flex-direction:column;gap:.45rem}
 .ph-loc{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--concrete)}
 
+/* badges de estado más discretos dentro de la card (no afecta la página de
+   detalle; sólo el .status que vive en esta sección) */
+.ph .status{font-size:clamp(8px,.6rem,9px);padding:2px 6px;letter-spacing:.06em}
+
+/* CTA "Ver proyecto" — oculto salvo en la card al frente del cilindro (.is-3d) */
+.ph-cta{display:none}
+
 /* hover sólo en grilla (en 3D el transform lo maneja el script) */
 .ph:not(.is-3d) .ph-link:hover{border-color:var(--ink);transform:translateY(-5px)}
 .ph:not(.is-3d) .ph-link:hover::after{transform:scaleX(1)}
@@ -118,28 +125,46 @@
 /* escenario 3D */
 .ph.is-3d .ph-stage{
   flex:1 1 auto;min-height:0;
-  perspective:var(--ph-persp,1050px);perspective-origin:50% 46%;
+  perspective:var(--ph-persp,1450px);perspective-origin:50% 46%;
 }
 .ph.is-3d .ph-axis{
   display:block;position:absolute;left:50%;top:50%;width:0;height:0;
   transform-style:preserve-3d;will-change:transform;
 }
 .ph.is-3d .ph-card{
-  --cw:172px;--ch:230px;
+  --cw:192px;--ch:264px;
   position:absolute;left:0;top:0;width:var(--cw);height:var(--ch);
   margin-left:calc(var(--cw) / -2);margin-top:calc(var(--ch) / -2);
-  will-change:transform,opacity;
-  /* transform/opacity los aplica el script en cada frame */
+  will-change:transform,opacity,filter;
+  /* transform/opacity/filter los aplica el script en cada frame */
 }
 .ph.is-3d .ph-link{height:100%;box-shadow:0 18px 40px -28px rgba(26,25,22,.55)}
-.ph.is-3d .ph-thumb{aspect-ratio:auto;flex:0 0 62%}
-.ph.is-3d .ph-meta{flex:1 1 auto;padding:.6rem .72rem .7rem;gap:.32rem}
+/* foto en 4/3 (igual que en la grilla): encuadre natural, sin recorte agresivo */
+.ph.is-3d .ph-thumb{aspect-ratio:4/3;flex:0 0 auto}
+.ph.is-3d .ph-meta{flex:1 1 auto;padding:.72rem .82rem .82rem;gap:.36rem}
+/* la card al frente gana sombra → más protagonismo/profundidad */
+.ph.is-3d .ph-card.is-front .ph-link{box-shadow:0 30px 64px -30px rgba(26,25,22,.62)}
 .ph.is-3d .ph-name{
   font-size:.95rem;
   display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
 }
 .ph.is-3d .ph-sub{gap:.3rem}
 .ph.is-3d .ph-card.is-active .ph-link::after{transform:scaleX(1)}
+
+/* CTA que se revela cuando la card está muy al frente (.is-front lo togglea el
+   script según cosT). Banda sobre el pie de la portada, transición suave. */
+.ph.is-3d .ph-cta{
+  display:flex;align-items:center;justify-content:center;
+  position:absolute;left:0;right:0;bottom:0;z-index:2;
+  padding:.5rem .6rem;
+  font-family:var(--font-mono);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--paper-2);
+  background:linear-gradient(to top,color-mix(in srgb,var(--ink) 82%,transparent),transparent);
+  opacity:0;transform:translateY(10px);
+  transition:opacity .4s ease,transform .4s ease;
+  pointer-events:none;
+}
+.ph.is-3d .ph-card.is-front .ph-cta{opacity:1;transform:translateY(0)}
 
 /* pista de scroll, se desvanece apenas el usuario avanza */
 .ph.is-3d .ph-hint{
@@ -151,13 +176,13 @@
 
 /* mobile: radio (vía JS) y card más chicos para que el cilindro entre */
 @media(max-width:680px){
-  .ph.is-3d{--ph-persp:760px}
-  .ph.is-3d .ph-card{--cw:146px;--ch:198px}
+  .ph.is-3d{--ph-persp:980px}
+  .ph.is-3d .ph-card{--cw:160px;--ch:224px}
   .ph.is-3d .ph-name{font-size:.86rem}
 }
 /* pantallas bajas: que la card no choque con el encabezado */
 @media(max-height:640px){
-  .ph.is-3d .ph-card{--cw:150px;--ch:200px}
+  .ph.is-3d .ph-card{--cw:168px;--ch:232px}
   .ph.is-3d .ph-shell{padding-top:calc(74px + .6rem)}
 }
 

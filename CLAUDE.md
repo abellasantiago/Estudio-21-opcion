@@ -38,6 +38,26 @@ registro), no rediseñar. Todo el copy va en **español rioplatense**.
 
 ## Historial de cambios
 
+### 2026-06-24 — feat: pulido del carrusel helicoidal (nitidez, separación, foco central)
+- **Imágenes/estética:** `<Image>` con srcset más denso `[240,360,480,640]`, `sizes`
+  acorde y `quality 82`; la thumb pasa a **`aspect-ratio: 4/3`** (encuadre natural, sin
+  recorte agresivo). Card más alta (**192×264**, antes 172×230) + más padding en la meta
+  → el **badge de estado** ahora entra siempre.
+- **Más separación entre cards:** `RADIUS` 330→**440** (160→250 mobile; círculo más
+  amplio) y `VERT_STEP` 55→**64**. Perspectiva 1050→**1450px** (980 mobile) y
+  `SCALE_MAX` 1.14→**1.0**: menos foreshortening = cards menos deformadas y más nítidas.
+- **Card central con protagonismo:** zoom propio (`zoomExtra` hasta **+12%**, sólo en el
+  tramo final al frente, continuo) + sombra extra en `.is-front`.
+- **Laterales atenuadas:** `blur()` progresivo (0 al frente, hasta **3px** al dorso) y
+  opacidad con falloff más marcado (**`cosT^2.6`**, antes `cosT²`).
+- Todo dentro del `render()` y listeners existentes; fallback `prefers-reduced-motion`
+  intacto (blur/zoom/sombra sólo en modo 3D, reseteados en `disable3D`). Build validado
+  (ahora **sí hay `node`** en el entorno).
+- ⚠️ **Siguen faltando las portadas reales** (`src/assets/proyectos/<slug>/portada.jpg`):
+  las 10 cards muestran el placeholder "imagen pendiente". La nitidez real depende de
+  subir fotos ≥640px de ancho (~4:3).
+- `package-lock.json` ahora versionado. Rama mergeada: `claude/naughty-brown-3c0926` → `main`
+
 ### 2026-06-24 — feat: sección de proyectos como carrusel helicoidal 3D
 - Nuevo componente `src/components/ProyectosHelicoidal.astro` (+ `src/styles/proyectos-helicoidal.css`):
   las cards se distribuyen en un **cilindro 3D** (CSS 3D transforms) que rota y

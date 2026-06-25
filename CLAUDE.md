@@ -38,6 +38,20 @@ registro), no rediseñar. Todo el copy va en **español rioplatense**.
 
 ## Historial de cambios
 
+### 2026-06-25 — feat: mejorar fluidez, zoom central y nitidez del carrusel helicoidal
+- **Header fuera del sticky:** título, filtros y contador scrollean con la página; el panel sticky
+  sólo contiene el cilindro 3D.
+- **Parallax multicapa:** grilla blueprint (veloz), fantasma "21" (lento) y marcas de registro
+  (intermedio) a distintas velocidades → sensación real de profundidad.
+- **Nombre gigante de fondo:** nombre + código `E21·NN` del centrado, sobredimensionado
+  detrás del cilindro, con cross-fade al cambiar de proyecto.
+- **Zoom al centro:** pico **1.70×**, ventana 22° (pop aislado); radio 540px; filtros compactos
+  (`MAX_STEP=34°`); sin snap automático (scroll libre = más fluido).
+- **Supersampling 2×:** card maquetada a 376×524px y reducida ÷2 por script → foto, títulos y
+  badge nítidos aunque la central esté a 1.70× + perspectiva. `will-change:transform` eliminado;
+  perspectiva 2600px; `widths [400,600,820,1080]`, `quality 88`.
+- Rama mergeada: `claude/wonderful-lalande-90c426` → `main`
+
 ### 2026-06-24 — feat: pulido del carrusel helicoidal (nitidez, separación, foco central)
 - **Imágenes/estética:** `<Image>` con srcset más denso `[240,360,480,640]`, `sizes`
   acorde y `quality 82`; la thumb pasa a **`aspect-ratio: 4/3`** (encuadre natural, sin

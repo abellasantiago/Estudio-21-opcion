@@ -15,6 +15,10 @@
 .ph-sticky{position:relative}
 .ph-shell{position:relative;z-index:1;display:flex;flex-direction:column}
 
+/* header (eyebrow + título + filtros + contador): vive fuera del panel sticky,
+   en flujo normal → scrollea junto con la página en vez de quedarse fijo. */
+.ph-head{position:relative;z-index:2}
+
 /* ---------- encabezado de sección (mismo tratamiento que las demás) ---------- */
 .ph-sechead{margin-bottom:clamp(1.6rem,3vw,2.4rem)}
 .ph-bar{
@@ -110,45 +114,93 @@
   padding-block:0;
   min-height:calc(100vh + (var(--ph-total) - 1) * var(--ph-scroll));
 }
+/* el header arranca despejando el navbar fijo y luego scrollea hacia arriba */
+.ph.is-3d .ph-head{
+  padding-top:calc(74px + clamp(1rem,4vh,2.2rem));
+  padding-bottom:clamp(1.4rem,4vh,2.6rem);
+}
 .ph.is-3d .ph-sticky{
   position:sticky;top:0;height:100vh;overflow:hidden;display:flex;
 }
+/* el panel sticky sólo contiene el escenario 3D, centrado en el viewport */
 .ph.is-3d .ph-shell{
   width:100%;height:100%;
-  padding-top:calc(74px + clamp(1.2rem,4vh,2.6rem));
+  padding-top:clamp(1rem,3vh,2rem);
   padding-bottom:clamp(.8rem,3vh,1.8rem);
 }
 .ph.is-3d .ph-sechead{margin-bottom:clamp(1rem,2.2vh,1.6rem)}
 .ph.is-3d .ph-bar{margin-bottom:0}
 .ph.is-3d .ph-counter{display:flex}
 
+/* ---------- capas de fondo del modo 3D (parallax + nombre gigante) ----------
+   Ocultas en modo grilla; el script las mueve/actualiza sólo en .is-3d. */
+.ph-grid,.ph-bgname{display:none}
+/* grilla blueprint: capa de textura que parallaxea más rápido que el fantasma */
+.ph.is-3d .ph-grid{
+  display:block;position:absolute;inset:-12% -6%;z-index:0;pointer-events:none;
+  background-image:linear-gradient(var(--line-soft) .5px,transparent .5px),linear-gradient(90deg,var(--line-soft) .5px,transparent .5px);
+  background-size:46px 46px;opacity:.55;will-change:transform;
+}
+/* nombre + código gigantes del proyecto centrado (marca de agua tras el cilindro) */
+.ph.is-3d .ph-bgname{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:absolute;left:0;right:0;top:52%;transform:translateY(-50%);
+  z-index:1;pointer-events:none;text-align:center;padding-inline:4vw;
+  opacity:1;transition:opacity .45s ease;will-change:opacity;
+}
+.ph.is-3d .ph-bgname-code{
+  font-family:var(--font-mono);font-size:clamp(.7rem,1.5vw,1rem);letter-spacing:.3em;
+  color:var(--petrol);margin-bottom:.6rem;
+}
+.ph.is-3d .ph-bgname-text{
+  font-family:var(--font-display);font-weight:700;line-height:.88;letter-spacing:-.02em;
+  font-size:clamp(2.4rem,7.5vw,6rem);
+  color:color-mix(in srgb,var(--petrol) 15%,transparent);
+  white-space:nowrap;overflow:hidden;max-width:100%;
+}
+
 /* escenario 3D */
 .ph.is-3d .ph-stage{
   flex:1 1 auto;min-height:0;
-  perspective:var(--ph-persp,1450px);perspective-origin:50% 46%;
+  /* perspectiva más larga = menos magnificación de la card al frente = menos
+     upscale en la rasterización = se ve más nítida (sigue habiendo profundidad) */
+  perspective:var(--ph-persp,2600px);perspective-origin:50% 46%;
 }
 .ph.is-3d .ph-axis{
   display:block;position:absolute;left:50%;top:50%;width:0;height:0;
   transform-style:preserve-3d;will-change:transform;
 }
+/* ====== SUPERSAMPLE 2× ======================================================
+   La card se MAQUETA al doble de tamaño (376×524 y todas sus medidas internas
+   ×2) y el <script> la reduce a la mitad (scale ÷ SS). Visualmente queda igual,
+   pero el navegador la rasteriza con 2× de píxeles → foto, títulos, código y
+   badge se ven nítidos aunque la central esté a 1.70× + perspectiva.
+   ⚠ Si cambia este factor hay que cambiar también SS en el <script>. ========== */
 .ph.is-3d .ph-card{
-  --cw:192px;--ch:264px;
+  --cw:376px;--ch:524px;
   position:absolute;left:0;top:0;width:var(--cw);height:var(--ch);
   margin-left:calc(var(--cw) / -2);margin-top:calc(var(--ch) / -2);
-  will-change:transform,opacity,filter;
-  /* transform/opacity/filter los aplica el script en cada frame */
+  will-change:opacity;
 }
-.ph.is-3d .ph-link{height:100%;box-shadow:0 18px 40px -28px rgba(26,25,22,.55)}
-/* foto en 4/3 (igual que en la grilla): encuadre natural, sin recorte agresivo */
-.ph.is-3d .ph-thumb{aspect-ratio:4/3;flex:0 0 auto}
-.ph.is-3d .ph-meta{flex:1 1 auto;padding:.72rem .82rem .82rem;gap:.36rem}
-/* la card al frente gana sombra → más protagonismo/profundidad */
-.ph.is-3d .ph-card.is-front .ph-link{box-shadow:0 30px 64px -30px rgba(26,25,22,.62)}
+.ph.is-3d .ph-link{height:100%;border-radius:16px;border-width:2px;box-shadow:0 36px 80px -56px rgba(26,25,22,.55)}
+.ph.is-3d .ph-link::after{height:6px}
+/* foto protagonista: ocupa todo el alto sobrante de la card; la ficha queda
+   compacta abajo (más foto, menos data) */
+.ph.is-3d .ph-thumb{flex:1 1 auto;aspect-ratio:auto;min-height:0;border-bottom-width:2px}
+.ph.is-3d .ph-code{top:20px;left:20px;font-size:1.24rem;padding:.4rem .84rem;border-radius:4px}
+.ph.is-3d .ph-ph{font-size:1.24rem;background-size:48px 48px}
+.ph.is-3d .ph-meta{flex:0 0 auto;padding:1rem 1.44rem 1.2rem;gap:.36rem}
+/* ficha más chica: título, ubicación/año y estado en cuerpo reducido (×2) */
 .ph.is-3d .ph-name{
-  font-size:.95rem;
-  display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  font-size:1.64rem;line-height:1.1;
+  display:-webkit-box;-webkit-line-clamp:1;line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;
 }
-.ph.is-3d .ph-sub{gap:.3rem}
+.ph.is-3d .ph-loc{font-size:1.16rem}
+.ph.is-3d .ph-sub{gap:.44rem}
+.ph.is-3d .status{font-size:16px;padding:2px 10px;gap:.6rem}
+.ph.is-3d .status .pip{width:10px;height:10px}
+/* la card al frente gana sombra → más protagonismo/profundidad */
+.ph.is-3d .ph-card.is-front .ph-link{box-shadow:0 68px 140px -60px rgba(26,25,22,.66)}
 .ph.is-3d .ph-card.is-active .ph-link::after{transform:scaleX(1)}
 
 /* CTA que se revela cuando la card está muy al frente (.is-front lo togglea el
@@ -156,11 +208,11 @@
 .ph.is-3d .ph-cta{
   display:flex;align-items:center;justify-content:center;
   position:absolute;left:0;right:0;bottom:0;z-index:2;
-  padding:.5rem .6rem;
-  font-family:var(--font-mono);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;
+  padding:1rem 1.2rem;
+  font-family:var(--font-mono);font-size:1.16rem;letter-spacing:.16em;text-transform:uppercase;
   color:var(--paper-2);
   background:linear-gradient(to top,color-mix(in srgb,var(--ink) 82%,transparent),transparent);
-  opacity:0;transform:translateY(10px);
+  opacity:0;transform:translateY(20px);
   transition:opacity .4s ease,transform .4s ease;
   pointer-events:none;
 }
@@ -176,14 +228,14 @@
 
 /* mobile: radio (vía JS) y card más chicos para que el cilindro entre */
 @media(max-width:680px){
-  .ph.is-3d{--ph-persp:980px}
-  .ph.is-3d .ph-card{--cw:160px;--ch:224px}
-  .ph.is-3d .ph-name{font-size:.86rem}
+  .ph.is-3d{--ph-persp:1750px}
+  .ph.is-3d .ph-card{--cw:300px;--ch:420px}
+  .ph.is-3d .ph-name{font-size:1.48rem}
+  .ph.is-3d .ph-head{padding-top:calc(64px + clamp(.8rem,3vh,1.6rem))}
 }
-/* pantallas bajas: que la card no choque con el encabezado */
-@media(max-height:640px){
-  .ph.is-3d .ph-card{--cw:168px;--ch:232px}
-  .ph.is-3d .ph-shell{padding-top:calc(74px + .6rem)}
+/* pantallas bajas: card más chica para que entre completa en el viewport */
+@media(max-height:680px){
+  .ph.is-3d .ph-card{--cw:320px;--ch:444px}
 }
 
 /* ============================================================

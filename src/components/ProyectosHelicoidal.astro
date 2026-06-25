@@ -42,36 +42,41 @@ const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
 <section class="ph block" id="proyectos" style={`--ph-total:${total}`} aria-labelledby="ph-title">
+  <div class="wrap ph-head">
+    <div class="sec-head ph-sechead">
+      <span class="eyebrow reveal">Obra construida</span>
+      <h2 id="ph-title" class="section-title reveal" data-d="1">
+        Quince proyectos, una misma manera de hacer.
+      </h2>
+    </div>
+
+    <div class="ph-bar reveal" data-d="2">
+      <div class="filters" id="phFilters" role="group" aria-label="Filtrar proyectos por estado">
+        <button type="button" data-filter="todos" aria-pressed="true">Todos</button>
+        <button type="button" data-filter="proximamente" aria-pressed="false">Próximamente</button>
+        <button type="button" data-filter="en-proceso" aria-pressed="false">En proceso</button>
+        <button type="button" data-filter="terminado" aria-pressed="false">Terminados</button>
+      </div>
+      <p class="ph-counter" aria-hidden="true">
+        <span class="ph-num" data-ph-current>01</span>
+        <span class="ph-sep">/</span>
+        <span class="ph-num" data-ph-total>{pad(total)}</span>
+      </p>
+    </div>
+  </div>
+
   <div class="ph-sticky">
     <span class="ghost21" aria-hidden="true">21</span>
+    <span class="ph-grid" aria-hidden="true"></span>
+    <p class="ph-bgname" aria-hidden="true">
+      <span class="ph-bgname-code"></span>
+      <span class="ph-bgname-text"></span>
+    </p>
     <span class="marks" aria-hidden="true">
       <span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span>
     </span>
 
     <div class="wrap ph-shell">
-      <div class="ph-head">
-        <div class="sec-head ph-sechead">
-          <span class="eyebrow reveal">Obra construida</span>
-          <h2 id="ph-title" class="section-title reveal" data-d="1">
-            Quince proyectos, una misma manera de hacer.
-          </h2>
-        </div>
-
-        <div class="ph-bar reveal" data-d="2">
-          <div class="filters" id="phFilters" role="group" aria-label="Filtrar proyectos por estado">
-            <button type="button" data-filter="todos" aria-pressed="true">Todos</button>
-            <button type="button" data-filter="proximamente" aria-pressed="false">Próximamente</button>
-            <button type="button" data-filter="en-proceso" aria-pressed="false">En proceso</button>
-            <button type="button" data-filter="terminado" aria-pressed="false">Terminados</button>
-          </div>
-          <p class="ph-counter" aria-hidden="true">
-            <span class="ph-num" data-ph-current>01</span>
-            <span class="ph-sep">/</span>
-            <span class="ph-num" data-ph-total>{pad(total)}</span>
-          </p>
-        </div>
-      </div>
-
       <div class="ph-stage">
         <ul class="ph-axis" id="phAxis">
           {items.map((it, i) => (
@@ -82,9 +87,9 @@ const pad = (n: number) => String(n).padStart(2, '0');
                     <Image
                       src={it.portada}
                       alt={`Portada del proyecto ${it.nombre}`}
-                      widths={[240, 360, 480, 640]}
-                      sizes="(max-width: 680px) 240px, 320px"
-                      quality={82}
+                      widths={[400, 600, 820, 1080]}
+                      sizes="(max-width: 680px) 320px, 440px"
+                      quality={88}
                       loading={i < 3 ? 'eager' : 'lazy'}
                     />
                   ) : (
@@ -123,18 +128,32 @@ const pad = (n: number) => String(n).padStart(2, '0');
     const filterBtns = Array.from(section.querySelectorAll<HTMLButtonElement>('#phFilters button'));
     const counterCur = section.querySelector<HTMLElement>('[data-ph-current]');
     const counterTot = section.querySelector<HTMLElement>('[data-ph-total]');
-    // elementos de fondo que reciben parallax vertical (más lento que el cilindro)
+    // capas de fondo del panel sticky que reciben parallax vertical a distintas
+    // velocidades (multicapa = sensación de profundidad). El header
+    // (título/filtros/contador) ya no está acá: vive fuera del sticky y scrollea.
     const ghost21 = section.querySelector<HTMLElement>('.ghost21');
-    const eyebrowEl = section.querySelector<HTMLElement>('.eyebrow');
-    const counterEl = section.querySelector<HTMLElement>('.ph-counter');
+    const gridEl = section.querySelector<HTMLElement>('.ph-grid');
     const marksEl = section.querySelector<HTMLElement>('.marks');
+    // nombre gigante de fondo del proyecto centrado (cross-fade al cambiar)
+    const bgName = section.querySelector<HTMLElement>('.ph-bgname');
+    const bgNameText = section.querySelector<HTMLElement>('.ph-bgname-text');
+    const bgNameCode = section.querySelector<HTMLElement>('.ph-bgname-code');
+    let bgTimer = 0;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-    // ---- parámetros validados ----
-    const VERT_STEP = 64; // descenso vertical por proyecto (px) — más aire entre cards
-    const SCALE_MIN = 0.72; // escala en el dorso (más chico → más profundidad)
-    const SCALE_MAX = 1.0; // escala base al frente (sin agrandar de más; el pop lo da el zoom central)
+    // ---- parámetros ----
+    const VERT_STEP = 64; // descenso vertical por proyecto (px) — aire entre cards
+    const MAX_STEP = 34; // ° máx entre cards: con pocos proyectos (filtros) no quedan ralos
+    // ---- zoom al centro (pico 1.60×) ----
+    // Con 15 cards juntas (24° entre sí) el zoom tiene que ser PUNTUAL: sólo la
+    // central crece, las vecinas se quedan en su tamaño de viaje → no se pisan.
+    const BASE_SIDE = 0.46; // tamaño "de viaje" en laterales/dorso (chico = no se superponen)
+    const BASE_FRONT = 0.86; // tamaño base al frente, sin el zoom
+    const ZOOM_AMOUNT = 0.84; // extra al centro → pico = BASE_FRONT + ZOOM_AMOUNT = 1.70×
+    const ZOOM_WIDTH = 22; // ° a cada lado del centro donde actúa el zoom (angosto = pop aislado)
+    const SS = 2; // factor de supersample: la card se maqueta a SS× (CSS) y acá se reduce ÷SS → nítida
     let RADIUS = 440; // radio del cilindro (px) — círculo amplio = cards más separadas; se ajusta en mobile
+    let stepAngle = 0; // ° entre cards (compartido layout/render); lo fija layout()
 
     const cards: CardRef[] = cardEls.map((el) => ({
       el,
@@ -149,29 +168,22 @@ const pad = (n: number) => String(n).padStart(2, '0');
     let lastActiveIdx = -1;
     let running = false;
     let rafId = 0;
-    let snapTimer = 0;
 
     const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
     const pad = (n: number) => String(n).padStart(2, '0');
-    const calcRadius = () => (window.innerWidth < 680 ? 250 : 440);
-
-    // snap: al frenar el scroll, asentar el cilindro en el proyecto más cercano
-    // (nunca entre dos). El lerp existente suaviza el movimiento hacia el entero.
-    const scheduleSnap = () => {
-      window.clearTimeout(snapTimer);
-      snapTimer = window.setTimeout(() => {
-        targetScroll = Math.round(targetScroll);
-      }, 120);
-    };
+    const calcRadius = () => (window.innerWidth < 680 ? 300 : 540);
 
     // ---- posicionar el cilindro para el subconjunto visible ----
     function layout() {
       RADIUS = calcRadius();
       N = active.length;
-      const step = 360 / Math.max(N, 1);
+      // ° entre cards: 360/N reparte en todo el cilindro, pero con pocos
+      // proyectos (al filtrar) eso los deja ralos → lo topamos a MAX_STEP para
+      // que queden juntos en un arco frontal en vez de desperdigados.
+      stepAngle = Math.min(360 / Math.max(N, 1), MAX_STEP);
       active.forEach((c, i) => {
-        c.baseAngle = i * step; // ángulo fijo de la card en el cilindro
+        c.baseAngle = i * stepAngle; // ángulo fijo de la card en el cilindro
         c.el.style.top = `${VERT_STEP * i}px`; // slot vertical en la espiral
       });
       section!.style.setProperty('--ph-total', String(Math.max(N, 1)));
@@ -183,42 +195,46 @@ const pad = (n: number) => String(n).padStart(2, '0');
       const scrollable = section!.offsetHeight - window.innerHeight;
       const passed = -section!.getBoundingClientRect().top;
       const progress = scrollable > 0 ? clamp(passed / scrollable, 0, 1) : 0;
+      // Sin snap: targetScroll sigue el progreso exacto del scroll → el cilindro
+      // queda donde lo dejaste, sin re-centrarse solo (más fluido al recorrer).
       targetScroll = progress * Math.max(N - 1, 0);
       section!.classList.toggle('is-scrolling', progress > 0.01);
-      scheduleSnap();
     }
 
     // ---- render: escala/opacidad continuas por curva de coseno ----
     function render() {
-      const step = 360 / Math.max(N, 1);
+      const step = stepAngle;
       const rotY = -scroll * step;
       const transY = -scroll * VERT_STEP;
       if (axis) axis.style.transform = `rotateY(${rotY}deg) translateY(${transY}px)`;
 
-      // Parallax vertical: el cilindro baja scroll*VERT_STEP px; los elementos de
-      // fondo suben a fracciones de esa velocidad → capas con profundidad.
+      // Parallax MULTICAPA: el cilindro baja scroll*VERT_STEP px; las capas de
+      // fondo suben a fracciones distintas de esa velocidad → cada una a su
+      // "profundidad" (grilla cerca/rápida, fantasma lejos/lento, marcas medio).
       const bgParallax = scroll * VERT_STEP * 0.35;
-      if (ghost21) ghost21.style.transform = `translateY(${-bgParallax}px)`;
-      if (eyebrowEl) eyebrowEl.style.transform = `translateY(${-bgParallax * 0.5}px)`;
-      if (counterEl) counterEl.style.transform = `translateY(${-bgParallax * 0.5}px)`;
-      if (marksEl) marksEl.style.transform = `translateY(${-bgParallax * 0.7}px)`;
+      if (gridEl) gridEl.style.transform = `translateY(${-bgParallax * 1.25}px)`;
+      if (ghost21) ghost21.style.transform = `translateY(${-bgParallax * 0.55}px)`;
+      if (marksEl) marksEl.style.transform = `translateY(${-bgParallax * 0.85}px)`;
 
       active.forEach((c) => {
         const eff = (((c.baseAngle + rotY) % 360) + 360) % 360; // ángulo efectivo (0 = frente)
         const fromFront = eff > 180 ? 360 - eff : eff; // 0=frente, 180=dorso
         const cosT = (Math.cos((fromFront * Math.PI) / 180) + 1) / 2; // 1 frente, 0 dorso
-        // zoom extra de la card central: sólo en el último tramo hacia el frente
-        // (continuo, sin saltos): 0 en cosT=0.78, +12% en cosT=1 → protagonismo.
-        const zoomExtra = cosT > 0.78 ? Math.pow((cosT - 0.78) / 0.22, 2) * 0.12 : 0;
-        const scale = SCALE_MIN + (SCALE_MAX - SCALE_MIN) * cosT + zoomExtra;
-        // opacidad con falloff más marcado (cosT^2.6): las laterales pierden
-        // visibilidad y la central resalta.
-        const opacity = 0.05 + 0.95 * Math.pow(cosT, 2.6);
-        // difuminado de las laterales: 0 al frente, hasta 3px al dorso.
-        const blur = (1 - cosT) * 3;
+        // Tamaño "de viaje": chico en laterales, base al frente (curva de profundidad).
+        const depth = BASE_SIDE + (BASE_FRONT - BASE_SIDE) * Math.pow(cosT, 1.3);
+        // Zoom al centro: pico justo al frente, baja suave a cada lado y es nulo
+        // más allá de ZOOM_WIDTH°. La card entra, crece hasta ~1.60× en el centro
+        // y se deszoomea al seguir su curso (entra y sale igual, sin saltos).
+        const peak = fromFront < ZOOM_WIDTH ? (Math.cos((fromFront / ZOOM_WIDTH) * Math.PI) + 1) / 2 : 0;
+        const scale = depth + ZOOM_AMOUNT * peak;
+        // opacidad con falloff marcado: las laterales pierden visibilidad.
+        const opacity = 0.12 + 0.88 * Math.pow(cosT, 2.2);
+        // difuminado sólo en laterales/dorso (la central y vecinas quedan nítidas).
+        const blur = (1 - cosT) * 1.8;
         c.el.style.opacity = opacity.toFixed(3);
         c.el.style.filter = blur > 0.25 ? `blur(${blur.toFixed(2)}px)` : 'none';
-        c.el.style.transform = `rotateY(${c.baseAngle}deg) translateZ(${RADIUS}px) scale(${scale.toFixed(4)})`;
+        // ÷SS: compensa la maqueta a SS× → tamaño visual idéntico, textura nítida
+        c.el.style.transform = `rotateY(${c.baseAngle}deg) translateZ(${RADIUS}px) scale(${(scale / SS).toFixed(4)})`;
         c.el.style.pointerEvents = cosT > 0.55 ? 'auto' : 'none'; // no clickear lo que no se ve
         c.el.classList.toggle('is-front', cosT > 0.92); // revela la info extra (vía CSS)
       });
@@ -227,12 +243,27 @@ const pad = (n: number) => String(n).padStart(2, '0');
       if (idx !== lastActiveIdx) {
         active.forEach((c, i) => c.el.classList.toggle('is-active', i === idx));
         if (counterCur) counterCur.textContent = pad(idx + 1);
+        updateBgName(active[idx]); // nombre gigante de fondo del centrado
         lastActiveIdx = idx;
       }
     }
 
+    // ---- nombre gigante de fondo: cross-fade al cambiar de proyecto centrado ----
+    function updateBgName(card: CardRef | undefined) {
+      if (!bgName || !card) return;
+      const nm = card.el.querySelector('.ph-name')?.textContent ?? '';
+      const cd = card.el.querySelector('.ph-code')?.textContent ?? '';
+      bgName.style.opacity = '0'; // funde el nombre saliente…
+      window.clearTimeout(bgTimer);
+      bgTimer = window.setTimeout(() => {
+        if (bgNameText) bgNameText.textContent = nm;
+        if (bgNameCode) bgNameCode.textContent = cd;
+        bgName.style.opacity = ''; // …y entra el nuevo (opacidad de CSS)
+      }, 160);
+    }
+
     function tick() {
-      scroll = lerp(scroll, targetScroll, 0.08);
+      scroll = lerp(scroll, targetScroll, 0.1);
       if (Math.abs(scroll - targetScroll) < 0.001) scroll = targetScroll;
       render();
     }
@@ -298,7 +329,6 @@ const pad = (n: number) => String(n).padStart(2, '0');
       io.observe(section!);
 
       window.addEventListener('scroll', updateTarget, { passive: true });
-      window.addEventListener('touchend', scheduleSnap, { passive: true });
       window.addEventListener(
         'resize',
         () => {
@@ -320,10 +350,11 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
     function disable3D() {
       stop();
-      window.clearTimeout(snapTimer);
+      window.clearTimeout(bgTimer);
       section!.classList.remove('is-3d', 'is-scrolling');
       if (axis) axis.style.transform = '';
-      [ghost21, eyebrowEl, counterEl, marksEl].forEach((el) => {
+      if (bgName) bgName.style.opacity = '';
+      [ghost21, gridEl, marksEl].forEach((el) => {
         if (el) el.style.transform = '';
       });
       cards.forEach((c) => {

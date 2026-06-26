@@ -2,6 +2,8 @@
 .hero{position:relative;padding-top:clamp(3rem,7vw,6rem);padding-bottom:clamp(2.5rem,5vw,4rem);overflow:hidden}
 .hero .wrap{position:relative;z-index:2}
 .hero-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:clamp(2rem,5vw,5rem);align-items:end}
+/* el bloque de texto se corre hacia la izquierda para aprovechar el margen vacío */
+.hero-main{transform:translateX(calc(-1 * var(--hero-shift)))}
 h1.hero-title{
   font-family:var(--font-display);font-weight:500;
   font-size:clamp(2.4rem,5.6vw,5rem);line-height:1.0;letter-spacing:-.025em;
@@ -19,12 +21,11 @@ h1.hero-title em{font-style:normal;color:var(--petrol)}
   border-top:1px solid var(--ink);
   display:grid;grid-template-columns:repeat(3,1fr);
 }
-.legend .cell{padding:1.5rem 1.6rem 1.5rem 0;border-right:1px solid var(--line);position:relative}
+/* cada stat con margen interno: no quedan pegadas al borde / divisor */
+.legend .cell{padding:1.5rem 1.6rem;border-right:1px solid var(--line);position:relative}
 .legend .cell:last-child{border-right:0}
 .legend .num{font-family:var(--font-display);font-weight:500;font-size:clamp(2.6rem,5vw,4.2rem);line-height:.9;letter-spacing:-.02em}
 .legend .lab{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--concrete);margin-top:.7rem}
-.legend .tag{position:absolute;top:1.5rem;right:1.6rem;font-family:var(--font-mono);font-size:.66rem;color:var(--concrete-soft)}
-.legend .cell:last-child .tag{right:0}
 
 @media(max-width:900px){
   .hero-grid{grid-template-columns:1fr;gap:2.4rem;align-items:start}

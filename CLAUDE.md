@@ -38,6 +38,18 @@ registro), no rediseñar. Todo el copy va en **español rioplatense**.
 
 ## Historial de cambios
 
+### 2026-06-26 — feat: limpiar cards del helicoidal (sin código, sin fondos, CTA en hover)
+- **Cartelito `E21·NN` eliminado** de las cards: se quitó el `<span class="ph-code">` del markup
+  y todas sus reglas CSS (antes arriba-izquierda de la portada).
+- **Nombre gigante de fondo eliminado:** se borró el `<p class="ph-bgname">` (nombre + código del
+  proyecto centrado), la función `updateBgName` y su CSS/cross-fade.
+- **Grilla blueprint de fondo eliminada:** se quitó el `<span class="ph-grid">`, su parallax en el
+  `render()` y sus estilos. El parallax multicapa queda con fantasma "21" + marcas de registro.
+- **CTA "Ver proyecto" sólo en hover de la card centrada:** antes se mostraba fija en la card al
+  frente (`.is-front`); ahora la regla exige `.is-front` **y** `:hover`, con fade hacia abajo al
+  entrar/salir (nunca aparece sola).
+- Build validado (12 páginas). Rama mergeada: `claude/condescending-proskuriakova-d3ceec` → `main`
+
 ### 2026-06-26 — feat: pulir hero y navbar; renombrar sección "modelo" a "nosotros"
 - **Navbar:** el logo `banner_negro.png` ("ESTUDIO 21 ARQUITECTOS") reemplaza el ícono "21"
   (se quitó el texto redundante "Estudio 21"); altura del logo `2rem`. Navbar **más fina**:

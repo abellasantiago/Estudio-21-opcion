@@ -38,6 +38,24 @@ registro), no rediseñar. Todo el copy va en **español rioplatense**.
 
 ## Historial de cambios
 
+### 2026-06-26 — feat: pulir hero y navbar; renombrar sección "modelo" a "nosotros"
+- **Navbar:** el logo `banner_negro.png` ("ESTUDIO 21 ARQUITECTOS") reemplaza el ícono "21"
+  (se quitó el texto redundante "Estudio 21"); altura del logo `2rem`. Navbar **más fina**:
+  `74px → 58px` (offset del menú mobile también a 58px).
+- **Nav links:** ahora **Inicio · Nosotros · Proyectos · Equipo · Contacto**. "Nosotros" → `/#nosotros`.
+  "Contacto" dejó de ser CTA con recuadro: es un link normal con el mismo hover (subrayado fino +
+  oscurecido), sin el relleno oscuro que opacaba todo. Se eliminaron los estilos `.nav-cta`.
+- **Hero:** eyebrow ahora dice **"Arquitectura que trasciende"**. El texto del hero y la marca se
+  corren a la izquierda con un token `--hero-shift` (clamp atado al margen vacío del centrado;
+  se anula en pantallas chicas). Token nuevo en `global.css`; clase `.hero-main` en el bloque de texto.
+- **Stats del hero:** cada celda con margen interno (`padding 1.5rem 1.6rem`, ya no pegadas al
+  borde/divisor) y **sin los numeritos** `01/02/03` (se quitó el markup `.tag` y su CSS).
+- **Renombrado "modelo" → "nosotros" (sólo código, sin cambio visual):** `Modelo.astro` →
+  `Nosotros.astro`, `modelo.css` → `nosotros.css` (con `git mv`); `id` de la sección, imports,
+  comentario, uso en `index.astro` y ancla del nav actualizados. Bloques **F01–F04** con margen
+  izquierdo (`padding-left 1.6rem` + el punto `.dot` corrido), reseteado en mobile.
+- Build validado (12 páginas). Rama mergeada: `claude/lucid-snyder-da12a2` → `main`
+
 ### 2026-06-25 — feat: mejorar fluidez, zoom central y nitidez del carrusel helicoidal
 - **Header fuera del sticky:** título, filtros y contador scrollean con la página; el panel sticky
   sólo contiene el cilindro 3D.

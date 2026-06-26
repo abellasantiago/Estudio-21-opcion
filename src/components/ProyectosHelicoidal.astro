@@ -67,11 +67,6 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
   <div class="ph-sticky">
     <span class="ghost21" aria-hidden="true">21</span>
-    <span class="ph-grid" aria-hidden="true"></span>
-    <p class="ph-bgname" aria-hidden="true">
-      <span class="ph-bgname-code"></span>
-      <span class="ph-bgname-text"></span>
-    </p>
     <span class="marks" aria-hidden="true">
       <span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span>
     </span>
@@ -95,7 +90,6 @@ const pad = (n: number) => String(n).padStart(2, '0');
                   ) : (
                     <span class="ph-ph">imagen pendiente</span>
                   )}
-                  <span class="ph-code">{it.codigo}</span>
                   <span class="ph-cta" aria-hidden="true">Ver proyecto →</span>
                 </span>
                 <span class="ph-meta">
@@ -132,13 +126,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     // velocidades (multicapa = sensación de profundidad). El header
     // (título/filtros/contador) ya no está acá: vive fuera del sticky y scrollea.
     const ghost21 = section.querySelector<HTMLElement>('.ghost21');
-    const gridEl = section.querySelector<HTMLElement>('.ph-grid');
     const marksEl = section.querySelector<HTMLElement>('.marks');
-    // nombre gigante de fondo del proyecto centrado (cross-fade al cambiar)
-    const bgName = section.querySelector<HTMLElement>('.ph-bgname');
-    const bgNameText = section.querySelector<HTMLElement>('.ph-bgname-text');
-    const bgNameCode = section.querySelector<HTMLElement>('.ph-bgname-code');
-    let bgTimer = 0;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     // ---- parámetros ----
@@ -210,9 +198,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
       // Parallax MULTICAPA: el cilindro baja scroll*VERT_STEP px; las capas de
       // fondo suben a fracciones distintas de esa velocidad → cada una a su
-      // "profundidad" (grilla cerca/rápida, fantasma lejos/lento, marcas medio).
+      // "profundidad" (fantasma lejos/lento, marcas medio).
       const bgParallax = scroll * VERT_STEP * 0.35;
-      if (gridEl) gridEl.style.transform = `translateY(${-bgParallax * 1.25}px)`;
       if (ghost21) ghost21.style.transform = `translateY(${-bgParallax * 0.55}px)`;
       if (marksEl) marksEl.style.transform = `translateY(${-bgParallax * 0.85}px)`;
 
@@ -243,23 +230,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
       if (idx !== lastActiveIdx) {
         active.forEach((c, i) => c.el.classList.toggle('is-active', i === idx));
         if (counterCur) counterCur.textContent = pad(idx + 1);
-        updateBgName(active[idx]); // nombre gigante de fondo del centrado
         lastActiveIdx = idx;
       }
-    }
-
-    // ---- nombre gigante de fondo: cross-fade al cambiar de proyecto centrado ----
-    function updateBgName(card: CardRef | undefined) {
-      if (!bgName || !card) return;
-      const nm = card.el.querySelector('.ph-name')?.textContent ?? '';
-      const cd = card.el.querySelector('.ph-code')?.textContent ?? '';
-      bgName.style.opacity = '0'; // funde el nombre saliente…
-      window.clearTimeout(bgTimer);
-      bgTimer = window.setTimeout(() => {
-        if (bgNameText) bgNameText.textContent = nm;
-        if (bgNameCode) bgNameCode.textContent = cd;
-        bgName.style.opacity = ''; // …y entra el nuevo (opacidad de CSS)
-      }, 160);
     }
 
     function tick() {
@@ -350,11 +322,9 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
     function disable3D() {
       stop();
-      window.clearTimeout(bgTimer);
       section!.classList.remove('is-3d', 'is-scrolling');
       if (axis) axis.style.transform = '';
-      if (bgName) bgName.style.opacity = '';
-      [ghost21, gridEl, marksEl].forEach((el) => {
+      [ghost21, marksEl].forEach((el) => {
         if (el) el.style.transform = '';
       });
       cards.forEach((c) => {

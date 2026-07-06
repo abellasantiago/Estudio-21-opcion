@@ -1,0 +1,33 @@
+---
+/*
+ * LivingBackground — el "espacio" continuo detrás del inicio y del helicoidal.
+ *
+ * Es una capa fija (position:fixed) con el mismo lenguaje que el backdrop del
+ * helicoidal: el fantasma "21" sobredimensionado + marcas de registro, más un
+ * par de anotaciones mono (coordenadas / código) que le dan textura de plano.
+ * El motor (immersive.ts) le aplica a cada capa [data-depth] paralaje de mouse,
+ * paralaje de scroll (data-scroll) y una deriva autónoma lenta (data-drift) para
+ * que "respire" aun sin interacción. Sin JS queda como backdrop estático y sutil.
+ *
+ * Las secciones del inicio quedan transparentes (ver immersive.css) para que este
+ * fondo se vea de forma continua hero → nosotros → proyectos = un mismo espacio.
+ */
+import '../styles/immersive.css';
+import { site } from '../data/site';
+---
+
+<div class="living-bg" aria-hidden="true">
+  <span class="lbg-ghost lbg-ghost-1" data-depth="0.05" data-scroll="-0.03" data-drift="16">21</span>
+  <span class="lbg-ghost lbg-ghost-2" data-depth="0.12" data-scroll="0.05" data-drift="10">21</span>
+
+  <span class="lbg-note lbg-note-1" data-depth="0.34" data-scroll="0.02" data-drift="6">
+    {site.direccion.ciudad} · 34°54′S 56°11′O
+  </span>
+  <span class="lbg-note lbg-note-2" data-depth="0.5" data-scroll="-0.02" data-drift="8">
+    EST·21 — Arquitectura y desarrollo
+  </span>
+
+  <span class="lbg-marks" data-depth="0.2" data-scroll="0.015">
+    <span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span>
+  </span>
+</div>

@@ -1,40 +1,235 @@
-/* ---------- HERO ---------- */
-.hero{position:relative;padding-top:clamp(3rem,7vw,6rem);padding-bottom:clamp(2.5rem,5vw,4rem);overflow:hidden}
-.hero .wrap{position:relative;z-index:2}
-.hero-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:clamp(2rem,5vw,5rem);align-items:end}
-/* el bloque de texto se corre hacia la izquierda para aprovechar el margen vacío */
-.hero-main{transform:translateX(calc(-1 * var(--hero-shift)))}
-h1.hero-title{
-  font-family:var(--font-display);font-weight:500;
-  font-size:clamp(2.4rem,5.6vw,5rem);line-height:1.0;letter-spacing:-.025em;
-  margin-top:1.6rem;max-width:14ch;
-}
-h1.hero-title em{font-style:normal;color:var(--petrol)}
-.hero-lead{font-size:clamp(1rem,1.3vw,1.22rem);color:var(--ink-soft);max-width:46ch;margin-top:1.7rem}
-.hero-side{padding-bottom:.4rem}
-.hero-dim{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;color:var(--concrete);text-transform:uppercase;margin-bottom:1.4rem;display:flex;align-items:center;gap:.6rem}
-.hero-dim::before{content:"";flex:0 0 auto;width:.5rem;height:.5rem;border:1px solid var(--petrol);border-radius:50%}
+/* ============================================================
+   HERO — "Estudio 21" como objeto en el espacio
+   ------------------------------------------------------------
+   BASE (fallback / reduced-motion / mobile): "Estudio 21" centrado,
+   estático y legible, con el copy debajo.
+   is-immersive (desktop con motion): el tramo inicial se vuelve alto
+   y el escenario queda sticky; el motor (immersive.ts) hace girar el
+   "Estudio 21" sobre sí mismo mientras el fondo vivo se mueve por detrás.
+   ============================================================ */
 
-/* title-block / legend */
-.legend{
-  margin-top:clamp(2.6rem,5vw,4rem);
-  border-top:1px solid var(--ink);
-  display:grid;grid-template-columns:repeat(3,1fr);
+.hero {
+  position: relative;
+  background: transparent;
 }
-/* cada stat con margen interno: no quedan pegadas al borde / divisor */
-.legend .cell{padding:1.5rem 1.6rem;border-right:1px solid var(--line);position:relative}
-.legend .cell:last-child{border-right:0}
-.legend .num{font-family:var(--font-display);font-weight:500;font-size:clamp(2.6rem,5vw,4.2rem);line-height:.9;letter-spacing:-.02em}
-.legend .lab{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--concrete);margin-top:.7rem}
 
-@media(max-width:900px){
-  .hero-grid{grid-template-columns:1fr;gap:2.4rem;align-items:start}
-  .hero-side{order:-1}
-  .hero .ghost21{font-size:min(70vw,30rem);right:-6vw}
+/* ---- tramo inicial (define el progreso del giro en modo inmersivo) ---- */
+.hero-track {
+  position: relative;
 }
-@media(max-width:600px){
-  .legend{grid-template-columns:1fr}
-  .legend .cell{border-right:0;border-bottom:1px solid var(--line);padding:1.3rem 0}
-  .legend .cell:last-child{border-bottom:0}
-  h1.hero-title{font-size:clamp(2.2rem,11vw,3.2rem)}
+
+/* ---- escenario centrado ---- */
+.hero-stage {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
+  text-align: center;
+  position: relative;
+  padding: clamp(4rem, 10vh, 8rem) var(--gutter);
+  /* perspectiva para el giro 3D del título (inofensiva en fallback) */
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+}
+
+.hero-eyebrow {
+  justify-content: center;
+}
+
+/* ---- "Estudio 21" ---- */
+.hero-title-wrap {
+  display: block;
+  /* la perspectiva va en el padre directo del título que rota: si estuviera
+     sólo en el stage, el transform de parallax de este wrap la "aplanaría" y el
+     giro se vería ortográfico (chato) en vez de con profundidad. */
+  perspective: 1000px;
+  perspective-origin: 50% 45%;
+}
+.hero-title {
+  display: grid;
+  justify-items: center;
+  gap: 0.1em;
+  transform-origin: center center;
+  backface-visibility: visible;
+}
+.hero-title .ht-word {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.4rem, 4.5vw, 3rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  line-height: 1;
+}
+.hero-title .ht-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(7rem, 26vw, 20rem);
+  line-height: 0.82;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  /* volumen sutil: extrusión hacia abajo + sombra blanda (no deforma) */
+  text-shadow:
+    0 1px 0 var(--line),
+    0 2px 0 var(--line-soft),
+    0 3px 0 var(--line-soft),
+    0 10px 22px rgba(26, 25, 22, 0.12);
+}
+
+.hero-dim {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.hero-dim::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid var(--petrol);
+  border-radius: 50%;
+}
+
+/* ---- indicador de scroll ---- */
+.scroll-hint {
+  position: absolute;
+  bottom: clamp(1.4rem, 4vh, 2.8rem);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+.scroll-hint-line {
+  width: 1px;
+  height: clamp(2rem, 5vh, 3.2rem);
+  background: linear-gradient(to bottom, transparent, var(--concrete));
+  position: relative;
+  overflow: hidden;
+}
+.scroll-hint-line::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -40%;
+  width: 100%;
+  height: 40%;
+  background: var(--ink);
+  animation: scroll-hint-run 1.8s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+.scroll-hint-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--concrete);
+}
+@keyframes scroll-hint-run {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(350%);
+  }
+}
+
+/* ---- bloque de contenido (claim + lead + stats) ---- */
+.hero-intro {
+  padding-block: clamp(2.5rem, 6vw, 5rem) clamp(3.5rem, 8vw, 6.5rem);
+}
+.hero-claim {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.8rem, 4.4vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  max-width: 16ch;
+}
+.hero-claim em {
+  font-style: normal;
+  color: var(--petrol);
+}
+.hero-lead {
+  font-size: clamp(1rem, 1.3vw, 1.22rem);
+  color: var(--ink-soft);
+  max-width: 46ch;
+  margin-top: 1.6rem;
+}
+
+/* ---- stats (legend) ---- */
+.legend {
+  margin-top: clamp(2.6rem, 5vw, 4rem);
+  border-top: 1px solid var(--ink);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.legend .cell {
+  padding: 1.5rem 1.6rem;
+  border-right: 1px solid var(--line);
+  position: relative;
+}
+.legend .cell:last-child {
+  border-right: 0;
+}
+.legend .num {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+}
+.legend .lab {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  margin-top: 0.7rem;
+}
+
+/* ============================================================
+   MODO INMERSIVO — el escenario se fija y el título gira con el scroll
+   ============================================================ */
+html.is-immersive .hero-track {
+  /* alto del tramo: cuanto más, más lento gira "Estudio 21" */
+  min-height: 240vh;
+}
+html.is-immersive .hero-stage {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  height: 100vh;
+}
+html.is-immersive .hero-title {
+  will-change: transform;
+}
+
+/* ---- responsive ---- */
+@media (max-width: 900px) {
+  .legend {
+    grid-template-columns: 1fr;
+  }
+  .legend .cell {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 1.3rem 0;
+  }
+  .legend .cell:last-child {
+    border-bottom: 0;
+  }
+}
+
+/* ---- reduced-motion: sin la animación del indicador de scroll ---- */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hint-line::after {
+    animation: none;
+    display: none;
+  }
 }

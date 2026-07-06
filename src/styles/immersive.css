@@ -1,0 +1,184 @@
+/* ============================================================
+   CAPA INMERSIVA — home de Estudio 21
+   ------------------------------------------------------------
+   Profundidad + movimiento estilo activetheory, con identidad de
+   estudio y Z CONTENIDO. Todo se activa sólo con `html.is-immersive`
+   (lo agrega immersive.ts si el equipo califica). Sin esa clase, el
+   sitio queda estático y legible (fallback / reduced-motion / mobile).
+   ============================================================ */
+
+/* ---------- fondo vivo compartido (el "espacio" continuo) ---------- */
+/* z-index:-1 → pinta por encima del papel de fondo pero por debajo de todo
+   el contenido; las secciones transparentes lo dejan ver, las opacas lo tapan. */
+.living-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.living-bg > * {
+  position: absolute;
+  will-change: transform;
+}
+.lbg-ghost {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.8;
+  color: var(--paper-deep);
+  user-select: none;
+}
+.lbg-ghost-1 {
+  font-size: min(52vw, 46rem);
+  top: -8vh;
+  right: -4vw;
+}
+.lbg-ghost-2 {
+  font-size: min(24vw, 18rem);
+  bottom: -6vh;
+  left: -3vw;
+  color: var(--line);
+}
+.lbg-note {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--concrete-soft);
+  opacity: 0.5;
+  white-space: nowrap;
+}
+.lbg-note-1 {
+  top: 22%;
+  left: 7%;
+}
+.lbg-note-2 {
+  bottom: 20%;
+  right: 8%;
+}
+/* marcas de registro a pantalla completa (mismo lenguaje que .marks) */
+.lbg-marks {
+  inset: 6vh 5vw;
+}
+.lbg-marks span {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  opacity: 0.45;
+}
+.lbg-marks span::before,
+.lbg-marks span::after {
+  content: '';
+  position: absolute;
+  background: var(--concrete-soft);
+}
+.lbg-marks span::before {
+  width: 100%;
+  height: 1px;
+  top: 0;
+}
+.lbg-marks span::after {
+  width: 1px;
+  height: 100%;
+  left: 0;
+}
+.lbg-marks .tl {
+  top: 0;
+  left: 0;
+}
+.lbg-marks .tr {
+  top: 0;
+  right: 0;
+  transform: scaleX(-1);
+}
+.lbg-marks .bl {
+  bottom: 0;
+  left: 0;
+  transform: scaleY(-1);
+}
+.lbg-marks .br {
+  bottom: 0;
+  right: 0;
+  transform: scale(-1);
+}
+
+/* ---------- rail de progreso (borde derecho) ---------- */
+.progress-rail {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100vh;
+  z-index: 55;
+  background: var(--line);
+  pointer-events: none;
+}
+.progress-rail-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--petrol);
+  transform: scaleY(0);
+  transform-origin: top center;
+}
+html.is-immersive .progress-rail {
+  display: block;
+}
+
+/* ---------- header: oculto sobre el hero, aparece al pasarlo ---------- */
+/* fixed (fuera de flujo) → el hero arranca full-bleed sin reservar la banda. */
+html.is-immersive #header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  transform: translateY(-12px);
+  pointer-events: none;
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease,
+    border-color 0.35s ease,
+    background 0.35s ease;
+}
+html.is-immersive #header.past-hero {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* ---------- secciones del inicio transparentes → fondo continuo ---------- */
+html.is-immersive #nosotros,
+html.is-immersive #proyectos.ph {
+  background: transparent;
+}
+/* el fondo vivo ya aporta fantasma + marcas: evitamos duplicar los internos */
+html.is-immersive #nosotros > .marks,
+html.is-immersive #proyectos .ph-sticky > .ghost21,
+html.is-immersive #proyectos .ph-sticky > .marks {
+  display: none;
+}
+/* el punto que corta la línea de las fases: sobre el espacio, no sobre paper-2 */
+html.is-immersive #nosotros .phase .dot {
+  background: var(--paper);
+}
+
+/* ---------- capas [data-depth]: base para el paralaje ---------- */
+/* el motor les setea transform inline; acá sólo el hint de compositing */
+html.is-immersive [data-depth] {
+  will-change: transform;
+}
+
+/* ============================================================
+   FALLBACK / reduced-motion → nada de esto se activa (no hay
+   is-immersive). El fondo vivo queda como backdrop estático y
+   sutil detrás del hero; el resto del sitio, tal cual.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .living-bg > *,
+  .progress-rail-fill {
+    transform: none !important;
+  }
+}

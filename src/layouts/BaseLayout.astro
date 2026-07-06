@@ -18,15 +18,22 @@ interface Props {
   description: string;
   image?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** Activa la capa inmersiva (sólo la home). */
+  immersive?: boolean;
 }
 
-const { title, description, image, jsonLd } = Astro.props;
+const { title, description, image, jsonLd, immersive = false } = Astro.props;
+
+// Se agrega `is-immersive` lo antes posible (antes del primer paint) para evitar
+// el flash del layout de fallback. El motor (immersive.ts) toma el control en runtime.
+const immersiveBoot = `(function(){try{var m=window.matchMedia;if(m&&!m('(prefers-reduced-motion: reduce)').matches&&m('(pointer: fine)').matches&&m('(min-width: 900px)').matches){document.documentElement.classList.add('is-immersive')}}catch(e){}})()`;
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="es" data-immersive-page={immersive ? '' : undefined}>
   <head>
     <BaseHead title={title} description={description} image={image} jsonLd={jsonLd} />
+    {immersive && <script is:inline set:html={immersiveBoot} />}
     <slot name="head" />
   </head>
   <body>
@@ -38,10 +45,19 @@ const { title, description, image, jsonLd } = Astro.props;
     <Footer />
 
     <script>
+      // ----- capa inmersiva (no-op fuera de la home) -----
+      import { initImmersive } from '../scripts/immersive';
+      initImmersive();
+
       // ----- header con sombra al hacer scroll -----
       const header = document.getElementById('header');
       if (header) {
-        const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 8);
+        const onScroll = () => {
+          header.classList.toggle('scrolled', window.scrollY > 8);
+          // en la home inmersiva el header arranca oculto y aparece al pasar el
+          // hero (la clase sólo tiene efecto bajo html.is-immersive, ver CSS).
+          header.classList.toggle('past-hero', window.scrollY > window.innerHeight * 0.7);
+        };
         onScroll();
         window.addEventListener('scroll', onScroll, { passive: true });
       }

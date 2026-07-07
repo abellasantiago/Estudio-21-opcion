@@ -123,6 +123,12 @@ export function initImmersive(): void {
         corridor.style.transform = `translateZ(${(descent * CORRIDOR_DEPTH).toFixed(1)}px)`;
       }
 
+      // las anotaciones mono del fondo se desvanecen al dejar el hero (para no
+      // entorpecer la lectura) y reaparecen al volver — se multiplica su opacidad
+      // por --hero-fade desde CSS (ver .lbg-note en immersive.css).
+      const heroFade = clamp(1 - scrollY / (window.innerHeight * 0.7), 0, 1);
+      root.style.setProperty('--hero-fade', heroFade.toFixed(3));
+
       // capas del fondo: mouse (todas) + scroll + deriva + rotateY (data-rotate)
       for (const p of parallax) {
         const drift = p.drift ? Math.sin(now * DRIFT_SPEED + p.phase) * p.drift : 0;
@@ -173,6 +179,7 @@ export function initImmersive(): void {
     for (const p of parallax) p.el.style.transform = '';
     if (scrollHint) scrollHint.style.opacity = '';
     if (railFill) railFill.style.transform = '';
+    root.style.removeProperty('--hero-fade');
     mx = my = tmx = tmy = angle = 0;
   }
 

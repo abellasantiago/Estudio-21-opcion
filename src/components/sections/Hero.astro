@@ -1,5 +1,6 @@
 ---
 import '../../styles/hero.css';
+import HeroBlueprints from '../HeroBlueprints.astro';
 import { site } from '../../data/site';
 
 // "21" extruido: capas apiladas en Z (de lejos → al frente). El giro (rotateY)
@@ -22,6 +23,8 @@ const numLayers = Array.from({ length: NUM_LAYERS }, (_, i) => {
        hace girar "Estudio 21". En fallback es un hero centrado normal. -->
   <div class="hero-track" data-immersive-intro>
     <div class="hero-stage">
+      <HeroBlueprints />
+
       <span class="eyebrow hero-eyebrow reveal">Arquitectura que trasciende</span>
 
       <div class="hero-title-wrap" data-depth="0.12">

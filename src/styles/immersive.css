@@ -46,7 +46,9 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--concrete-soft);
-  opacity: 0.5;
+  /* --hero-fade (lo setea el motor con el scroll) desvanece las notas al dejar
+     el hero y las trae de vuelta al subir; sin motor, var no seteada → opacidad 0.5. */
+  opacity: calc(0.5 * var(--hero-fade, 1));
   white-space: nowrap;
 }
 .lbg-note-1 {

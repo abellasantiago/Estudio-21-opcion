@@ -1,0 +1,76 @@
+/* ============================================================
+   EASTER EGG — planos ocultos que flanquean el "21"
+   ------------------------------------------------------------
+   Dos zonas invisibles en el espacio vacío del hero. Al pasar el
+   cursor, el plano se DIBUJA (stroke-dashoffset atado al movimiento
+   del cursor); al salir, se desvanece y "vuelve a dormir".
+   Sólo en modo inmersivo (desktop con puntero fino y motion).
+   ============================================================ */
+
+.hero-zone {
+  display: none;
+  position: absolute;
+  z-index: 2;
+  cursor: crosshair; /* pista sutil de que ahí hay algo que descubrir */
+}
+/* izquierda (planta): la más grande, un poco más abajo */
+.hero-zone-left {
+  left: 8%;
+  top: 25%;
+  width: 18%;
+  height: 44%;
+}
+/* derecha (fachada): más chica */
+.hero-zone-right {
+  right: 7%;
+  top: 27%;
+  width: 12%;
+  height: 32%;
+}
+/* sólo con la capa inmersiva activa (misma condición que el resto) */
+html.is-immersive .hero-zone {
+  display: block;
+}
+
+.bp-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.hero-zone.is-active .bp-svg {
+  opacity: 1;
+}
+
+/* trazos del plano: arrancan ocultos (dash 0 + hueco enorme); el JS va revelando
+   sólo los segmentos por los que pasa el cursor (reconstruye el dash pattern).
+   OJO: sin `non-scaling-stroke` a propósito — ese modo mide el dash en px de
+   pantalla y no en unidades del viewBox, lo que descuadraba el dibujo (aparecían
+   tramos donde no pasó el cursor). Así el dash queda en las mismas unidades que
+   getTotalLength() y se revela exactamente bajo el cursor. */
+.bp-draw {
+  fill: none;
+  stroke: var(--concrete-soft);
+  stroke-width: 1.2;
+  stroke-opacity: 0.62;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 0 9999;
+}
+.bp-accent {
+  stroke: var(--petrol);
+}
+.bp-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  fill: var(--concrete);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-zone {
+    display: none !important;
+  }
+}

@@ -47,14 +47,18 @@
   perspective: 1000px;
   perspective-origin: 50% 45%;
 }
+/* preserve-3d (no grid/flex, que aplanan el 3D): el título rota como un bloque
+   con grosor. La perspectiva la da .hero-title-wrap (padre directo). */
 .hero-title {
-  display: grid;
-  justify-items: center;
-  gap: 0.1em;
+  position: relative;
+  text-align: center;
+  transform-style: preserve-3d;
   transform-origin: center center;
   backface-visibility: visible;
 }
 .hero-title .ht-word {
+  display: block;
+  margin-bottom: 0.1em;
   font-family: var(--font-display);
   font-weight: 500;
   font-size: clamp(1.4rem, 4.5vw, 3rem);
@@ -64,18 +68,41 @@
   line-height: 1;
 }
 .hero-title .ht-num {
+  display: block;
+  transform-style: preserve-3d;
+}
+/* el "21" extruido: una pila de capas a distinto translateZ */
+.ht-num-3d {
+  position: relative;
+  display: inline-block;
+  transform-style: preserve-3d;
+}
+.ht-num-layer {
+  display: block;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: clamp(7rem, 26vw, 20rem);
   line-height: 0.82;
   letter-spacing: -0.03em;
-  color: var(--ink);
-  /* volumen sutil: extrusión hacia abajo + sombra blanda (no deforma) */
-  text-shadow:
-    0 1px 0 var(--line),
-    0 2px 0 var(--line-soft),
-    0 3px 0 var(--line-soft),
-    0 10px 22px rgba(26, 25, 22, 0.12);
+  transform: translateZ(var(--z, 0));
+}
+/* la cara del frente (última en el DOM) sostiene la caja; el resto van detrás */
+.ht-num-layer:not(:last-child) {
+  position: absolute;
+  inset: 0;
+}
+
+/* sólo para lectores de pantalla (el "21" visible está aria-hidden) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .hero-dim {

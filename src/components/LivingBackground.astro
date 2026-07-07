@@ -1,23 +1,39 @@
 ---
 /*
- * LivingBackground — el "espacio" continuo detrás del inicio y del helicoidal.
+ * LivingBackground — el "espacio" 3D continuo detrás de toda la home.
  *
- * Es una capa fija (position:fixed) con el mismo lenguaje que el backdrop del
- * helicoidal: el fantasma "21" sobredimensionado + marcas de registro, más un
- * par de anotaciones mono (coordenadas / código) que le dan textura de plano.
- * El motor (immersive.ts) le aplica a cada capa [data-depth] paralaje de mouse,
- * paralaje de scroll (data-scroll) y una deriva autónoma lenta (data-drift) para
- * que "respire" aun sin interacción. Sin JS queda como backdrop estático y sutil.
+ * Capas (de atrás hacia adelante):
+ *   · corredor de marcos de registro que retroceden en Z y AVANZAN hacia la
+ *     cámara con el scroll (sensación de recorrer el estudio hero → cards);
+ *   · fantasma "21" grande que gira lento durante el descenso (data-rotate);
+ *   · un "21" secundario, anotaciones mono (coordenadas / código) y marcas de
+ *     registro a pantalla completa, todo con paralaje de mouse/scroll + deriva.
  *
- * Las secciones del inicio quedan transparentes (ver immersive.css) para que este
- * fondo se vea de forma continua hero → nosotros → proyectos = un mismo espacio.
+ * El motor (immersive.ts) mueve todo esto; sin JS queda un backdrop estático y
+ * sutil. Las secciones del inicio y el helicoidal quedan transparentes (ver
+ * immersive.css) para que este fondo se vea de forma continua = un mismo espacio.
  */
 import '../styles/immersive.css';
 import { site } from '../data/site';
+
+// marcos del corredor: del más cercano al más lejano (cada uno a su translateZ).
+const CORRIDOR_FRAMES = 7;
+const frames = Array.from(
+  { length: CORRIDOR_FRAMES },
+  (_, i) => -700 - i * 300, // -700 (cerca) … -2500 (lejos)
+);
 ---
 
 <div class="living-bg" aria-hidden="true">
-  <span class="lbg-ghost lbg-ghost-1" data-depth="0.05" data-scroll="-0.03" data-drift="16">21</span>
+  <!-- corredor de marcos: profundidad real que avanza con el scroll -->
+  <div class="depth-corridor" data-corridor>
+    {frames.map((z) => (
+      <span class="depth-frame" style={`--z:${z}px`}></span>
+    ))}
+  </div>
+
+  <!-- "21" de fondo que gira lento durante todo el descenso -->
+  <span class="lbg-ghost lbg-ghost-1" data-depth="0.05" data-scroll="-0.03" data-drift="16" data-rotate="150">21</span>
   <span class="lbg-ghost lbg-ghost-2" data-depth="0.12" data-scroll="0.05" data-drift="10">21</span>
 
   <span class="lbg-note lbg-note-1" data-depth="0.34" data-scroll="0.02" data-drift="6">

@@ -1,6 +1,20 @@
 ---
 import '../../styles/hero.css';
 import { site } from '../../data/site';
+
+// "21" extruido: capas apiladas en Z (de lejos → al frente). El giro (rotateY)
+// las muestra como un bloque con grosor en vez de texto plano. Se generan del
+// fondo (claro) al frente (tinta) para que la cara oscura quede arriba también
+// en fallback (sin perspectiva las capas se superponen y manda el DOM order).
+const NUM_LAYERS = 12;
+const numLayers = Array.from({ length: NUM_LAYERS }, (_, i) => {
+  const t = i / (NUM_LAYERS - 1); // 0 = capa más lejana, 1 = cara al frente
+  const z = -(1 - t) * 26; // px de profundidad (lejos: -26 → frente: 0)
+  const mix = (a: number, b: number) => Math.round(a + (b - a) * t);
+  // interpolar var(--line) (211,208,200) lejos → var(--ink) (26,25,22) al frente
+  const col = `rgb(${mix(211, 26)}, ${mix(208, 25)}, ${mix(200, 22)})`;
+  return { z, col };
+});
 ---
 
 <section class="hero" id="inicio">
@@ -13,7 +27,14 @@ import { site } from '../../data/site';
       <div class="hero-title-wrap" data-depth="0.12">
         <h1 class="hero-title" data-immersive-title>
           <span class="ht-word">Estudio</span>
-          <span class="ht-num">21</span>
+          <span class="ht-num" aria-hidden="true">
+            <span class="ht-num-3d">
+              {numLayers.map((l) => (
+                <span class="ht-num-layer" style={`--z:${l.z}px; color:${l.col}`}>21</span>
+              ))}
+            </span>
+          </span>
+          <span class="sr-only">21</span>
         </h1>
       </div>
 

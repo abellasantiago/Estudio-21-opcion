@@ -103,6 +103,60 @@
   transform: scale(-1);
 }
 
+/* ---------- profundidad 3D del fondo (sólo inmersivo) ---------- */
+/* la perspectiva habilita el giro del "21" de fondo y el corredor de marcos */
+html.is-immersive .living-bg {
+  perspective: 1100px;
+  perspective-origin: 50% 42%;
+}
+
+/* corredor de marcos de registro que retroceden en Z y avanzan con el scroll */
+.depth-corridor {
+  display: none;
+}
+html.is-immersive .depth-corridor {
+  display: block;
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  opacity: 0.6;
+  /* se atenúa en el centro para no competir con el texto del hero/secciones */
+  -webkit-mask-image: radial-gradient(ellipse 82% 82% at 50% 42%, transparent 18%, #000 66%);
+  mask-image: radial-gradient(ellipse 82% 82% at 50% 42%, transparent 18%, #000 66%);
+}
+.depth-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(64vw, 760px);
+  height: min(78vh, 720px);
+  border: 1px solid var(--line);
+  transform: translate(-50%, -50%) translateZ(var(--z, 0));
+  will-change: transform;
+}
+/* pequeñas esquinas de registro en cada marco → lenguaje de plano */
+.depth-frame::before,
+.depth-frame::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--concrete-soft);
+  opacity: 0.7;
+}
+.depth-frame::before {
+  top: -1px;
+  left: -1px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.depth-frame::after {
+  bottom: -1px;
+  right: -1px;
+  border-left: 0;
+  border-top: 0;
+}
+
 /* ---------- rail de progreso (borde derecho) ---------- */
 .progress-rail {
   display: none;

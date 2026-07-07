@@ -1,16 +1,18 @@
 /**
  * Motor inmersivo de la home de Estudio 21.
  * ------------------------------------------------------------
- * Aplica la capa de profundidad/movimiento (estilo activetheory, pero con
- * identidad de estudio y movimiento en Z CONTENIDO) sobre el markup semántico
- * de la home. Todo es progressive enhancement: sin JS / prefers-reduced-motion /
- * mobile → el sitio queda estático y legible (esta capa ni se activa).
+ * Aplica la capa de profundidad/movimiento (estilo activetheory, con identidad
+ * de estudio y Z contenido) sobre el markup semántico de la home. Todo es
+ * progressive enhancement: sin JS / prefers-reduced-motion / mobile → el sitio
+ * queda estático y legible (esta capa ni se activa).
  *
  * Un único requestAnimationFrame maneja:
- *   · el giro del "Estudio 21" del hero, atado al progreso del tramo inicial;
- *   · el paralaje de mouse de las capas [data-depth] (hero + fondo vivo + secciones);
- *   · la deriva autónoma + paralaje de scroll del fondo vivo (vida sin interacción);
- *   · la aparición del header al pasar el hero y el rail de progreso.
+ *   · el giro del "Estudio 21" del hero (rotateY) + su retroceso y desvanecido
+ *     a medida que la cámara avanza (se integra al fondo);
+ *   · el "descenso" hero → cards: el corredor de marcos avanza en Z y el
+ *     fantasma "21" del fondo gira lento (movimiento/profundidad continuos);
+ *   · el paralaje de mouse de las capas [data-depth] + deriva autónoma del fondo;
+ *   · el rail de progreso.
  *
  * Sólo se tocan `transform`/`opacity`. Al desactivar (resize a mobile, etc.) se
  * limpian todos los estilos inline — mismo patrón que `disable3D` del helicoidal.
@@ -21,6 +23,7 @@ type Parallax = {
   depth: number; // desplazamiento por mouse (proporción de MOUSE_RANGE)
   scroll: number; // paralaje de scroll (px por px scrolleado)
   drift: number; // amplitud de la deriva autónoma (px)
+  rotate: number; // ° de rotateY a lo largo del descenso (0 = no rota)
   phase: number; // desfase de la deriva, para que no vayan todas iguales
 };
 
@@ -34,9 +37,11 @@ export function initImmersive(): void {
 
   const intro = document.querySelector<HTMLElement>('[data-immersive-intro]');
   const title = document.querySelector<HTMLElement>('[data-immersive-title]');
-  // La aparición del header NO la maneja este motor: la resuelve el listener de
-  // scroll siempre-activo de BaseLayout (clase `past-hero`), así el header
-  // aparece aunque esta capa no llegara a arrancar.
+  const corridor = document.querySelector<HTMLElement>('[data-corridor]');
+  // fin del "descenso": el arranque del helicoidal de proyectos (las cards).
+  const descentEnd = document.getElementById('proyectos');
+  // La aparición del header la resuelve el scroll siempre-activo de BaseLayout
+  // (clase `past-hero`), no este motor → aparece aunque esta capa no arrancara.
   const railFill = document.querySelector<HTMLElement>('[data-rail-fill]');
   const scrollHint = document.querySelector<HTMLElement>('[data-scroll-hint]');
 
@@ -46,7 +51,9 @@ export function initImmersive(): void {
   const capable = () => !reduceMq.matches && fineMq.matches && wideMq.matches;
 
   // ---- parámetros (Z contenido, movimiento cuidado) ----
-  const TOTAL_ROTATION = 360; // ° que gira "Estudio 21" a lo largo del tramo inicial
+  const TOTAL_ROTATION = 360; // ° que gira "Estudio 21" en el tramo del hero
+  const TITLE_RECEDE = 460; // px que retrocede el título en Z mientras gira
+  const CORRIDOR_DEPTH = 720; // px que avanza el corredor de marcos en el descenso
   const MOUSE_RANGE = 26; // px máx de desplazamiento por paralaje de mouse
   const DRIFT_SPEED = 0.00016; // velocidad de la deriva autónoma del fondo vivo
 
@@ -68,6 +75,7 @@ export function initImmersive(): void {
       depth: parseFloat(el.dataset.depth || '0'),
       scroll: parseFloat(el.dataset.scroll || '0'),
       drift: parseFloat(el.dataset.drift || '0'),
+      rotate: parseFloat(el.dataset.rotate || '0'),
       phase: Math.random() * Math.PI * 2,
     }));
   }
@@ -84,7 +92,7 @@ export function initImmersive(): void {
       my = lerp(my, tmy, 0.06);
       const scrollY = window.scrollY;
 
-      // progreso del tramo inicial (0 al empezar → 1 al llegar al helicoidal)
+      // progreso del tramo del hero (0 al empezar → 1 al terminar el giro)
       let introProgress = 0;
       if (intro) {
         const range = intro.offsetHeight - window.innerHeight;
@@ -92,16 +100,37 @@ export function initImmersive(): void {
           range > 0 ? clamp(-intro.getBoundingClientRect().top / range, 0, 1) : 0;
       }
 
-      // giro del "Estudio 21", centrado, suavizado con lerp
-      angle = lerp(angle, introProgress * TOTAL_ROTATION, 0.1);
-      if (title) title.style.transform = `rotateY(${angle.toFixed(2)}deg)`;
+      // progreso del "descenso" completo hero → cards (helicoidal)
+      let descent = 0;
+      if (descentEnd) {
+        const absTop = descentEnd.getBoundingClientRect().top + scrollY;
+        descent = absTop > 0 ? clamp(scrollY / absTop, 0, 1) : 0;
+      }
 
-      // capas: mouse (todas) + scroll (fondo) + deriva autónoma (fondo)
+      // "Estudio 21": gira sobre sí mismo, retrocede en Z y se desvanece
+      // (se va integrando al fondo mientras la cámara avanza hacia las cards).
+      angle = lerp(angle, introProgress * TOTAL_ROTATION, 0.1);
+      if (title) {
+        const recede = introProgress * TITLE_RECEDE;
+        title.style.transform = `translateZ(${(-recede).toFixed(1)}px) rotateY(${angle.toFixed(2)}deg)`;
+        // se mantiene bien visible girando y recién se desvanece al final del
+        // tramo (introProgress 0.65 → 1), cuando se integra al fondo/espacio.
+        title.style.opacity = clamp(1 - (introProgress - 0.65) / 0.35, 0, 1).toFixed(3);
+      }
+
+      // corredor de marcos: avanza hacia la cámara durante todo el descenso
+      if (corridor) {
+        corridor.style.transform = `translateZ(${(descent * CORRIDOR_DEPTH).toFixed(1)}px)`;
+      }
+
+      // capas del fondo: mouse (todas) + scroll + deriva + rotateY (data-rotate)
       for (const p of parallax) {
         const drift = p.drift ? Math.sin(now * DRIFT_SPEED + p.phase) * p.drift : 0;
         const tx = mx * p.depth * MOUSE_RANGE + drift * 0.6;
         const ty = my * p.depth * MOUSE_RANGE + scrollY * p.scroll + drift;
-        p.el.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0)`;
+        let t = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0)`;
+        if (p.rotate) t += ` rotateY(${(descent * p.rotate).toFixed(2)}deg)`;
+        p.el.style.transform = t;
       }
 
       // el indicador de scroll se desvanece apenas se avanza
@@ -136,7 +165,11 @@ export function initImmersive(): void {
     window.removeEventListener('mousemove', onMouse);
     root.classList.remove('is-immersive');
     // limpiar todos los transforms/opacidades inline → fallback estático
-    if (title) title.style.transform = '';
+    if (title) {
+      title.style.transform = '';
+      title.style.opacity = '';
+    }
+    if (corridor) corridor.style.transform = '';
     for (const p of parallax) p.el.style.transform = '';
     if (scrollHint) scrollHint.style.opacity = '';
     if (railFill) railFill.style.transform = '';

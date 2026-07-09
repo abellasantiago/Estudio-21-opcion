@@ -37,6 +37,12 @@ export function initImmersive(): void {
 
   const intro = document.querySelector<HTMLElement>('[data-immersive-intro]');
   const title = document.querySelector<HTMLElement>('[data-immersive-title]');
+  // La opacidad del título NO puede ir sobre `title` (.hero-title): ese elemento
+  // tiene `transform-style: preserve-3d` y `opacity < 1` es una propiedad de
+  // "grouping" que lo aplana → el "21" extruido colapsaba a una sola capa 2D al
+  // scrollear. La aplicamos sobre el padre (.hero-title-wrap), que no es contexto
+  // 3D, así las capas siguen en 3D.
+  const titleFade = title?.parentElement ?? null;
   const corridor = document.querySelector<HTMLElement>('[data-corridor]');
   // fin del "descenso": el arranque del helicoidal de proyectos (las cards).
   const descentEnd = document.getElementById('proyectos');
@@ -112,10 +118,26 @@ export function initImmersive(): void {
       angle = lerp(angle, introProgress * TOTAL_ROTATION, 0.1);
       if (title) {
         const recede = introProgress * TITLE_RECEDE;
-        title.style.transform = `translateZ(${(-recede).toFixed(1)}px) rotateY(${angle.toFixed(2)}deg)`;
+        // vaivén leve autónomo + inclinación sutil hacia el mouse, para que en
+        // reposo el "21" no quede estático y se perciba su profundidad. Se apaga
+        // a medida que arranca el giro del scroll (idle → 0) para no competir.
+        const idle = clamp(1 - introProgress * 2.5, 0, 1);
+        // rotación izquierda-derecha continua (bien perceptible en reposo) + un
+        // cabeceo vertical más leve; la inclinación hacia el mouse la refuerza.
+        const swayY = Math.sin(now * 0.0006) * 9 * idle;
+        const swayX = Math.sin(now * 0.0008 + 1.3) * 2.4 * idle;
+        const tiltY = mx * 5 * idle;
+        const tiltX = -my * 4 * idle;
+        title.style.transform =
+          `translateZ(${(-recede).toFixed(1)}px) ` +
+          `rotateX(${(swayX + tiltX).toFixed(2)}deg) ` +
+          `rotateY(${(angle + swayY + tiltY).toFixed(2)}deg)`;
+        // el fade va en el padre (no en el nodo preserve-3d) — ver `titleFade`.
         // se mantiene bien visible girando y recién se desvanece al final del
         // tramo (introProgress 0.65 → 1), cuando se integra al fondo/espacio.
-        title.style.opacity = clamp(1 - (introProgress - 0.65) / 0.35, 0, 1).toFixed(3);
+        if (titleFade) {
+          titleFade.style.opacity = clamp(1 - (introProgress - 0.65) / 0.35, 0, 1).toFixed(3);
+        }
       }
 
       // corredor de marcos: avanza hacia la cámara durante todo el descenso
@@ -171,10 +193,8 @@ export function initImmersive(): void {
     window.removeEventListener('mousemove', onMouse);
     root.classList.remove('is-immersive');
     // limpiar todos los transforms/opacidades inline → fallback estático
-    if (title) {
-      title.style.transform = '';
-      title.style.opacity = '';
-    }
+    if (title) title.style.transform = '';
+    if (titleFade) titleFade.style.opacity = '';
     if (corridor) corridor.style.transform = '';
     for (const p of parallax) p.el.style.transform = '';
     if (scrollHint) scrollHint.style.opacity = '';

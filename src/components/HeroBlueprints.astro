@@ -19,17 +19,33 @@ import '../styles/hero-blueprints.css';
 <div class="hero-zone hero-zone-left" aria-hidden="true" data-blueprint>
   <svg class="bp-svg" viewBox="0 0 210 214" fill="none">
     <path class="bp-draw" d="M24 24 H186 V186 H24 Z" />
-    <path class="bp-draw" d="M116 24 V104" />
+    <!-- muro interior con vano de puerta (hueco y58–84) -->
+    <path class="bp-draw" d="M116 24 V58" />
+    <path class="bp-draw" d="M116 84 V104" />
     <path class="bp-draw" d="M116 104 H186" />
     <path class="bp-draw" d="M24 128 H78 V186" />
-    <path class="bp-draw bp-accent" d="M116 58 A26 26 0 0 0 90 84" />
+    <!-- puerta: hoja (recta) + barrido (arco), mismo trazo que el resto -->
+    <path class="bp-draw" d="M116 84 H90" />
+    <path class="bp-draw" d="M116 58 A26 26 0 0 0 90 84" />
+    <!-- baño -->
     <path class="bp-draw" d="M150 138 H178 V178 H150 Z" />
     <path class="bp-draw" d="M150 156 H178" />
+    <!-- cocina (mesada en L) -->
     <path class="bp-draw" d="M32 32 H72 M32 32 V66" />
+    <!-- escalera -->
     <path class="bp-draw" d="M88 128 V186 M108 128 V186" />
     <path class="bp-draw" d="M88 142 H108 M88 156 H108 M88 170 H108" />
+    <!-- cota inferior + norte -->
     <path class="bp-draw" d="M24 198 H186 M24 194 V202 M186 194 V202" />
     <path class="bp-draw" d="M196 30 V54 M196 30 l-4 8 M196 30 l4 8" />
+    <!-- dormitorio: cama + cabecera + mesas de luz (minidetalle) -->
+    <path class="bp-draw" d="M150 34 H176 V78 H150 Z" />
+    <path class="bp-draw" d="M150 46 H176" />
+    <path class="bp-draw" d="M138 34 H150 V50 H138 Z" />
+    <path class="bp-draw" d="M176 34 H186 V50 H176 Z" />
+    <!-- cota izquierda -->
+    <path class="bp-draw" d="M14 26 V184 M10 26 H18 M10 184 H18" />
+    <text class="bp-label" x="8" y="105" transform="rotate(-90 8 105)" text-anchor="middle">6.30</text>
     <text class="bp-label" x="36" y="46" text-anchor="start">PLANTA</text>
     <text class="bp-label" x="196" y="66" text-anchor="middle">N</text>
     <text class="bp-label" x="105" y="211" text-anchor="middle">8.40</text>
@@ -65,8 +81,10 @@ import '../styles/hero-blueprints.css';
 
   if (fine.matches && !reduce.matches) {
     const SEG = 6; // largo de cada segmento interno de línea (unidades del viewBox)
-    const THRESHOLD = 12; // radio del "haz de linterna" que descubre la línea al pasar
+    const THRESHOLD = 17; // radio del "haz de linterna" que descubre la línea al pasar
     const TH2 = THRESHOLD * THRESHOLD;
+    const DRAW_OPACITY = 0.62; // opacidad plena del trazo revelado (ver .bp-draw)
+    const clampN = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 
     type Stroke = {
       el: SVGPathElement;
@@ -103,7 +121,6 @@ import '../styles/hero-blueprints.css';
       }));
 
       let active = false;
-      let resetTimer = 0;
       let last: { x: number; y: number } | null = null;
 
       // reconstruye el dash pattern mostrando sólo los segmentos ya recorridos
@@ -123,9 +140,16 @@ import '../styles/hero-blueprints.css';
         }
         dash.push(run);
         s.el.style.strokeDasharray = dash.join(' ');
+        // fade-in suave por trazo: la opacidad crece con la fracción recorrida
+        // (transición CSS en .bp-draw) → nunca "pop", se dibuja como a lápiz.
+        let cov = 0;
+        for (let i = 0; i < s.n; i++) if (s.covered[i]) cov++;
+        const frac = cov / s.n;
+        s.el.style.strokeOpacity = (DRAW_OPACITY * clampN(0.4 + frac, 0, 1)).toFixed(3);
       };
       const hideStroke = (s: Stroke) => {
         s.el.style.strokeDasharray = '0 ' + s.len;
+        s.el.style.strokeOpacity = '0';
       };
 
       const coverAt = (lx: number, ly: number) => {
@@ -170,13 +194,15 @@ import '../styles/hero-blueprints.css';
         // rótulos: aparecen al pasar por encima de su posición
         for (const l of labels) {
           if (l.shown) continue;
-          if (Math.hypot(l.x - loc.x, l.y - loc.y) < 12) {
+          if (Math.hypot(l.x - loc.x, l.y - loc.y) < 14) {
             l.shown = true;
             l.el.style.opacity = '1';
           }
         }
       };
 
+      // reset SÓLO al inicializar: deja el plano en blanco y dormido. Al salir
+      // con el cursor NO se resetea — lo dibujado persiste, sólo se atenúa.
       const reset = () => {
         for (const s of strokes) {
           s.covered.fill(false);
@@ -187,20 +213,24 @@ import '../styles/hero-blueprints.css';
           l.shown = false;
           l.el.style.opacity = '0';
         }
+        zone.classList.remove('is-drawn');
         last = null;
       };
 
+      const hasDrawing = () => strokes.some((s) => s.covered.some(Boolean));
+
       zone.addEventListener('pointerenter', () => {
-        window.clearTimeout(resetTimer);
         active = true;
         last = null;
+        // recupera opacidad plena de todo el dibujo (is-active gana a is-drawn)
         zone.classList.add('is-active');
       });
       zone.addEventListener('pointermove', onMove);
       zone.addEventListener('pointerleave', () => {
         active = false;
-        zone.classList.remove('is-active'); // dispara el fade-out (CSS)
-        resetTimer = window.setTimeout(reset, 520); // resetea al terminar el fade
+        zone.classList.remove('is-active');
+        // el plano queda dibujado, "durmiendo" muy tenue (no se borra ni resetea)
+        if (hasDrawing()) zone.classList.add('is-drawn');
       });
 
       reset();

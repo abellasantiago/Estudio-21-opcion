@@ -16,6 +16,18 @@ const numLayers = Array.from({ length: NUM_LAYERS }, (_, i) => {
   const col = `rgb(${mix(211, 26)}, ${mix(208, 25)}, ${mix(200, 22)})`;
   return { z, col };
 });
+
+// "Estudio" también extruido (mismo efecto que el "21", pero más chato porque
+// la palabra es más pequeña): capas apiladas en Z, de var(--line) al frente
+// var(--ink-soft) (59,57,51).
+const WORD_LAYERS = 8;
+const wordLayers = Array.from({ length: WORD_LAYERS }, (_, i) => {
+  const t = i / (WORD_LAYERS - 1);
+  const z = -(1 - t) * 11; // menos profundidad que el "21"
+  const mix = (a: number, b: number) => Math.round(a + (b - a) * t);
+  const col = `rgb(${mix(211, 59)}, ${mix(208, 57)}, ${mix(200, 51)})`;
+  return { z, col };
+});
 ---
 
 <section class="hero" id="inicio">
@@ -29,7 +41,13 @@ const numLayers = Array.from({ length: NUM_LAYERS }, (_, i) => {
 
       <div class="hero-title-wrap" data-depth="0.12">
         <h1 class="hero-title" data-immersive-title>
-          <span class="ht-word">Estudio</span>
+          <span class="ht-word" aria-hidden="true">
+            <span class="ht-word-3d">
+              {wordLayers.map((l) => (
+                <span class="ht-word-layer" style={`--z:${l.z}px; color:${l.col}`}>Estudio</span>
+              ))}
+            </span>
+          </span>
           <span class="ht-num" aria-hidden="true">
             <span class="ht-num-3d">
               {numLayers.map((l) => (
@@ -37,7 +55,7 @@ const numLayers = Array.from({ length: NUM_LAYERS }, (_, i) => {
               ))}
             </span>
           </span>
-          <span class="sr-only">21</span>
+          <span class="sr-only">Estudio 21</span>
         </h1>
       </div>
 

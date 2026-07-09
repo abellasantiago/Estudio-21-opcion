@@ -12,20 +12,26 @@
   position: absolute;
   z-index: 2;
   cursor: crosshair; /* pista sutil de que ahí hay algo que descubrir */
+  /* MISMA base de escala que el "21" (font-size clamp idéntico). El tamaño del
+     plano se expresa en `em` sobre esta base, así ACOMPAÑA el zoom del sitio:
+     el navegador escala rem/em, pero en % el plano se quedaba igual al hacer
+     zoom (bug reportado). En viewports angostos (26vw < 20rem) la base pasa a
+     ser vw y el plano escala con el ancho igual que el título. */
+  font-size: clamp(7rem, 26vw, 20rem);
 }
-/* izquierda (planta): la más grande, un poco más abajo */
+/* izquierda (planta): cuadrada (ratio ~ viewBox 210×214), arriba */
 .hero-zone-left {
   left: 8%;
-  top: 25%;
-  width: 18%;
-  height: 44%;
+  top: 16%;
+  width: 0.78em;
+  height: 0.82em;
 }
-/* derecha (fachada): más chica */
+/* derecha (fachada): más chica, bien arriba */
 .hero-zone-right {
   right: 7%;
-  top: 27%;
-  width: 12%;
-  height: 32%;
+  top: 11%;
+  width: 0.53em;
+  height: 0.95em;
 }
 /* sólo con la capa inmersiva activa (misma condición que el resto) */
 html.is-immersive .hero-zone {
@@ -37,8 +43,15 @@ html.is-immersive .hero-zone {
   height: 100%;
   overflow: visible;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.6s ease;
 }
+/* en reposo, tras haberlo descubierto: el plano no desaparece del todo, queda
+   "durmiendo" dibujado muy tenue en el hero. */
+.hero-zone.is-drawn .bp-svg {
+  opacity: 0.26;
+}
+/* con el cursor encima recupera toda la opacidad (regla después de is-drawn
+   para ganar por orden con la misma especificidad). */
 .hero-zone.is-active .bp-svg {
   opacity: 1;
 }
@@ -48,15 +61,20 @@ html.is-immersive .hero-zone {
    OJO: sin `non-scaling-stroke` a propósito — ese modo mide el dash en px de
    pantalla y no en unidades del viewBox, lo que descuadraba el dibujo (aparecían
    tramos donde no pasó el cursor). Así el dash queda en las mismas unidades que
-   getTotalLength() y se revela exactamente bajo el cursor. */
+   getTotalLength() y se revela exactamente bajo el cursor.
+   `stroke-linecap: butt` (no round) a propósito: con round, un dash de largo 0
+   —como el estado oculto `0 9999`— se dibuja como un PUNTO en el arranque de cada
+   trazo (los "vértices" que aparecían al hover). Con butt, largo 0 = nada.
+   La opacidad la maneja el JS con transición → fade-in suave al pasar el cursor. */
 .bp-draw {
   fill: none;
   stroke: var(--concrete-soft);
   stroke-width: 1.2;
-  stroke-opacity: 0.62;
-  stroke-linecap: round;
+  stroke-opacity: 0;
+  stroke-linecap: butt;
   stroke-linejoin: round;
   stroke-dasharray: 0 9999;
+  transition: stroke-opacity 0.35s ease;
 }
 .bp-accent {
   stroke: var(--petrol);
@@ -67,6 +85,7 @@ html.is-immersive .hero-zone {
   letter-spacing: 0.12em;
   fill: var(--concrete);
   opacity: 0;
+  transition: opacity 0.35s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {

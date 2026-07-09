@@ -56,16 +56,31 @@
   transform-origin: center center;
   backface-visibility: visible;
 }
+/* "Estudio" extruido igual que el "21": bloque preserve-3d con capas apiladas */
 .hero-title .ht-word {
   display: block;
   margin-bottom: 0.1em;
+  transform-style: preserve-3d;
+}
+.ht-word-3d {
+  position: relative;
+  display: inline-block;
+  transform-style: preserve-3d;
+}
+.ht-word-layer {
+  display: block;
   font-family: var(--font-display);
   font-weight: 500;
   font-size: clamp(1.4rem, 4.5vw, 3rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink-soft);
   line-height: 1;
+  transform: translateZ(var(--z, 0));
+}
+/* la cara del frente (última en el DOM) sostiene la caja; el resto van detrás */
+.ht-word-layer:not(:last-child) {
+  position: absolute;
+  inset: 0;
 }
 .hero-title .ht-num {
   display: block;

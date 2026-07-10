@@ -43,7 +43,7 @@ html.is-immersive .hero-zone {
   height: 100%;
   overflow: visible;
   opacity: 0;
-  transition: opacity 0.6s ease;
+  transition: opacity 2.1s ease;
 }
 /* en reposo, tras haberlo descubierto: el plano no desaparece del todo, queda
    "durmiendo" dibujado muy tenue en el hero. */

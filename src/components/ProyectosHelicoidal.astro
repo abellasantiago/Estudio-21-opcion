@@ -53,8 +53,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
     <div class="ph-bar reveal" data-d="2">
       <div class="filters" id="phFilters" role="group" aria-label="Filtrar proyectos por estado">
         <button type="button" data-filter="todos" aria-pressed="true">Todos</button>
-        <button type="button" data-filter="proximamente" aria-pressed="false">Próximamente</button>
         <button type="button" data-filter="en-proceso" aria-pressed="false">En proceso</button>
+        <button type="button" data-filter="proximamente" aria-pressed="false">Próximamente</button>
         <button type="button" data-filter="terminado" aria-pressed="false">Terminados</button>
       </div>
       <p class="ph-counter" aria-hidden="true">
@@ -127,6 +127,11 @@ const pad = (n: number) => String(n).padStart(2, '0');
     // (título/filtros/contador) ya no está acá: vive fuera del sticky y scrollea.
     const ghost21 = section.querySelector<HTMLElement>('.ghost21');
     const marksEl = section.querySelector<HTMLElement>('.marks');
+    // barra de filtros: en 3D se relocaliza al panel sticky (riel pineado); en
+    // grilla/fallback se queda en el header. Guardamos su lugar original.
+    const bar = section.querySelector<HTMLElement>('.ph-bar');
+    const sticky = section.querySelector<HTMLElement>('.ph-sticky');
+    const barHome = bar?.parentElement ?? null;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     // ---- parámetros ----
@@ -142,6 +147,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
     const SS = 2; // factor de supersample: la card se maqueta a SS× (CSS) y acá se reduce ÷SS → nítida
     let RADIUS = 440; // radio del cilindro (px) — círculo amplio = cards más separadas; se ajusta en mobile
     let stepAngle = 0; // ° entre cards (compartido layout/render); lo fija layout()
+    // px que scrollea la sección ANTES de que el panel sticky se fije (= alto del
+    // header con el título). Hasta ese punto el scroll mueve la página, no el
+    // helicoidal: el progreso queda en 0 y la 1ª card se mantiene centrada.
+    let headOffset = 0;
 
     const cards: CardRef[] = cardEls.map((el) => ({
       el,
@@ -166,6 +175,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
     function layout() {
       RADIUS = calcRadius();
       N = active.length;
+      // El panel sticky (top:0) se fija cuando su borde superior —en flujo normal,
+      // a `sticky.offsetTop` px del tope de la sección— llega al tope del viewport.
+      // No depende de N; sí del alto del header (responsive) → se recalcula acá.
+      headOffset = sticky ? sticky.offsetTop : 0;
       // ° entre cards: 360/N reparte en todo el cilindro, pero con pocos
       // proyectos (al filtrar) eso los deja ralos → lo topamos a MAX_STEP para
       // que queden juntos en un arco frontal en vez de desperdigados.
@@ -180,9 +193,13 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
     // ---- progreso de scroll de la sección (0..1) -> targetScroll (0..N-1) ----
     function updateTarget() {
-      const scrollable = section!.offsetHeight - window.innerHeight;
       const passed = -section!.getBoundingClientRect().top;
-      const progress = scrollable > 0 ? clamp(passed / scrollable, 0, 1) : 0;
+      // El recorrido del helicoidal arranca cuando el panel se fija (passed >=
+      // headOffset) y termina al soltarse (passed = offsetHeight - innerHeight).
+      // Antes de fijarse el progreso es 0 → la 1ª card queda centrada mientras la
+      // sección sube; el giro sólo empieza en el tramo pineado.
+      const range = section!.offsetHeight - window.innerHeight - headOffset;
+      const progress = range > 0 ? clamp((passed - headOffset) / range, 0, 1) : 0;
       // Sin snap: targetScroll sigue el progreso exacto del scroll → el cilindro
       // queda donde lo dejaste, sin re-centrarse solo (más fluido al recorrer).
       targetScroll = progress * Math.max(N - 1, 0);
@@ -249,10 +266,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
     // ---- traer una card al frente desplazando la página (foco por teclado) ----
     function scrollToIndex(i: number) {
-      const scrollable = section!.offsetHeight - window.innerHeight;
+      // Mapea la card i al tramo pineado [headOffset .. offsetHeight-innerHeight]
+      // (mismo modelo que updateTarget): i=0 cae en el arranque del helicoidal.
+      const range = section!.offsetHeight - window.innerHeight - headOffset;
       const p = N > 1 ? i / (N - 1) : 0;
       window.scrollTo({
-        top: section!.offsetTop + p * scrollable,
+        top: section!.offsetTop + headOffset + p * range,
         behavior: reduce.matches ? 'auto' : 'smooth',
       });
     }
@@ -267,13 +286,39 @@ const pad = (n: number) => String(n).padStart(2, '0');
         if (!show) c.el.classList.remove('is-active');
       });
       if (section!.classList.contains('is-3d')) {
-        scroll = 0;
-        targetScroll = 0;
         lastActiveIdx = -1;
-        layout();
-        // reiniciar el recorrido desde el principio de la sección
-        window.scrollTo({ top: section!.offsetTop, behavior: reduce.matches ? 'auto' : 'smooth' });
-        updateTarget();
+        // Alto del NUEVO recorrido según --ph-total = N (ver min-height en el CSS:
+        // 100vh + (N-1)·--ph-scroll). Lo calculamos ANTES de reconstruir, para
+        // decidir sin depender del reflow.
+        const rawStep = getComputedStyle(section!).getPropertyValue('--ph-scroll').trim();
+        const phStep = rawStep.endsWith('vh')
+          ? (parseFloat(rawStep) / 100) * window.innerHeight
+          : parseFloat(rawStep) || 0;
+        const newScrollable = Math.max(active.length - 1, 0) * phStep;
+        if (window.scrollY > section!.offsetTop + newScrollable) {
+          // Vas a un filtro más corto y tu posición quedaría más allá de su final
+          // (te dejaría clavado en la última card). Saltamos al inicio PRIMERO
+          // —instantáneo, con la sección todavía alta = destino válido— y RECIÉN
+          // LUEGO reconstruimos el cilindro más corto: al acortarse ya estás
+          // arriba, el recorte pasa por debajo del viewport y nunca se ve el final
+          // de la sección (sin el flash ni el giro de rebote).
+          // OJO: 'instant', NO 'auto'. `html` tiene `scroll-behavior: smooth`, y
+          // behavior:'auto' RESPETA ese valor → animaría suave (el "glitch" de
+          // pasar por el medio). 'instant' fuerza el salto sin animación.
+          // Aterriza en el ARRANQUE del helicoidal (offsetTop + headOffset), no en
+          // el tope de la sección: caés justo donde el scroll empieza a mover las
+          // cards, con la 1ª centrada.
+          window.scrollTo({ top: section!.offsetTop + headOffset, behavior: 'instant' });
+          layout();
+          scroll = 0;
+          targetScroll = 0;
+        } else {
+          // Cabés dentro del nuevo recorrido: se mantiene tu posición y se remapea
+          // el progreso 0..1 al nuevo N (las cards cambian sin saltar).
+          layout();
+          updateTarget();
+          scroll = targetScroll;
+        }
         render();
       } else {
         N = active.length;
@@ -288,6 +333,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
     // ---- activar la capa 3D ----
     function enable3D() {
       section!.classList.add('is-3d');
+      // mover los filtros al panel sticky → quedan pineados mientras se scrollea
+      // (sin el reveal, que pelearía con el transform de centrado del riel).
+      if (bar && sticky && bar.parentElement !== sticky) {
+        bar.classList.remove('reveal');
+        sticky.appendChild(bar);
+      }
       layout();
       updateTarget();
       lastActiveIdx = -1;
@@ -323,6 +374,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
     function disable3D() {
       stop();
       section!.classList.remove('is-3d', 'is-scrolling');
+      // devolver los filtros al header (grilla accesible)
+      if (bar && barHome && bar.parentElement !== barHome) barHome.appendChild(bar);
       if (axis) axis.style.transform = '';
       [ghost21, marksEl].forEach((el) => {
         if (el) el.style.transform = '';

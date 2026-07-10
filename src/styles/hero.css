@@ -55,6 +55,19 @@
   transform-style: preserve-3d;
   transform-origin: center center;
   backface-visibility: visible;
+  /* Modo base (mobile / sin-JS): el "Estudio 21" gira horizontalmente
+     de forma constante e infinita. En modo inmersivo lo maneja el motor
+     JS (rotateY por scroll + este mismo giro continuo); ver override abajo. */
+  animation: hero-spin-y 18s linear infinite;
+}
+/* giro horizontal continuo del bloque 3D "Estudio 21" */
+@keyframes hero-spin-y {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
 }
 /* "Estudio" extruido igual que el "21": bloque preserve-3d con capas apiladas */
 .hero-title .ht-word {
@@ -251,6 +264,9 @@ html.is-immersive .hero-stage {
 }
 html.is-immersive .hero-title {
   will-change: transform;
+  /* en inmersivo el transform (y el giro continuo) lo escribe immersive.ts
+     frame a frame; la animación CSS lo pisaría, así que acá se apaga. */
+  animation: none;
 }
 
 /* ---- responsive ---- */
@@ -268,10 +284,13 @@ html.is-immersive .hero-title {
   }
 }
 
-/* ---- reduced-motion: sin la animación del indicador de scroll ---- */
+/* ---- reduced-motion: sin la animación del indicador de scroll ni el giro ---- */
 @media (prefers-reduced-motion: reduce) {
   .scroll-hint-line::after {
     animation: none;
     display: none;
+  }
+  .hero-title {
+    animation: none;
   }
 }

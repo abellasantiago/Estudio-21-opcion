@@ -45,6 +45,13 @@ const immersiveBoot = `(function(){try{var m=window.matchMedia;if(m&&!m('(prefer
     <Footer />
 
     <script>
+      // ----- recargar arranca arriba (en la home, el hero) -----
+      // Por defecto el navegador restaura la posición de scroll al recargar; lo
+      // desactivamos para volver siempre al inicio, salvo que se llegue con un
+      // ancla (#seccion), donde respetamos el destino del fragmento.
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      if (!window.location.hash) window.scrollTo(0, 0);
+
       // ----- capa inmersiva (no-op fuera de la home) -----
       import { initImmersive } from '../scripts/immersive';
       initImmersive();

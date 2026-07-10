@@ -57,7 +57,8 @@ export function initImmersive(): void {
   const capable = () => !reduceMq.matches && fineMq.matches && wideMq.matches;
 
   // ---- parámetros (Z contenido, movimiento cuidado) ----
-  const TOTAL_ROTATION = 360; // ° que gira "Estudio 21" en el tramo del hero
+  const TOTAL_ROTATION = 360; // ° extra que gira "Estudio 21" con el scroll del hero
+  const SPIN_PERIOD = 18000; // ms por vuelta del giro horizontal continuo (constante)
   const TITLE_RECEDE = 460; // px que retrocede el título en Z mientras gira
   const CORRIDOR_DEPTH = 720; // px que avanza el corredor de marcos en el descenso
   const MOUSE_RANGE = 26; // px máx de desplazamiento por paralaje de mouse
@@ -113,25 +114,26 @@ export function initImmersive(): void {
         descent = absTop > 0 ? clamp(scrollY / absTop, 0, 1) : 0;
       }
 
-      // "Estudio 21": gira sobre sí mismo, retrocede en Z y se desvanece
-      // (se va integrando al fondo mientras la cámara avanza hacia las cards).
-      angle = lerp(angle, introProgress * TOTAL_ROTATION, 0.1);
+      // "Estudio 21": gira horizontalmente de forma constante e infinita
+      // (giro continuo por tiempo) + un giro extra atado al scroll del hero;
+      // además retrocede en Z y se desvanece integrándose al fondo.
+      const spin = (now / SPIN_PERIOD) * 360;
+      angle = spin + introProgress * TOTAL_ROTATION;
       if (title) {
         const recede = introProgress * TITLE_RECEDE;
         // vaivén leve autónomo + inclinación sutil hacia el mouse, para que en
         // reposo el "21" no quede estático y se perciba su profundidad. Se apaga
         // a medida que arranca el giro del scroll (idle → 0) para no competir.
         const idle = clamp(1 - introProgress * 2.5, 0, 1);
-        // rotación izquierda-derecha continua (bien perceptible en reposo) + un
-        // cabeceo vertical más leve; la inclinación hacia el mouse la refuerza.
-        const swayY = Math.sin(now * 0.0006) * 9 * idle;
+        // el giro horizontal ya es continuo (angle); acá sólo un cabeceo vertical
+        // leve + la inclinación hacia el mouse para reforzar la profundidad.
         const swayX = Math.sin(now * 0.0008 + 1.3) * 2.4 * idle;
         const tiltY = mx * 5 * idle;
         const tiltX = -my * 4 * idle;
         title.style.transform =
           `translateZ(${(-recede).toFixed(1)}px) ` +
           `rotateX(${(swayX + tiltX).toFixed(2)}deg) ` +
-          `rotateY(${(angle + swayY + tiltY).toFixed(2)}deg)`;
+          `rotateY(${(angle + tiltY).toFixed(2)}deg)`;
         // el fade va en el padre (no en el nodo preserve-3d) — ver `titleFade`.
         // se mantiene bien visible girando y recién se desvanece al final del
         // tramo (introProgress 0.65 → 1), cuando se integra al fondo/espacio.

@@ -171,8 +171,12 @@ valores → Deploy. Cada `git push` vuelve a publicar.
   Se hace `preload` de Space Grotesk 500 (los titulares) en el `<head>`.
 - **Estilos:** los tokens y helpers compartidos están en `src/styles/global.css`;
   cada componente importa su propio `.css`.
-- **JS:** sólo el menú móvil, la sombra del header al scrollear, el reveal-on-scroll
-  y el filtro de proyectos. Todo respeta `prefers-reduced-motion`.
+- **JS:** el menú móvil, la sombra del header al scrollear, el reveal-on-scroll, el
+  filtro de proyectos y el carrusel **helicoidal 3D** (giro del cilindro atado al scroll,
+  que arranca recién cuando el panel se fija; la 1ª card queda centrada hasta ahí). Al
+  **recargar** la página se vuelve al inicio (hero) en vez de restaurar la posición previa.
+  Todo respeta `prefers-reduced-motion` (sin motion, el helicoidal queda como grilla
+  estática accesible).
 
 ## Solución de problemas
 

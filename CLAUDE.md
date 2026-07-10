@@ -38,6 +38,27 @@ registro), no rediseñar. Todo el copy va en **español rioplatense**.
 
 ## Historial de cambios
 
+### 2026-07-10 — feat: helicoidal — giro atado al pin del sticky + refresh al hero
+- **El cilindro no gira hasta que el panel sticky se fija.** Nuevo `headOffset` en
+  `ProyectosHelicoidal.astro` = px que scrollea la sección antes de que `.ph-sticky` se pinee
+  (alto del header, `sticky.offsetTop`; se recalcula en `layout()`). `updateTarget` deja el
+  progreso en **0** durante todo ese tramo (1ª card centrada) y mapea 0→1 sólo en el tramo
+  pineado `[headOffset .. offsetHeight-innerHeight]`. `scrollToIndex` (foco por teclado) usa el
+  mismo modelo. Antes el giro arrancaba apenas entraba la sección.
+- **Filtros sin salto ni glitch.** Al filtrar en 3D se mantiene la posición y se remapea el
+  recorrido al nuevo N (progreso 0..1 reescalado). Si pasás a un estado con **menos** proyectos y
+  tu posición queda más allá del final del nuevo recorrido, se rebobina al **arranque del
+  helicoidal** (`offsetTop + headOffset`, no al tope de la sección). Se salta al inicio **antes**
+  de acortar la sección y con `behavior:'instant'` — **no `'auto'`**, que respeta el
+  `scroll-behavior:smooth` del `html` y animaría (era la causa del "flash" de pasar por el
+  medio/final antes de llegar).
+- **Recargar vuelve al hero.** `BaseLayout.astro`: `history.scrollRestoration='manual'` +
+  `scrollTo(0,0)` si no hay ancla → al refrescar arranca arriba en vez de restaurar la posición
+  previa (respeta anclas `/#seccion`).
+- Incluye ajustes en curso de hero/blueprints, `immersive.ts` y fotos del equipo
+  (`santiago-abella2.png` nuevo).
+- Build validado (12 páginas). Trabajo directo en `main` (sin rama): commit `58ecd50` (código) + docs.
+
 ### 2026-06-26 — feat: limpiar cards del helicoidal (sin código, sin fondos, CTA en hover)
 - **Cartelito `E21·NN` eliminado** de las cards: se quitó el `<span class="ph-code">` del markup
   y todas sus reglas CSS (antes arriba-izquierda de la portada).

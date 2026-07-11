@@ -1,0 +1,163 @@
+/* ============================================================
+   PRELOADER — planta arquitectónica que se dibuja trazo por trazo
+   ------------------------------------------------------------
+   Overlay a pantalla completa (sólo la home). Se dibuja una planta
+   en hardline: primero el contorno + las cotas, después los detalles
+   interiores (tabiques, aberturas, mobiliario, rótulos). Al terminar
+   hace fade y deja ver el hero (el "21" girando en 3D, ya vivo detrás).
+
+   Progressive enhancement:
+   · sin JS  → <noscript> lo oculta (se ve el hero directo).
+   · reduced-motion → no se muestra (media query).
+   El motor (Preloader.astro) asigna los delays de cada trazo y maneja
+   el bloqueo de scroll y el cierre.
+   ============================================================ */
+
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2.2rem, 6vw, 4rem);
+  opacity: 1;
+  transition: opacity 1.1s ease;
+}
+.preloader.is-done {
+  opacity: 0;
+  pointer-events: none;
+}
+/* bloqueo de scroll mientras corre el preloader */
+html.pl-lock {
+  overflow: hidden;
+}
+
+.pl-sheet {
+  position: relative;
+  width: min(92vw, 1060px);
+}
+.pl-plan {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* HUD mono arriba de la hoja (marca + contador) */
+.pl-hud {
+  position: absolute;
+  top: -1.7rem;
+  left: 2px;
+  right: 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--concrete);
+}
+.pl-hud b {
+  color: var(--petrol);
+  font-weight: 500;
+}
+
+/* ---- trazo: cada elemento se dibuja con stroke-dashoffset ---- */
+.pl-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.pl-fade {
+  opacity: 0;
+}
+.is-drawing .pl-draw {
+  animation: pl-stroke var(--pl-dur, 0.55s) cubic-bezier(0.65, 0, 0.2, 1) both;
+}
+.is-drawing .pl-fade {
+  animation: pl-fadein 0.45s ease both;
+}
+@keyframes pl-stroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes pl-fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---- pesos de línea (jerarquía de dibujo arquitectónico) ---- */
+.pl-wall {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+  stroke-linecap: butt;
+}
+.pl-part {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: butt;
+}
+.pl-thin {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 1.1;
+  stroke-linecap: butt;
+}
+.pl-fur {
+  fill: none;
+  stroke: var(--concrete);
+  stroke-width: 1.1;
+  stroke-linejoin: round;
+  stroke-linecap: butt;
+}
+.pl-door {
+  fill: none;
+  stroke: var(--petrol);
+  stroke-width: 1.3;
+  stroke-linecap: butt;
+}
+.pl-dim {
+  fill: none;
+  stroke: var(--petrol);
+  stroke-width: 0.9;
+  stroke-linecap: butt;
+}
+.pl-fillink {
+  fill: var(--ink);
+  stroke: none;
+}
+.pl-t {
+  font-family: var(--font-mono);
+  fill: var(--concrete);
+  letter-spacing: 0.06em;
+}
+.pl-t-ink {
+  fill: var(--ink);
+}
+.pl-t-dim {
+  fill: var(--petrol);
+}
+
+@media (max-width: 640px) {
+  .pl-hud {
+    font-size: 0.6rem;
+    top: -1.4rem;
+  }
+}
+
+/* accesibilidad: si se prefiere menos movimiento, no se muestra el preloader */
+@media (prefers-reduced-motion: reduce) {
+  .preloader {
+    display: none;
+  }
+}

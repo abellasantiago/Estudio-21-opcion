@@ -13,6 +13,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
+import Preloader from '../components/Preloader.astro';
 
 interface Props {
   title: string;
@@ -38,6 +39,7 @@ const immersiveBoot = `(function(){try{var m=window.matchMedia;if(m&&!m('(prefer
     <slot name="head" />
   </head>
   <body>
+    {immersive && <Preloader />}
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
     <Header />
     <main id="contenido">

@@ -44,6 +44,24 @@ Navbar fina (58px) con el logo `banner_negro.png` ("ESTUDIO 21 ARQUITECTOS"); li
 **Inicio · Nosotros · Proyectos · Equipo · Contacto** ("Contacto" es un link normal,
 no CTA con recuadro).
 
+### Preloader (sólo home)
+`src/components/Preloader.astro` + `src/styles/preloader.css`, montado en `BaseLayout`
+sólo cuando `immersive` (la home), como primer hijo del `<body>`.
+- Overlay a pantalla completa (fondo `--paper`) donde una **planta arquitectónica** en
+  hardline se **dibuja trazo por trazo** (stroke-dashoffset por elemento con `pathLength=1`):
+  fase 1 contorno + cotas, fase 2 tabiques/aberturas (puertas con barrido, ventanas),
+  fase 3 mobiliario, fase 4 norte/escala/carátula. Minimalista (sin nombres de ambiente
+  ni m², sin marcas de esquina): muros a doble línea (cap `butt`, sin puntitos en el
+  arranque de cada trazo), puertas cuyo barrido no pisa el mobiliario, HUD mono con
+  contador. Al completar el dibujo hace **fade out lento** (~1,1 s) y queda el hero (el
+  "21" ya girando en 3D detrás).
+- El script del componente asigna los delays escalonados por fase, bloquea el scroll
+  (`html.pl-lock`) y cierra con `is-done`. Robustez: si la pestaña carga oculta espera a
+  ser visible (rAF/animaciones están pausadas en background); `<noscript>` lo oculta sin
+  JS; con `prefers-reduced-motion` no se muestra; se saltea con cualquier interacción.
+- Duración fija (~2,8 s de dibujo + fade). La planta es genérica ("unidad tipo"), no un
+  proyecto real: se puede cambiar por la planta de un proyecto cuando se quiera.
+
 ### Hero (capa inmersiva)
 - Motor en `src/scripts/immersive.ts` (sólo en la home, `data-immersive-page`, y sólo
   si no hay `prefers-reduced-motion`, con puntero fino y pantalla ≥900px). Progressive

@@ -80,6 +80,18 @@ no CTA con recuadro).
   N. Si pasás a un estado con **menos** proyectos y tu posición queda más allá del final,
   se **rebobina al arranque del helicoidal** (`offsetTop + headOffset`) con salto
   instantáneo (ver nota `behavior:'instant'` abajo).
+- **Toggle "Ver todos" ⇄ "Volver al giro"** (`#phViewToggle`; la sección lleva
+  `.is-toggleable` cuando el 3D está activo): alterna el cilindro por una **grilla estática
+  con todos los proyectos a la vista** (salida rápida para quien no quiere recorrer todo el
+  scroll). No es un fade — las cards **viajan** entre estados: desenrollar (cilindro→grilla)
+  usa **FLIP** (se mide el rect de cada card en el cilindro y se la suelta en su celda con
+  traslación+escala+fade, cascada leve por índice); reensamblar (grilla→cilindro) hace un
+  **bloom** (nacen chicas/translúcidas en su lugar del anillo) y reposiciona el scroll al
+  arranque del helicoidal. El botón vive en el header en grilla y se **relocaliza pineado**
+  (arriba-derecha del panel; abajo-derecha en mobile) en 3D; respeta el subconjunto filtrado
+  y se protege de clicks a mitad de transición (clase `.is-flipping`, que además libera el
+  `overflow` para que las cards no se corten al volar). Con `prefers-reduced-motion` o sin JS
+  el toggle no aparece (queda la grilla accesible de siempre).
 - **Cards limpias:** sin cartelito `E21·NN`, sin nombre gigante de fondo, sin grilla
   blueprint; el fondo del panel es parallax multicapa (fantasma "21" + marcas de registro).
   El CTA "Ver proyecto" aparece **sólo en hover de la card al frente**.

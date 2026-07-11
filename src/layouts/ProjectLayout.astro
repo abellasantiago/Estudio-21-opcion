@@ -12,7 +12,7 @@ interface Props {
 }
 
 const { proyecto } = Astro.props;
-const { nombre, codigo, slug, estado, ubicacion, barrio, anio, unidades, metros } =
+const { nombre, slug, estado, ubicacion, barrio, anio, unidades, metros } =
   proyecto.data;
 
 const { Content } = await render(proyecto);
@@ -36,7 +36,7 @@ const ogImage = portada
   ? (await getImage({ src: portada, width: 1200, format: 'jpg' })).src
   : undefined;
 
-const title = `${nombre} (${codigo}) — Estudio 21`;
+const title = `${nombre} — Estudio 21`;
 const description = `${nombre}: ${estadoFrase} de Estudio 21 en ${
   barrio ? `${barrio}, ` : ''
 }${ubicacion} (${anio}).`;
@@ -46,7 +46,6 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Residence',
   name: nombre,
-  identifier: codigo,
   url,
   address: {
     '@type': 'PostalAddress',
@@ -56,11 +55,11 @@ const jsonLd = {
 };
 
 const ficha = [
-  { k: 'Estado', v: estadoLabel, pendiente: false },
-  { k: 'Año', v: String(anio), pendiente: false },
-  { k: 'Ubicación', v: barrio ?? ubicacion, pendiente: false },
-  { k: 'Unidades', v: unidades != null ? String(unidades) : 'Pendiente', pendiente: unidades == null },
-  { k: 'm²', v: metros != null ? String(metros) : 'Pendiente', pendiente: metros == null },
+  { k: 'Estado', v: estadoLabel, pendiente: false, loc: false },
+  { k: 'Año', v: String(anio), pendiente: false, loc: false },
+  { k: 'Ubicación', v: barrio ?? ubicacion, pendiente: false, loc: true },
+  { k: 'Unidades', v: unidades != null ? String(unidades) : 'Pendiente', pendiente: unidades == null, loc: false },
+  { k: 'm²', v: metros != null ? String(metros) : 'Pendiente', pendiente: metros == null, loc: false },
 ];
 ---
 
@@ -71,7 +70,6 @@ const ficha = [
 
       <div class="proj-head">
         <div>
-          <div class="proj-code">{codigo}</div>
           <h1 class="proj-title">{nombre}</h1>
         </div>
         <span class={`status ${estado}`}><span class="pip"></span>{estadoLabel}</span>
@@ -91,7 +89,6 @@ const ficha = [
         </div>
       ) : (
         <div class="proj-cover is-placeholder">
-          <span class="cover-code">{codigo}</span>
           <span class="cover-ph">imagen pendiente</span>
         </div>
       )}
@@ -101,7 +98,7 @@ const ficha = [
         {ficha.map((c) => (
           <div class="cell">
             <div class="fk">{c.k}</div>
-            <div class={`fv${c.pendiente ? ' pendiente' : ''}`}>{c.v}</div>
+            <div class={`fv${c.pendiente ? ' pendiente' : ''}${c.loc ? ' fv-loc' : ''}`}>{c.v}</div>
           </div>
         ))}
       </div>

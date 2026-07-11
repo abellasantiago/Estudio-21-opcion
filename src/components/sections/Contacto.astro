@@ -9,8 +9,8 @@ import { site } from '../../data/site';
     <span class="eyebrow reveal">Contacto</span>
     <h2 class="reveal" data-d="1">El próximo proyecto empieza con una conversación.</h2>
     <p class="ctext reveal" data-d="2">
-      No trabajamos con formularios. Si te interesa invertir con nosotros o
-      conocer lo que estamos desarrollando, escribinos o pasá por el estudio.
+      Si te interesa invertir con nosotros o conocer lo que estamos
+      desarrollando, contactanos o pasá por el estudio.
     </p>
 
     <div class="contact-rows reveal" data-d="3">
@@ -19,13 +19,6 @@ import { site } from '../../data/site';
         <span class="cv">{site.email}</span>
         <span class="arrow">→</span>
       </a>
-      {site.whatsapp && (
-        <a class="crow" href={`https://wa.me/${site.whatsapp}`} target="_blank" rel="noopener">
-          <span class="ck">WhatsApp</span>
-          <span class="cv">{site.telefono ?? site.whatsapp}</span>
-          <span class="arrow">↗</span>
-        </a>
-      )}
       {site.instagram && (
         <a class="crow" href={site.instagram} target="_blank" rel="noopener">
           <span class="ck">Instagram</span>

@@ -20,7 +20,7 @@ export const site = {
     'https://www.google.com/maps/search/?api=1&query=21+de+Setiembre+3024+Montevideo',
   // PENDIENTE: completar si querés sumarlos al sitio.
   telefono: null as string | null, // ej. '+598 ...'
-  whatsapp: null as string | null, // ej. '598xxxxxxxx' (sin +, para wa.me)
+  whatsapp: '59899421576' as string | null, // sin +, para wa.me
   instagram: null as string | null, // ej. 'https://instagram.com/...'
   // Imagen por defecto para compartir (Open Graph / Twitter).
   // Banner de marca 1920×1080 (negro + tagline). Para proyectos con portada,

@@ -1,0 +1,32 @@
+/* ---------- BOTÓN FLOTANTE DE WHATSAPP ----------
+   Fijo abajo a la derecha, en la paleta del sitio (petróleo + papel), sin el
+   verde clásico para no chocar con la estética. Se apaga con reduced-motion. */
+.wa-float{
+  position:fixed;
+  right:clamp(1rem,3vw,2rem);
+  bottom:clamp(1rem,3vw,2rem);
+  z-index:70;
+  width:56px;height:56px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  background:var(--petrol);
+  color:var(--paper-2);
+  border:1px solid var(--petrol-bright);
+  box-shadow:0 14px 30px -12px rgba(26,25,22,.5), 0 3px 8px -4px rgba(26,25,22,.4);
+  transition:transform .28s cubic-bezier(.2,.7,.3,1), background .28s ease, box-shadow .28s ease;
+}
+.wa-float:hover{
+  background:var(--petrol-bright);
+  transform:translateY(-3px);
+  box-shadow:0 22px 42px -14px rgba(26,25,22,.55), 0 4px 10px -4px rgba(26,25,22,.4);
+}
+.wa-float:focus-visible{outline:2px solid var(--petrol);outline-offset:3px}
+.wa-ico{display:block}
+
+@media(max-width:600px){
+  .wa-float{width:52px;height:52px}
+}
+@media(prefers-reduced-motion:reduce){
+  .wa-float{transition:none}
+  .wa-float:hover{transform:none}
+}

@@ -51,9 +51,15 @@ no CTA con recuadro).
 - El "Estudio 21" gira en 3D (rotateY continuo + extra atado al scroll del hero,
   retrocede en Z y se desvanece integrándose al fondo), parallax de mouse en las capas
   `[data-depth]`, corredor de marcos que avanza en Z, rail de progreso.
-- Easter egg de blueprints "linterna" y notas mono de fondo que se desvanecen al dejar
-  el hero (`--hero-fade`). Eyebrow: **"Arquitectura que trasciende"**. El texto/marca se
-  corren a la izquierda con el token `--hero-shift` (se anula en pantallas chicas).
+- Easter egg de blueprint "linterna" (`HeroBlueprints.astro`): **un solo plano**, a la
+  izquierda del "21" (PLANTA); se descubre pasando el mouse (dibujo tipo lápiz por
+  segmentos) y al salir queda "durmiendo" tenue. El de la fachada (derecha) se sacó.
+- **`--hero-fade`** (seteado por `immersive.ts` según el scroll) desvanece al dejar el
+  hero y trae de vuelta al subir: las notas mono del fondo vivo, el blueprint izquierdo,
+  el eyebrow **"Arquitectura que trasciende"** (combinado con su reveal-on-scroll inicial
+  vía una custom property `--reveal`, no pisa la transición de `.reveal`) y la línea
+  **"21 de Setiembre 3024"** (`.hero-dim`). El texto/marca se corren a la izquierda con
+  el token `--hero-shift` (se anula en pantallas chicas).
 
 ### Proyectos — carrusel helicoidal 3D
 `src/components/ProyectosHelicoidal.astro` + `src/styles/proyectos-helicoidal.css`.

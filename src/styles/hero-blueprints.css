@@ -1,9 +1,9 @@
 /* ============================================================
-   EASTER EGG — planos ocultos que flanquean el "21"
+   EASTER EGG — plano oculto junto al "21"
    ------------------------------------------------------------
-   Dos zonas invisibles en el espacio vacío del hero. Al pasar el
-   cursor, el plano se DIBUJA (stroke-dashoffset atado al movimiento
-   del cursor); al salir, se desvanece y "vuelve a dormir".
+   Zona invisible en el espacio vacío del hero. Al pasar el cursor,
+   el plano se DIBUJA (stroke-dashoffset atado al movimiento del
+   cursor); al salir, se desvanece y "vuelve a dormir".
    Sólo en modo inmersivo (desktop con puntero fino y motion).
    ============================================================ */
 
@@ -17,7 +17,12 @@
      el navegador escala rem/em, pero en % el plano se quedaba igual al hacer
      zoom (bug reportado). En viewports angostos (26vw < 20rem) la base pasa a
      ser vw y el plano escala con el ancho igual que el título. */
-  font-size: clamp(7rem, 26vw, 20rem);
+  font-size: clamp(7.7rem, 28.5vw, 22rem);
+  /* se desvanece al dejar el hero con scroll y reaparece al volver arriba,
+     igual que .lbg-note (ver --hero-fade, seteado por immersive.ts). Va en el
+     contenedor (no en .bp-svg) para no tocar la opacidad por estado
+     (oculto/is-drawn/is-active) que maneja el resto de este archivo. */
+  opacity: var(--hero-fade, 1);
 }
 /* izquierda (planta): cuadrada (ratio ~ viewBox 210×214), arriba */
 .hero-zone-left {
@@ -25,13 +30,6 @@
   top: 16%;
   width: 0.78em;
   height: 0.82em;
-}
-/* derecha (fachada): más chica, bien arriba */
-.hero-zone-right {
-  right: 7%;
-  top: 11%;
-  width: 0.53em;
-  height: 0.95em;
 }
 /* sólo con la capa inmersiva activa (misma condición que el resto) */
 html.is-immersive .hero-zone {

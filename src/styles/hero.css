@@ -37,6 +37,17 @@
 .hero-eyebrow {
   justify-content: center;
 }
+/* además del reveal-on-scroll (.reveal/.in, ver global.css), se desvanece al
+   dejar el hero con scroll y reaparece al volver arriba — igual que .lbg-note
+   (--hero-fade, seteado por immersive.ts). Se combina con un custom property
+   en vez de pisar `opacity` directo para no romper la transición de .reveal. */
+.hero-eyebrow.reveal {
+  --reveal: 0;
+  opacity: calc(var(--reveal) * var(--hero-fade, 1));
+}
+.hero-eyebrow.reveal.in {
+  --reveal: 1;
+}
 
 /* ---- "Estudio 21" ---- */
 .hero-title-wrap {
@@ -84,7 +95,7 @@
   display: block;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(1.4rem, 4.5vw, 3rem);
+  font-size: clamp(1.55rem, 5vw, 3.3rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   line-height: 1;
@@ -109,7 +120,7 @@
   display: block;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(7rem, 26vw, 20rem);
+  font-size: clamp(7.7rem, 28.5vw, 22rem);
   line-height: 0.82;
   letter-spacing: -0.03em;
   transform: translateZ(var(--z, 0));
@@ -142,6 +153,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
+  /* se desvanece al dejar el hero con scroll y reaparece al volver arriba,
+     igual que .lbg-note (--hero-fade, seteado por immersive.ts). */
+  opacity: var(--hero-fade, 1);
 }
 .hero-dim::before {
   content: '';

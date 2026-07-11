@@ -1,16 +1,16 @@
 ---
 /*
- * HeroBlueprints — easter egg: dos "planos" ocultos que flanquean el "21".
+ * HeroBlueprints — easter egg: "plano" oculto que flanquea el "21" (zona
+ * izquierda, PLANTA: rectángulo cerrado con ambientes, puerta con barrido,
+ * baño, cocina, escalera, cota y norte). Decoración pura (aria-hidden).
  *
- * Cada zona es un área invisible en el espacio vacío del hero. El plano se
- * descubre TIPO LÁPIZ: sólo se dibuja la PORCIÓN de línea por la que el cursor
- * pasa por encima (cobertura por segmentos). Lo que no recorrés no aparece. Al
- * sacar el cursor se desvanece y se resetea (vuelve a dormir).
+ * Se descubre TIPO LÁPIZ: sólo se dibuja la PORCIÓN de línea por la que el
+ * cursor pasa por encima (cobertura por segmentos). Lo que no recorrés no
+ * aparece. Al sacar el cursor se desvanece y se resetea (vuelve a dormir).
+ * Además, su opacidad se ata a --hero-fade (mismo mecanismo que .lbg-note):
+ * se desvanece al dejar el hero con scroll y reaparece al volver arriba.
  *
- * Zona izquierda: PLANTA (rectángulo cerrado con ambientes, puerta con barrido,
- * baño, cocina, escalera, cota y norte). Zona derecha: FACHADA (envolvente,
- * cornisa, entrepisos, grilla de ventanas, puerta y cota). Decoración pura
- * (aria-hidden). Sólo en desktop con puntero fino y sin prefers-reduced-motion.
+ * Sólo en desktop con puntero fino y sin prefers-reduced-motion.
  */
 import '../styles/hero-blueprints.css';
 ---
@@ -49,28 +49,6 @@ import '../styles/hero-blueprints.css';
     <text class="bp-label" x="36" y="46" text-anchor="start">PLANTA</text>
     <text class="bp-label" x="196" y="66" text-anchor="middle">N</text>
     <text class="bp-label" x="105" y="211" text-anchor="middle">8.40</text>
-  </svg>
-</div>
-
-<!-- ZONA DERECHA — fachada -->
-<div class="hero-zone hero-zone-right" aria-hidden="true" data-blueprint>
-  <svg class="bp-svg" viewBox="0 0 200 212" fill="none">
-    <path class="bp-draw" d="M6 192 H194" />
-    <path class="bp-draw" d="M34 44 H166 V192 H34 Z" />
-    <path class="bp-draw" d="M28 44 H172 M28 44 V36 H172 V44" />
-    <path class="bp-draw" d="M34 96 H166" />
-    <path class="bp-draw" d="M34 144 H166" />
-    <path class="bp-draw" d="M50 84 H74 V56 H50 Z" />
-    <path class="bp-draw" d="M88 84 H112 V56 H88 Z" />
-    <path class="bp-draw" d="M126 84 H150 V56 H126 Z" />
-    <path class="bp-draw" d="M50 132 H74 V104 H50 Z" />
-    <path class="bp-draw" d="M88 132 H112 V104 H88 Z" />
-    <path class="bp-draw" d="M126 132 H150 V104 H126 Z" />
-    <path class="bp-draw" d="M64 192 V152 H92 V192" />
-    <path class="bp-draw" d="M120 180 H150 V152 H120 Z" />
-    <path class="bp-draw bp-accent" d="M20 44 V192 M16 44 H24 M16 192 H24" />
-    <text class="bp-label" x="100" y="208" text-anchor="middle">FACHADA</text>
-    <text class="bp-label" x="12" y="120" transform="rotate(-90 12 120)" text-anchor="middle">12.60</text>
   </svg>
 </div>
 

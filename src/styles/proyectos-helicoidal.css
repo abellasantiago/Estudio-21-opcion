@@ -20,7 +20,33 @@
 .ph-head{position:relative;z-index:2}
 
 /* ---------- encabezado de sección (mismo tratamiento que las demás) ---------- */
+/* fila superior: título a la izquierda, toggle de vista a la derecha */
+.ph-head-top{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:1rem 1.5rem;flex-wrap:wrap;
+}
 .ph-sechead{margin-bottom:clamp(1.6rem,3vw,2.4rem)}
+
+/* ---------- toggle de vista (cilindro ⇄ grilla) ----------------------------
+   Oculto por defecto (sin JS / reduced-motion no hay cilindro que alternar);
+   el script agrega .is-toggleable a la sección cuando el 3D está disponible. */
+.ph-viewtoggle{
+  display:none;align-items:center;gap:.5rem;flex:0 0 auto;
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink);background:var(--paper-2);
+  border:1px solid var(--line);border-radius:2px;
+  padding:.55rem .9rem;cursor:pointer;white-space:nowrap;
+  transition:border-color .25s ease,color .25s ease,background .25s ease,box-shadow .25s ease;
+}
+.ph.is-toggleable .ph-viewtoggle{display:inline-flex}
+.ph-viewtoggle:hover{border-color:var(--ink);box-shadow:0 8px 22px -14px rgba(26,25,22,.55)}
+.ph-viewtoggle:active{transform:translateY(1px)}
+.ph-vt-ico{width:15px;height:15px;flex:0 0 auto;color:var(--petrol);transition:transform .3s ease}
+.ph-viewtoggle:hover .ph-vt-ico{transform:rotate(-6deg)}
+.ph-viewtoggle .ico-spin{display:none}
+.ph-viewtoggle.is-grid .ico-grid{display:none}
+.ph-viewtoggle.is-grid .ico-spin{display:inline-block}
+.ph-viewtoggle.is-grid:hover .ph-vt-ico{transform:rotate(90deg)}
 .ph-bar{
   display:flex;align-items:flex-end;justify-content:space-between;
   gap:1.2rem 1.5rem;flex-wrap:wrap;margin-bottom:clamp(1.8rem,3vw,2.8rem);
@@ -146,6 +172,22 @@
 .ph.is-3d .filters button{text-align:left;width:100%}
 .ph.is-3d .ph-counter{justify-content:flex-start;margin-top:.15rem}
 
+/* En 3D el toggle se relocaliza (vía script) dentro del panel sticky: queda
+   pineado arriba a la derecha, como un conmutador de vista, mientras se recorre
+   el cilindro. Un velo de papel + blur lo despega del escenario sin taparlo. */
+.ph.is-3d .ph-sticky > .ph-viewtoggle{
+  position:absolute;z-index:7;
+  top:clamp(4.8rem,11vh,7rem);right:clamp(1rem,4vw,3.4rem);
+  background:color-mix(in srgb,var(--paper) 84%,transparent);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+}
+
+/* Durante el desenrollado las cards vuelan fuera del panel: hay que soltar el
+   recorte para que no se corten a mitad de vuelo. */
+.ph.is-flipping .ph-sticky{overflow:visible}
+.ph.is-flipping{overflow:visible}
+.ph.is-flipping .ph-card{will-change:transform,opacity}
+
 @media(max-width:680px){
   .ph.is-3d .ph-bar{
     top:calc(64px + .5rem);left:0;right:0;
@@ -234,6 +276,12 @@
   .ph.is-3d .ph-card{--cw:300px;--ch:420px}
   .ph.is-3d .ph-name{font-size:1.48rem}
   .ph.is-3d .ph-head{padding-top:calc(64px + clamp(.8rem,3vh,1.6rem))}
+  /* en mobile la barra de filtros ocupa el tope: el toggle baja a la esquina
+     inferior derecha para no pisarla (queda sobre el hint, que va centrado) */
+  .ph.is-3d .ph-sticky > .ph-viewtoggle{
+    top:auto;bottom:clamp(1rem,4vh,1.8rem);right:1rem;
+    font-size:.68rem;padding:.5rem .75rem;
+  }
 }
 /* pantallas bajas: card más chica para que entre completa en el viewport */
 @media(max-height:680px){

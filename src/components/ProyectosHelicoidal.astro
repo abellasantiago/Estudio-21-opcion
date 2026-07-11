@@ -43,11 +43,33 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 <section class="ph block" id="proyectos" style={`--ph-total:${total}`} aria-labelledby="ph-title">
   <div class="wrap ph-head">
-    <div class="sec-head ph-sechead">
-      <span class="eyebrow reveal">Obra construida</span>
-      <h2 id="ph-title" class="section-title reveal" data-d="1">
-        Quince proyectos, una misma manera de hacer.
-      </h2>
+    <div class="ph-head-top">
+      <div class="sec-head ph-sechead">
+        <span class="eyebrow reveal">Obra construida</span>
+        <h2 id="ph-title" class="section-title reveal" data-d="1">
+          Quince proyectos, una misma manera de hacer.
+        </h2>
+      </div>
+
+      <!-- Cambia entre el cilindro (recorrido) y la grilla (ver todo de un vistazo).
+           Oculto por defecto; el <script> lo habilita sólo cuando el 3D está activo
+           (con motion permitido). En 3D se relocaliza pineado en el panel sticky. -->
+      <button
+        type="button"
+        class="ph-viewtoggle"
+        id="phViewToggle"
+        aria-pressed="false"
+        aria-label="Ver todos los proyectos en una grilla"
+      >
+        <svg class="ph-vt-ico ico-grid" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+          <rect x="1.5" y="1.5" width="5.3" height="5.3" rx="1" /><rect x="9.2" y="1.5" width="5.3" height="5.3" rx="1" />
+          <rect x="1.5" y="9.2" width="5.3" height="5.3" rx="1" /><rect x="9.2" y="9.2" width="5.3" height="5.3" rx="1" />
+        </svg>
+        <svg class="ph-vt-ico ico-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M13.8 8a5.8 5.8 0 1 1-1.75-4.15" /><path d="M12.7 1.5v3h-3" />
+        </svg>
+        <span class="ph-vt-txt">Ver todos</span>
+      </button>
     </div>
 
     <div class="ph-bar reveal" data-d="2">
@@ -132,6 +154,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
     const bar = section.querySelector<HTMLElement>('.ph-bar');
     const sticky = section.querySelector<HTMLElement>('.ph-sticky');
     const barHome = bar?.parentElement ?? null;
+    // toggle de vista (cilindro ⇄ grilla). Su "casa" es el header; en 3D el
+    // script lo relocaliza dentro del panel sticky (queda pineado).
+    const toggleBtn = section.querySelector<HTMLButtonElement>('#phViewToggle');
+    const toggleTxt = toggleBtn?.querySelector<HTMLElement>('.ph-vt-txt') ?? null;
+    const toggleHome = toggleBtn?.parentElement ?? null;
+    const header = document.getElementById('header');
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     // ---- parámetros ----
@@ -166,6 +194,16 @@ const pad = (n: number) => String(n).padStart(2, '0');
     let running = false;
     let rafId = 0;
 
+    // ---- estado de la vista (cilindro 3D ⇄ grilla "ver todos") ----
+    // 'cilindro' = helicoidal atado al scroll · 'grilla' = todos a la vista.
+    let viewMode: 'cilindro' | 'grilla' = 'cilindro';
+    let transitioning = false; // true mientras corre el desenrollado/reensamblado
+    let flipTimer = 0;
+    const is3d = () => section!.classList.contains('is-3d');
+    const navH = () => header?.getBoundingClientRect().height || 58;
+    // easing del viaje de las cards: entrada decidida, aterrizaje suave.
+    const FLIP_EASE = 'cubic-bezier(.22,.72,.14,1)';
+
     const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
     const pad = (n: number) => String(n).padStart(2, '0');
@@ -193,6 +231,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
     // ---- progreso de scroll de la sección (0..1) -> targetScroll (0..N-1) ----
     function updateTarget() {
+      if (!is3d() || transitioning) return; // en grilla / durante el flip no se scrubea
       const passed = -section!.getBoundingClientRect().top;
       // El recorrido del helicoidal arranca cuando el panel se fija (passed >=
       // headOffset) y termina al soltarse (passed = offsetHeight - innerHeight).
@@ -278,6 +317,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
     // ---- filtros (sirven igual en 3D y en grilla) ----
     function applyFilter(filter: string) {
+      if (transitioning) return; // no filtrar a mitad del desenrollado/reensamblado
       filterBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === filter)));
       active = cards.filter((c) => filter === 'todos' || c.status === filter);
       cards.forEach((c) => {
@@ -330,56 +370,29 @@ const pad = (n: number) => String(n).padStart(2, '0');
       b.addEventListener('click', () => applyFilter(b.dataset.filter ?? 'todos')),
     );
 
-    // ---- activar la capa 3D ----
-    function enable3D() {
-      section!.classList.add('is-3d');
-      // mover los filtros al panel sticky → quedan pineados mientras se scrollea
-      // (sin el reveal, que pelearía con el transform de centrado del riel).
-      if (bar && sticky && bar.parentElement !== sticky) {
-        bar.classList.remove('reveal');
-        sticky.appendChild(bar);
+    // ---- relocar barra de filtros + toggle según el modo ----------------------
+    // En 3D ambos viven pineados en el panel sticky; en grilla vuelven al header.
+    function dockControls(to3d: boolean) {
+      if (to3d) {
+        if (bar && sticky && bar.parentElement !== sticky) {
+          bar.classList.remove('reveal'); // el reveal pelearía con el transform del riel
+          sticky.appendChild(bar);
+        }
+        if (toggleBtn && sticky && toggleBtn.parentElement !== sticky) sticky.appendChild(toggleBtn);
+      } else {
+        if (bar && barHome && bar.parentElement !== barHome) barHome.appendChild(bar);
+        if (toggleBtn && toggleHome && toggleBtn.parentElement !== toggleHome) {
+          toggleHome.appendChild(toggleBtn);
+        }
       }
-      layout();
-      updateTarget();
-      lastActiveIdx = -1;
-      render();
-
-      // correr el rAF sólo mientras la sección está visible
-      const io = new IntersectionObserver(
-        (entries) => entries.forEach((e) => (e.isIntersecting ? start() : stop())),
-        { rootMargin: '0px' },
-      );
-      io.observe(section!);
-
-      window.addEventListener('scroll', updateTarget, { passive: true });
-      window.addEventListener(
-        'resize',
-        () => {
-          layout();
-          updateTarget();
-          render();
-        },
-        { passive: true },
-      );
-
-      // foco por teclado → rotar el cilindro para mostrar la card enfocada
-      cards.forEach((c) => {
-        c.el.querySelector('a')?.addEventListener('focus', () => {
-          const vi = active.indexOf(c);
-          if (vi >= 0) scrollToIndex(vi);
-        });
-      });
     }
 
-    function disable3D() {
-      stop();
-      section!.classList.remove('is-3d', 'is-scrolling');
-      // devolver los filtros al header (grilla accesible)
-      if (bar && barHome && bar.parentElement !== barHome) barHome.appendChild(bar);
+    // ---- borrar los estilos inline del cilindro → deja actuar a la grilla CSS ----
+    // Sobre TODAS las cards (no sólo las visibles): si una está filtrada afuera y
+    // luego se vuelve a mostrar, no debe arrastrar transform/opacidad del cilindro.
+    function clearCylinderStyles() {
       if (axis) axis.style.transform = '';
-      [ghost21, marksEl].forEach((el) => {
-        if (el) el.style.transform = '';
-      });
+      [ghost21, marksEl].forEach((el) => { if (el) el.style.transform = ''; });
       cards.forEach((c) => {
         c.el.style.transform = '';
         c.el.style.opacity = '';
@@ -390,13 +403,230 @@ const pad = (n: number) => String(n).padStart(2, '0');
       });
     }
 
-    // Sólo activamos el efecto si el usuario no pidió menos movimiento.
-    if (!reduce.matches) enable3D();
+    // ---- reflejar el modo en el botón (texto/estado/accesibilidad) ----
+    function syncToggle() {
+      if (!toggleBtn) return;
+      const grilla = viewMode === 'grilla';
+      toggleBtn.setAttribute('aria-pressed', String(grilla));
+      toggleBtn.classList.toggle('is-grid', grilla);
+      if (toggleTxt) toggleTxt.textContent = grilla ? 'Volver al giro' : 'Ver todos';
+      toggleBtn.setAttribute(
+        'aria-label',
+        grilla
+          ? 'Volver a la vista giratoria de proyectos'
+          : 'Ver todos los proyectos en una grilla',
+      );
+    }
 
-    // Responder si la preferencia cambia en runtime.
+    // ---- FLIP: rects de las cards visibles en coordenadas de viewport ----
+    const rectsOf = () => active.map((c) => c.el.getBoundingClientRect());
+
+    // limpieza común al terminar una transición (libera transiciones inline)
+    function finishFlip(total: number, after?: () => void) {
+      clearTimeout(flipTimer);
+      flipTimer = window.setTimeout(() => {
+        active.forEach((c) => {
+          c.el.style.transition = '';
+          c.el.style.transformOrigin = '';
+        });
+        section!.classList.remove('is-flipping');
+        transitioning = false;
+        after?.();
+      }, total);
+    }
+
+    // ======= DESENROLLAR: cilindro → grilla (cada card viaja a su celda) =======
+    function goGrilla() {
+      if (transitioning || viewMode === 'grilla') return;
+      transitioning = true;
+      viewMode = 'grilla';
+      syncToggle();
+      stop();
+
+      // FIRST — posición y opacidad actuales de cada card sobre el cilindro
+      const first = rectsOf();
+      const firstOpac = active.map((c) => getComputedStyle(c.el).opacity);
+
+      // pasar al layout de grilla (documento normal, scrolleable)
+      section!.classList.remove('is-3d', 'is-scrolling');
+      section!.classList.add('is-grid', 'is-flipping');
+      dockControls(false);
+      clearCylinderStyles();
+
+      // encuadrar la grilla justo bajo el navbar. Salto SECO: `html` tiene
+      // scroll-behavior:smooth y 'auto' lo respetaría (animaría) → 'instant'.
+      const top = Math.max(0, section!.offsetTop - navH() - 4);
+      window.scrollTo({ top, behavior: 'instant' as ScrollBehavior });
+
+      // LAST — destino de cada card ya en la grilla
+      const last = rectsOf();
+
+      // INVERT — devolver cada card a su lugar del cilindro (delta de centros)
+      active.forEach((c, i) => {
+        const f = first[i], l = last[i];
+        const dx = f.left + f.width / 2 - (l.left + l.width / 2);
+        const dy = f.top + f.height / 2 - (l.top + l.height / 2);
+        // escala de partida = tamaño en pantalla ÷ tamaño en la celda. Se topa por
+        // abajo: las cards del dorso están tan escorzadas (rect casi 0) que sin el
+        // piso arrancarían como un punto; con el piso nacen chicas y crecen limpio.
+        const rawS = f.width > 4 && l.width > 4 ? f.width / l.width : 1;
+        const s = Math.max(0.25, Math.min(2.6, rawS));
+        c.el.style.transition = 'none';
+        c.el.style.transformOrigin = '50% 50%';
+        c.el.style.opacity = firstOpac[i];
+        c.el.style.transform = `translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px) scale(${s.toFixed(3)})`;
+      });
+
+      void section!.offsetWidth; // reflow: consolida el estado invertido
+
+      // PLAY — soltar a la celda con una cascada leve por índice
+      const DUR = 720;
+      active.forEach((c, i) => {
+        const delay = i * 24;
+        c.el.style.transition =
+          `transform ${DUR}ms ${FLIP_EASE} ${delay}ms, opacity ${Math.round(DUR * 0.7)}ms ease ${delay}ms`;
+        c.el.style.transform = '';
+        c.el.style.opacity = '';
+      });
+
+      finishFlip(DUR + active.length * 24 + 80);
+    }
+
+    // ======= REENSAMBLAR: grilla → cilindro (las cards florecen en su anillo) =======
+    function goCilindro() {
+      if (transitioning || viewMode === 'cilindro') return;
+      transitioning = true;
+      viewMode = 'cilindro';
+      syncToggle();
+
+      // montar el cilindro en el arranque del helicoidal (eje SIN rotar → el
+      // transform base de cada card queda alineado ~pantalla para el "bloom")
+      section!.classList.remove('is-grid');
+      section!.classList.add('is-3d', 'is-flipping');
+      dockControls(true);
+      layout();
+      headOffset = sticky ? sticky.offsetTop : 0;
+      scroll = 0;
+      targetScroll = 0;
+      lastActiveIdx = -1;
+      render(); // deja a cada card en su transform/opacidad final del cilindro
+
+      // encuadrar el panel pineado (salto seco, ver nota de scroll arriba)
+      window.scrollTo({ top: section!.offsetTop + headOffset, behavior: 'instant' as ScrollBehavior });
+
+      // estado final por card (destino del bloom) capturado del render anterior
+      const bases = active.map((c) => c.el.style.transform);
+      const opac = active.map((c) => c.el.style.opacity || '1');
+
+      active.forEach((c, i) => {
+        c.el.style.transition = 'none';
+        c.el.style.transformOrigin = '50% 50%';
+        c.el.style.opacity = '0';
+        c.el.style.transform = `scale(.62) ${bases[i]}`; // arranca chico, en su lugar del anillo
+      });
+
+      void section!.offsetWidth;
+
+      const DUR = 640;
+      active.forEach((c, i) => {
+        const delay = i * 20;
+        c.el.style.transition =
+          `transform ${DUR}ms ${FLIP_EASE} ${delay}ms, opacity ${Math.round(DUR * 0.85)}ms ease ${delay}ms`;
+        c.el.style.transform = bases[i];
+        c.el.style.opacity = opac[i];
+      });
+
+      finishFlip(DUR + active.length * 20 + 90, () => {
+        // reanudar el scrubbing desde el arranque (rAF vuelve a mandar el transform)
+        active.forEach((c) => (c.el.style.transition = ''));
+        updateTarget();
+        scroll = targetScroll;
+        lastActiveIdx = -1;
+        render();
+        start();
+      });
+    }
+
+    // ---- montar el cilindro sin animación (carga inicial / cambio de preferencia) ----
+    function enter3DInitial() {
+      section!.classList.remove('is-grid');
+      section!.classList.add('is-3d');
+      dockControls(true);
+      layout();
+      updateTarget();
+      lastActiveIdx = -1;
+      render();
+      start();
+    }
+
+    // ---- interacciones (se enganchan UNA vez; cada handler se guarda por modo) ----
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (e.isIntersecting && is3d() && !transitioning) start();
+          else stop();
+        }),
+      { rootMargin: '0px' },
+    );
+    io.observe(section);
+
+    window.addEventListener('scroll', updateTarget, { passive: true });
+    window.addEventListener(
+      'resize',
+      () => {
+        if (!is3d() || transitioning) return;
+        layout();
+        updateTarget();
+        render();
+      },
+      { passive: true },
+    );
+
+    // foco por teclado → rotar el cilindro para mostrar la card enfocada
+    cards.forEach((c) => {
+      c.el.querySelector('a')?.addEventListener('focus', () => {
+        if (!is3d() || transitioning) return;
+        const vi = active.indexOf(c);
+        if (vi >= 0) scrollToIndex(vi);
+      });
+    });
+
+    toggleBtn?.addEventListener('click', () => {
+      if (transitioning) return;
+      if (viewMode === 'cilindro') goGrilla();
+      else goCilindro();
+    });
+
+    // ---- arranque: 3D si hay motion permitido; si no, grilla accesible sin toggle ----
+    if (!reduce.matches) {
+      section.classList.add('is-toggleable');
+      viewMode = 'cilindro';
+      syncToggle();
+      enter3DInitial();
+    } else {
+      viewMode = 'grilla';
+    }
+
+    // Responder si la preferencia de movimiento cambia en runtime.
     reduce.addEventListener?.('change', (e) => {
-      if (e.matches) disable3D();
-      else if (!section!.classList.contains('is-3d')) enable3D();
+      clearTimeout(flipTimer);
+      transitioning = false;
+      section!.classList.remove('is-flipping');
+      if (e.matches) {
+        // ahora pide menos movimiento → grilla fija, sin toggle
+        stop();
+        section!.classList.remove('is-toggleable', 'is-3d', 'is-scrolling');
+        section!.classList.add('is-grid');
+        dockControls(false);
+        clearCylinderStyles();
+        viewMode = 'grilla';
+      } else {
+        // vuelve a permitir movimiento → reactivar cilindro y toggle
+        section!.classList.add('is-toggleable');
+        viewMode = 'cilindro';
+        syncToggle();
+        enter3DInitial();
+      }
     });
   }
 </script>

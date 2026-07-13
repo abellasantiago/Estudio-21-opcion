@@ -1,74 +1,42 @@
 ---
 /*
- * Preloader de la home: una planta arquitectónica que se dibuja trazo por
- * trazo (contorno + cotas → tabiques/aberturas → mobiliario → rótulos) y al
- * terminar hace fade dejando el hero ("Estudio 21" girando en 3D).
+ * Preloader de la home: una planta arquitectónica minimalista que se dibuja
+ * trazo por trazo (contorno → tabiques/aberturas → mobiliario). Al terminar,
+ * TODO el overlay (papel + plano) se barre HACIA ARRIBA como un telón y deja
+ * ver directamente el hero real: el "21" que ya viene girando en 3D detrás
+ * (con sus "21" fantasma de fondo, que aparecen recién ahí). No hay "21"
+ * intermedio — no se percibe ningún cambio de un 21 a otro. Se muestra en cada
+ * carga de la home.
  *
- * El plano respeta buenas prácticas: muros a doble línea, puertas con hoja +
- * barrido que NO chocan con el mobiliario, ventanas sobre muro exterior,
- * cotas encadenadas, norte, escala gráfica y rótulo.
+ * Plano depurado pero con oficio: la arquitectura esencial (muros a doble línea,
+ * puertas con hoja + barrido que NO chocan con el mobiliario, ventanas sobre muro
+ * exterior) más un mínimo de grafismo de plano — una cota general y escala
+ * gráfica. Sin carátula ni rótulos de ambiente: minimalista.
  *
- * Fases (data-ph) → el script asigna los delays de cada trazo:
- *   1 = contorno (envolvente) + cotas
+ * Fases (data-ph) → el script asigna los delays de cada trazo (dibujo pausado,
+ * capa por capa, como un plano que se va levantando):
+ *   1 = contorno (envolvente)
  *   2 = tabiques + aberturas (puertas, ventanas)
  *   3 = mobiliario y artefactos
- *   4 = rótulos, norte, escala y carátula
+ *   4 = grafismo: cota general y escala gráfica
  */
 import '../styles/preloader.css';
 ---
 
 <div class="preloader" id="preloader" role="status" aria-label="Cargando Estudio 21">
-  <span class="pl-ghost pl-ghost-1" aria-hidden="true">21</span>
-  <span class="pl-ghost pl-ghost-2" aria-hidden="true">21</span>
   <div class="pl-sheet">
     <svg
       class="pl-plan"
-      viewBox="0 0 780 500"
+      viewBox="120 78 560 392"
       preserveAspectRatio="xMidYMid meet"
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <!-- ===================== FASE 1 · CONTORNO + COTAS ===================== -->
+      <!-- ===================== FASE 1 · CONTORNO ===================== -->
       <g data-ph="1">
         <!-- envolvente: muro exterior a doble línea, con hueco de acceso al sur -->
         <path class="pl-wall pl-draw" pathLength="1" d="M162 138 H638 V412 H252 M210 412 H162 V138" />
         <path class="pl-wall pl-draw" pathLength="1" d="M174 150 H626 V400 H252 M210 400 H174 V150" />
-
-        <!-- cota general superior -->
-        <path class="pl-dim pl-draw" pathLength="1" d="M162 90 H638" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M158 94 l8 -8" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M634 94 l8 -8" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M162 138 V86" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M638 138 V86" />
-        <text class="pl-t pl-t-dim pl-fade" x="400" y="84" font-size="12" text-anchor="middle">8.80</text>
-
-        <!-- cota parcial superior (dos paños) -->
-        <path class="pl-dim pl-draw" pathLength="1" d="M162 116 H638" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M158 120 l8 -8" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M426 120 l8 -8" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M634 120 l8 -8" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M430 138 V112" />
-        <text class="pl-t pl-t-dim pl-fade" x="296" y="111" font-size="11" text-anchor="middle">4.90</text>
-        <text class="pl-t pl-t-dim pl-fade" x="528" y="111" font-size="11" text-anchor="middle">3.90</text>
-
-        <!-- cota lateral izquierda (altura total) -->
-        <path class="pl-dim pl-draw" pathLength="1" d="M120 150 V400" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M116 154 l8 -8" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M116 396 l8 8" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M162 150 H116" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M162 400 H116" />
-        <text class="pl-t pl-t-dim pl-fade" x="112" y="278" font-size="11" text-anchor="middle" transform="rotate(-90 112 278)">5.00</text>
-
-        <!-- cota lateral derecha (dormitorio / baño) -->
-        <path class="pl-dim pl-draw" pathLength="1" d="M676 150 V400" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M672 154 l8 -8" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M672 286 l8 -8" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M672 396 l8 8" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M638 150 H684" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M638 290 H684" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M638 400 H684" />
-        <text class="pl-t pl-t-dim pl-fade" x="672" y="222" font-size="11" text-anchor="middle" transform="rotate(-90 672 222)">2.80</text>
-        <text class="pl-t pl-t-dim pl-fade" x="672" y="347" font-size="11" text-anchor="middle" transform="rotate(-90 672 347)">2.20</text>
       </g>
 
       <!-- ===================== FASE 2 · TABIQUES + ABERTURAS ===================== -->
@@ -76,9 +44,9 @@ import '../styles/preloader.css';
         <!-- tabique vertical (social | privado), con huecos de puertas -->
         <path class="pl-part pl-draw" pathLength="1" d="M425 150 V165 M425 205 V320 M425 356 V400" />
         <path class="pl-part pl-draw" pathLength="1" d="M435 150 V165 M435 205 V320 M435 356 V400" />
-        <!-- tabique horizontal (dormitorio | baño) -->
-        <path class="pl-part pl-draw" pathLength="1" d="M435 285 H626" />
-        <path class="pl-part pl-draw" pathLength="1" d="M435 295 H626" />
+        <!-- tabique horizontal (dormitorio | baño): corrido hacia abajo → dormitorio más amplio, baño más compacto -->
+        <path class="pl-part pl-draw" pathLength="1" d="M435 303 H626" />
+        <path class="pl-part pl-draw" pathLength="1" d="M435 313 H626" />
 
         <!-- jambas (cierran el espesor del muro en cada hueco) -->
         <path class="pl-thin pl-draw" pathLength="1" d="M210 400 V412 M252 400 V412" />
@@ -91,81 +59,79 @@ import '../styles/preloader.css';
         <!-- puerta dormitorio -->
         <path class="pl-door pl-draw" pathLength="1" d="M435 205 H475" />
         <path class="pl-door pl-draw" pathLength="1" d="M475 205 A40 40 0 0 0 435 165" />
-        <!-- puerta baño -->
-        <path class="pl-door pl-draw" pathLength="1" d="M435 356 H471" />
-        <path class="pl-door pl-draw" pathLength="1" d="M471 356 A36 36 0 0 0 435 320" />
+        <!-- puerta baño (bisagra arriba del hueco, la hoja tuca contra el tabique) -->
+        <path class="pl-door pl-draw" pathLength="1" d="M435 320 H471" />
+        <path class="pl-door pl-draw" pathLength="1" d="M471 320 A36 36 0 0 1 435 356" />
 
         <!-- ventanas (sólo en muro exterior): jambas + vidrio -->
         <path class="pl-thin pl-draw" pathLength="1" d="M250 138 V150 M340 138 V150 M250 144 H340" />
-        <path class="pl-thin pl-draw" pathLength="1" d="M470 138 V150 M560 138 V150 M470 144 H560" />
         <path class="pl-thin pl-draw" pathLength="1" d="M300 400 V412 M380 400 V412 M300 406 H380" />
         <path class="pl-thin pl-draw" pathLength="1" d="M626 190 H638 M626 250 H638 M632 190 V250" />
+        <!-- ventanita de ventilación del baño -->
+        <path class="pl-thin pl-draw" pathLength="1" d="M626 360 H638 M626 386 H638 M632 360 V386" />
       </g>
 
       <!-- ===================== FASE 3 · MOBILIARIO ===================== -->
       <g data-ph="3" class="pl-fur">
-        <!-- cocina: mesada en L (contorno único) + bacha + anafe -->
+        <!-- cocina: mesada en L + bacha + anafe -->
         <path class="pl-fur pl-fade" pathLength="1" d="M174 150 H300 V186 H210 V300 H174 Z" />
         <circle class="pl-fur pl-fade" pathLength="1" cx="250" cy="168" r="7" />
-        <rect class="pl-fur pl-fade" pathLength="1" x="180" y="232" width="26" height="26" />
+        <rect class="pl-fur pl-fade" pathLength="1" x="180" y="230" width="26" height="26" />
 
-        <!-- comedor: mesa + 4 sillas -->
-        <rect class="pl-fur pl-fade" pathLength="1" x="250" y="210" width="110" height="48" rx="6" />
-        <rect class="pl-fur pl-fade" pathLength="1" x="272" y="190" width="20" height="16" rx="2" />
-        <rect class="pl-fur pl-fade" pathLength="1" x="318" y="190" width="20" height="16" rx="2" />
-        <rect class="pl-fur pl-fade" pathLength="1" x="272" y="262" width="20" height="16" rx="2" />
-        <rect class="pl-fur pl-fade" pathLength="1" x="318" y="262" width="20" height="16" rx="2" />
+        <!-- comedor: mesa separada de la mesada (circulación) + 4 sillas -->
+        <rect class="pl-fur pl-fade" pathLength="1" x="264" y="238" width="102" height="46" rx="6" />
+        <rect class="pl-fur pl-fade" pathLength="1" x="281" y="216" width="22" height="15" rx="2" />
+        <rect class="pl-fur pl-fade" pathLength="1" x="327" y="216" width="22" height="15" rx="2" />
+        <rect class="pl-fur pl-fade" pathLength="1" x="281" y="291" width="22" height="15" rx="2" />
+        <rect class="pl-fur pl-fade" pathLength="1" x="327" y="291" width="22" height="15" rx="2" />
 
-        <!-- dormitorio: cama + almohadas + mesas de luz + placard -->
-        <rect class="pl-fur pl-fade" pathLength="1" x="505" y="156" width="100" height="116" rx="4" />
-        <rect class="pl-fur pl-fade" pathLength="1" x="511" y="160" width="40" height="20" rx="3" />
-        <rect class="pl-fur pl-fade" pathLength="1" x="559" y="160" width="40" height="20" rx="3" />
-        <path class="pl-fur pl-fade" pathLength="1" d="M505 208 H605" />
-        <rect class="pl-fur pl-fade" pathLength="1" x="481" y="156" width="22" height="22" />
-        <rect class="pl-fur pl-fade" pathLength="1" x="607" y="156" width="19" height="22" />
-        <rect class="pl-fur pl-fade" pathLength="1" x="435" y="212" width="30" height="70" />
-        <path class="pl-fur pl-fade" pathLength="1" d="M450 212 V282" />
+        <!-- dormitorio: cama pegada a la cabecera + almohadas + mesas de luz + cómoda -->
+        <rect class="pl-fur pl-fade" pathLength="1" x="506" y="154" width="86" height="104" rx="4" />
+        <rect class="pl-fur pl-fade" pathLength="1" x="512" y="158" width="34" height="18" rx="3" />
+        <rect class="pl-fur pl-fade" pathLength="1" x="552" y="158" width="34" height="18" rx="3" />
+        <path class="pl-fur pl-fade" pathLength="1" d="M506 208 H592" />
+        <rect class="pl-fur pl-fade" pathLength="1" x="480" y="154" width="22" height="22" />
+        <rect class="pl-fur pl-fade" pathLength="1" x="596" y="154" width="20" height="22" />
+        <rect class="pl-fur pl-fade" pathLength="1" x="435" y="217" width="26" height="74" />
+        <path class="pl-fur pl-fade" pathLength="1" d="M448 217 V291" />
 
-        <!-- baño: inodoro + bacha + ducha -->
-        <rect class="pl-fur pl-fade" pathLength="1" x="616" y="368" width="10" height="22" rx="2" />
-        <ellipse class="pl-fur pl-fade" pathLength="1" cx="602" cy="379" rx="13" ry="8" />
-        <rect class="pl-fur pl-fade" pathLength="1" x="520" y="382" width="40" height="16" rx="3" />
-        <ellipse class="pl-fur pl-fade" pathLength="1" cx="540" cy="390" rx="13" ry="6" />
-        <rect class="pl-fur pl-fade" pathLength="1" x="566" y="300" width="58" height="48" />
-        <path class="pl-fur pl-fade" pathLength="1" d="M566 300 L624 348" />
-        <circle class="pl-fur pl-fade" pathLength="1" cx="595" cy="324" r="3" />
+        <!-- baño (más compacto): ducha en el rincón · inodoro a la izq., lavabo bajo la ducha -->
+        <rect class="pl-fur pl-fade" pathLength="1" x="568" y="315" width="54" height="42" />
+        <path class="pl-fur pl-fade" pathLength="1" d="M568 315 L622 357" />
+        <circle class="pl-fur pl-fade" pathLength="1" cx="595" cy="336" r="3" />
+        <rect class="pl-fur pl-fade" pathLength="1" x="488" y="389" width="26" height="10" rx="2" />
+        <ellipse class="pl-fur pl-fade" pathLength="1" cx="501" cy="381" rx="11" ry="8" />
+        <rect class="pl-fur pl-fade" pathLength="1" x="544" y="388" width="42" height="12" rx="3" />
+        <ellipse class="pl-fur pl-fade" pathLength="1" cx="565" cy="394" rx="13" ry="6" />
       </g>
 
-      <!-- ===================== FASE 4 · RÓTULOS + NORTE + ESCALA + CARÁTULA ===================== -->
+      <!-- ===================== FASE 4 · GRAFISMO (COTA · ESCALA) ===================== -->
       <g data-ph="4">
-        <!-- norte (flecha sin círculo) -->
-        <path class="pl-dim pl-draw" pathLength="1" d="M700 128 V96 M693 105 L700 96 L707 105" />
-        <text class="pl-t pl-t-ink pl-fade" x="700" y="90" font-size="10" text-anchor="middle">N</text>
+        <!-- cota general de ancho: líneas de referencia → línea de cota → marcas → número -->
+        <path class="pl-dim pl-draw" pathLength="1" d="M162 136 V104" />
+        <path class="pl-dim pl-draw" pathLength="1" d="M638 136 V104" />
+        <path class="pl-dim pl-draw" pathLength="1" d="M162 110 H638" />
+        <path class="pl-dim pl-draw" pathLength="1" d="M158 114 l8 -8" />
+        <path class="pl-dim pl-draw" pathLength="1" d="M634 114 l8 -8" />
+        <text class="pl-t pl-fade" x="400" y="105" font-size="12" text-anchor="middle">8.80</text>
 
-        <!-- escala gráfica -->
-        <path class="pl-dim pl-draw" pathLength="1" d="M120 440 H208" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M120 440 V447 M142 440 V447 M164 440 V447 M186 440 V447 M208 440 V447" />
-        <text class="pl-t pl-fade" x="120" y="458" font-size="8" text-anchor="middle">0</text>
-        <text class="pl-t pl-fade" x="164" y="458" font-size="8" text-anchor="middle">2</text>
-        <text class="pl-t pl-fade" x="208" y="458" font-size="8" text-anchor="middle">4</text>
-        <text class="pl-t pl-fade" x="222" y="458" font-size="8" text-anchor="start">m</text>
+        <!-- cota general de alto (izquierda): referencias → línea → marcas → número -->
+        <path class="pl-dim pl-draw" pathLength="1" d="M160 138 H140" />
+        <path class="pl-dim pl-draw" pathLength="1" d="M160 412 H140" />
+        <path class="pl-dim pl-draw" pathLength="1" d="M146 138 V412" />
+        <path class="pl-dim pl-draw" pathLength="1" d="M142 142 l8 -8" />
+        <path class="pl-dim pl-draw" pathLength="1" d="M142 416 l8 -8" />
+        <text class="pl-t pl-fade" x="139" y="275" font-size="11" text-anchor="middle" transform="rotate(-90 139 275)">5.10</text>
 
-        <!-- carátula -->
-        <rect class="pl-thin pl-fade" x="496" y="430" width="204" height="40" />
-        <path class="pl-thin pl-draw" pathLength="1" d="M496 448 H700" />
-        <path class="pl-thin pl-draw" pathLength="1" d="M496 459 H700" />
-        <text class="pl-t pl-t-ink pl-fade" x="504" y="443" font-size="10">ESTUDIO 21 — ARQUITECTOS</text>
-        <text class="pl-t pl-fade" x="504" y="456" font-size="8.5">PLANTA · UNIDAD TIPO</text>
-        <text class="pl-t pl-fade" x="504" y="467" font-size="8.5">ESC 1:100 · E21·PL-01</text>
+        <!-- escala gráfica (abajo izquierda) -->
+        <path class="pl-dim pl-draw" pathLength="1" d="M162 442 H250" />
+        <path class="pl-dim pl-draw" pathLength="1" d="M162 442 V449 M184 442 V449 M206 442 V449 M228 442 V449 M250 442 V449" />
+        <text class="pl-t pl-fade" x="162" y="461" font-size="8.5" text-anchor="middle">0</text>
+        <text class="pl-t pl-fade" x="206" y="461" font-size="8.5" text-anchor="middle">2</text>
+        <text class="pl-t pl-fade" x="250" y="461" font-size="8.5" text-anchor="middle">4</text>
+        <text class="pl-t pl-fade" x="262" y="461" font-size="8.5" text-anchor="start">m</text>
       </g>
     </svg>
-  </div>
-
-  <!-- "Estudio 21" que llega desde el fondo girando (empalma con el hero) -->
-  <div class="pl-brand" aria-hidden="true">
-    <span class="pb-eyebrow">Arquitectura que trasciende</span>
-    <span class="pb-wm"><span class="pb-word">Estudio</span><span class="pb-num">21</span></span>
-    <span class="pb-dim">21 de Setiembre 3024</span>
   </div>
 </div>
 
@@ -200,13 +166,14 @@ import '../styles/preloader.css';
       root.classList.remove('pl-lock');
       pre.remove();
     } else {
-      const STROKE = 0.55; // debe coincidir con --pl-dur del CSS
-      const HOLD = 0.6; // pausa con el plano completo antes de pasar al 21
-      const TRANS = 1.1; // retroceso del plano + llegada del 21 antes del cross-fade
+      const STROKE = 0.7; // duración de cada trazo (debe coincidir con --pl-dur del CSS)
+      const HOLD = 0.85; // pausa con el plano completo antes de la barrida
+      const TRANS = 1.25; // duración de la barrida hacia arriba (revela el hero)
 
-      // delays por fase: contorno/cotas → tabiques → mobiliario → rótulos
-      const step: Record<string, number> = { '1': 0.02, '2': 0.018, '3': 0.013, '4': 0.02 };
-      const gap = 0.12; // pausa entre fases
+      // delays por fase (stagger entre trazos): dibujo pausado, más deliberado en
+      // el contorno y el grafismo, más fluido en tabiques y mobiliario
+      const step: Record<string, number> = { '1': 0.22, '2': 0.042, '3': 0.026, '4': 0.075 };
+      const gap = 0.22; // pausa entre fases (se percibe capa por capa)
 
       const els = Array.from(pre.querySelectorAll<SVGElement>('.pl-draw, .pl-fade'));
       let t = 0.06;
@@ -229,7 +196,8 @@ import '../styles/preloader.css';
       let transTimer = 0;
       let safetyTimer = 0;
 
-      // cierre: cross-fade del overlay dejando el hero (el "21" ya girando en 3D)
+      // cierre: quita el overlay (ya barrido hacia arriba) dejando el hero real
+      // en cuadro — el "21" que venía girando en 3D detrás
       const finish = () => {
         if (done) return;
         done = true;
@@ -243,8 +211,9 @@ import '../styles/preloader.css';
         setTimeout(remove, 1400);
       };
 
-      // transición plano → 21: el plano retrocede en Z y el "21" llega desde el
-      // fondo girando; tras `TRANS` el overlay hace cross-fade al hero real.
+      // transición plano → hero: todo el overlay se barre hacia arriba como un
+      // telón, revelando el "21" del hero (ya girando en 3D); tras `TRANS` se
+      // quita el overlay ya invisible.
       const complete = () => {
         if (done || completing) return;
         completing = true;
@@ -257,7 +226,7 @@ import '../styles/preloader.css';
         if (started || done) return;
         started = true;
         pre.classList.add('is-drawing');
-        // al completar el dibujo: hold con el plano y después la transición al 21
+        // al completar el dibujo: hold con el plano y después la barrida hacia arriba
         dismissTimer = window.setTimeout(complete, (drawEnd + HOLD) * 1000);
         safetyTimer = window.setTimeout(finish, (drawEnd + HOLD + TRANS) * 1000 + 3000);
       };

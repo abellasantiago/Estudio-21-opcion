@@ -47,18 +47,25 @@ no CTA con recuadro).
 ### Preloader (sólo home)
 `src/components/Preloader.astro` + `src/styles/preloader.css`, montado en `BaseLayout`
 sólo cuando `immersive` (la home), como primer hijo del `<body>`.
-- Overlay a pantalla completa (fondo `--paper`, con los mismos **ghost "21"** tenues del
-  hero detrás — `.pl-ghost`, empalman al hacer fade) donde una **planta arquitectónica** en
-  hardline (trazos finos y suaves en tono `--ink-soft`, tamaño contenido) se **dibuja trazo
-  por trazo** (stroke-dashoffset por elemento con `pathLength=1`): fase 1 contorno + cotas,
-  fase 2 tabiques/aberturas (puertas con barrido, ventanas), fase 3 mobiliario (aparece con
-  **fade**, evita los puntitos que dejan las formas cerradas al dibujarse), fase 4
-  norte/escala/carátula. Minimalista: sin rótulos de ambiente ni m², sin marcas de esquina,
-  sin HUD; muros a doble línea con cap `butt`. Al completar el dibujo se mantiene **~0,6 s** y
-  hace la **transición "swap en Z"**: la lámina retrocede en Z y se desvanece mientras
-  **"Estudio 21" llega desde el fondo girando** (`.pl-brand`, mismo tamaño/posición que el
-  hero — clamp 22rem) y se asienta; el overlay hace **cross-fade** al hero real (el "21" ya
-  girando en 3D). Fases del cierre en el script: `is-transition` (retroceso + llegada) → `is-done`.
+- Overlay a pantalla completa (fondo `--paper` **limpio** mientras se arma — sin ghosts
+  propios) donde una **planta arquitectónica minimalista** en hardline
+  (trazos finos y suaves en tono `--ink-soft`, lámina contenida — `.pl-sheet` `min(56vw,
+  600px)`, `viewBox` ajustado al edificio) se **dibuja trazo por trazo** (stroke-dashoffset
+  por elemento con `pathLength=1`, **trazo pausado** — `STROKE` 0,7 s con easing tipo lápiz):
+  fase 1 contorno (envolvente a doble línea), fase 2 tabiques/aberturas (puertas con barrido,
+  ventanas), fase 3 mobiliario (aparece con **fade**, evita los puntitos que dejan las formas
+  cerradas al dibujarse), fase 4 **grafismo mínimo** (cotas generales de ancho y alto, y
+  escala gráfica — acento petróleo, números mono con fade). El dibujo se percibe **capa por capa**
+  (`step`/`gap` por fase, más deliberado en contorno y grafismo; ~4 s en total).
+  Minimalista igual: **sin carátula ni rótulos de ambiente**, sin marcas de esquina, sin HUD;
+  muros a doble línea con cap `butt`. Al completar el dibujo se mantiene **~0,85 s** y hace la
+  **transición "barrida hacia arriba"** (lenta, ~1,2 s): **TODO el overlay** (papel + plano)
+  se barre subiendo como un telón (`.preloader.is-transition` con `pl-wipe-up` — `clip-path`
+  `inset` que sube + leve empuje en Y) y deja ver **directamente el hero real**: el "21" que
+  **ya viene girando en 3D detrás** (`immersive.ts` lo gira desde el load) **junto con sus
+  "21" fantasma de fondo** (`.lbg-ghost`, que recién aparecen al levantarse el telón). **No
+  hay "21" intermedio** — no se percibe ningún cambio de un 21 a otro. Cierre en el script:
+  `is-transition` (barrida) → `is-done` (quita el overlay ya invisible).
 - El script del componente asigna los delays escalonados por fase, bloquea el scroll
   (`html.pl-lock`) y cierra con `is-done`. Robustez: si la pestaña carga oculta espera a
   ser visible (rAF/animaciones están pausadas en background); `<noscript>` lo oculta sin

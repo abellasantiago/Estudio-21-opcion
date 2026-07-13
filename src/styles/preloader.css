@@ -23,8 +23,6 @@
   justify-content: center;
   padding: clamp(2.2rem, 6vw, 4rem);
   opacity: 1;
-  perspective: 1300px;
-  perspective-origin: 50% 46%;
   transition: opacity 0.8s ease;
 }
 .preloader.is-done {
@@ -39,7 +37,7 @@ html.pl-lock {
 .pl-sheet {
   position: relative;
   z-index: 1;
-  width: min(68vw, 760px);
+  width: min(56vw, 600px);
 }
 .pl-plan {
   display: block;
@@ -48,157 +46,27 @@ html.pl-lock {
   overflow: visible;
 }
 
-/* ghost "21" del fondo — mismo lenguaje que el hero (.lbg-ghost): quedan detrás
-   del plano mientras se dibuja y empalman con los del hero al hacer fade. */
-.pl-ghost {
-  position: absolute;
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 0.8;
-  user-select: none;
-  pointer-events: none;
-}
-.pl-ghost-1 {
-  font-size: min(52vw, 46rem);
-  top: -8vh;
-  right: -4vw;
-  color: var(--paper-deep);
-}
-.pl-ghost-2 {
-  font-size: min(24vw, 18rem);
-  bottom: -6vh;
-  left: -3vw;
-  color: var(--line);
-}
+/* Sin "21" fantasma en el preloader: el fondo queda limpio (sólo `--paper`)
+   mientras se arma el plano; los ghost "21" son los del hero (.lbg-ghost) y
+   aparecen recién al levantarse el telón con la barrida. */
 
-/* ---- transición plano → 21 (opción "swap en Z") ---- */
-/* el plano (la lámina) retrocede en Z y se desvanece */
-.preloader.is-transition .pl-sheet {
-  animation: pl-recede 0.9s cubic-bezier(0.5, 0, 0.2, 1) forwards;
+/* ---- transición: barrida hacia arriba que revela el hero ---- */
+/* al terminar el dibujo, TODO el overlay (papel + plano) se barre hacia arriba
+   como un telón y deja ver el hero real: el "21" que ya viene girando en 3D
+   detrás, junto con sus "21" fantasma de fondo (que aparecen recién ahora). No
+   hay "21" intermedio → no se percibe ningún cambio de un 21 a otro. */
+.preloader.is-transition {
+  animation: pl-wipe-up 1.2s cubic-bezier(0.62, 0, 0.2, 1) forwards;
 }
-@keyframes pl-recede {
-  to {
-    transform: translateZ(-520px) scale(0.72);
-    opacity: 0;
-  }
-}
-/* "Estudio 21" centrado como en el hero (mismo tamaño/posición), llega girando */
-.pl-brand {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.4rem;
-  text-align: center;
-  pointer-events: none;
-  perspective: 1000px;
-}
-.pb-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--concrete);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6em;
-  opacity: 0;
-}
-.pb-eyebrow::before {
-  content: '';
-  width: 1.6rem;
-  height: 1px;
-  background: var(--petrol);
-}
-.pb-wm {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.06em;
-  transform-style: preserve-3d;
-  opacity: 0;
-}
-.pb-word {
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: clamp(1.55rem, 5vw, 3.3rem);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  line-height: 1;
-  color: var(--ink);
-}
-.pb-num {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(7.7rem, 28.5vw, 22rem);
-  line-height: 0.82;
-  letter-spacing: -0.03em;
-  color: var(--ink);
-}
-.pb-dim {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--concrete);
-  opacity: 0;
-}
-.preloader.is-transition .pb-wm {
-  animation:
-    pl-arrive 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards,
-    pl-spin 18s linear 0.9s infinite;
-}
-.preloader.is-transition .pb-eyebrow,
-.preloader.is-transition .pb-dim {
-  animation: pl-fadein 0.6s ease 0.55s forwards;
-}
-@keyframes pl-arrive {
+@keyframes pl-wipe-up {
   0% {
-    opacity: 0;
-    transform: translateZ(-460px) rotateY(80deg);
-    filter: blur(3px);
-  }
-  60% {
-    opacity: 1;
-    filter: blur(0);
+    clip-path: inset(0 0 0 0);
+    transform: translateY(0);
   }
   100% {
-    opacity: 1;
-    transform: translateZ(0) rotateY(0deg);
-    filter: blur(0);
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(-40px);
   }
-}
-@keyframes pl-spin {
-  from {
-    transform: rotateY(0deg);
-  }
-  to {
-    transform: rotateY(-360deg);
-  }
-}
-
-/* HUD mono arriba de la hoja (marca + contador) */
-.pl-hud {
-  position: absolute;
-  top: -1.7rem;
-  left: 2px;
-  right: 2px;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--concrete);
-}
-.pl-hud b {
-  color: var(--petrol);
-  font-weight: 500;
 }
 
 /* ---- trazo: cada elemento se dibuja con stroke-dashoffset ---- */
@@ -209,11 +77,13 @@ html.pl-lock {
 .pl-fade {
   opacity: 0;
 }
+/* trazo pausado, con arranque suave y asentado al final (sensación de lápiz
+   que apoya, recorre y levanta) — coincide con STROKE del componente */
 .is-drawing .pl-draw {
-  animation: pl-stroke var(--pl-dur, 0.55s) cubic-bezier(0.65, 0, 0.2, 1) both;
+  animation: pl-stroke var(--pl-dur, 0.7s) cubic-bezier(0.45, 0.05, 0.2, 1) both;
 }
 .is-drawing .pl-fade {
-  animation: pl-fadein 0.45s ease both;
+  animation: pl-fadein 0.55s ease both;
 }
 @keyframes pl-stroke {
   to {
@@ -262,15 +132,12 @@ html.pl-lock {
   stroke-width: 1;
   stroke-linecap: butt;
 }
+/* grafismo de plano: cota / escala / norte (mismo acento petróleo que las puertas) */
 .pl-dim {
   fill: none;
   stroke: var(--petrol);
   stroke-width: 0.7;
   stroke-linecap: butt;
-}
-.pl-fillink {
-  fill: var(--ink);
-  stroke: none;
 }
 .pl-t {
   font-family: var(--font-mono);
@@ -279,16 +146,6 @@ html.pl-lock {
 }
 .pl-t-ink {
   fill: var(--ink);
-}
-.pl-t-dim {
-  fill: var(--petrol);
-}
-
-@media (max-width: 640px) {
-  .pl-hud {
-    font-size: 0.6rem;
-    top: -1.4rem;
-  }
 }
 
 /* accesibilidad: si se prefiere menos movimiento, no se muestra el preloader */

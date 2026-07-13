@@ -47,14 +47,18 @@ no CTA con recuadro).
 ### Preloader (sólo home)
 `src/components/Preloader.astro` + `src/styles/preloader.css`, montado en `BaseLayout`
 sólo cuando `immersive` (la home), como primer hijo del `<body>`.
-- Overlay a pantalla completa (fondo `--paper`) donde una **planta arquitectónica** en
-  hardline se **dibuja trazo por trazo** (stroke-dashoffset por elemento con `pathLength=1`):
-  fase 1 contorno + cotas, fase 2 tabiques/aberturas (puertas con barrido, ventanas),
-  fase 3 mobiliario, fase 4 norte/escala/carátula. Minimalista (sin nombres de ambiente
-  ni m², sin marcas de esquina): muros a doble línea (cap `butt`, sin puntitos en el
-  arranque de cada trazo), puertas cuyo barrido no pisa el mobiliario, HUD mono con
-  contador. Al completar el dibujo hace **fade out lento** (~1,1 s) y queda el hero (el
-  "21" ya girando en 3D detrás).
+- Overlay a pantalla completa (fondo `--paper`, con los mismos **ghost "21"** tenues del
+  hero detrás — `.pl-ghost`, empalman al hacer fade) donde una **planta arquitectónica** en
+  hardline (trazos finos y suaves en tono `--ink-soft`, tamaño contenido) se **dibuja trazo
+  por trazo** (stroke-dashoffset por elemento con `pathLength=1`): fase 1 contorno + cotas,
+  fase 2 tabiques/aberturas (puertas con barrido, ventanas), fase 3 mobiliario (aparece con
+  **fade**, evita los puntitos que dejan las formas cerradas al dibujarse), fase 4
+  norte/escala/carátula. Minimalista: sin rótulos de ambiente ni m², sin marcas de esquina,
+  sin HUD; muros a doble línea con cap `butt`. Al completar el dibujo se mantiene **~0,6 s** y
+  hace la **transición "swap en Z"**: la lámina retrocede en Z y se desvanece mientras
+  **"Estudio 21" llega desde el fondo girando** (`.pl-brand`, mismo tamaño/posición que el
+  hero — clamp 22rem) y se asienta; el overlay hace **cross-fade** al hero real (el "21" ya
+  girando en 3D). Fases del cierre en el script: `is-transition` (retroceso + llegada) → `is-done`.
 - El script del componente asigna los delays escalonados por fase, bloquea el scroll
   (`html.pl-lock`) y cierra con `is-done`. Robustez: si la pestaña carga oculta espera a
   ser visible (rAF/animaciones están pausadas en background); `<noscript>` lo oculta sin

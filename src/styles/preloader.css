@@ -23,7 +23,9 @@
   justify-content: center;
   padding: clamp(2.2rem, 6vw, 4rem);
   opacity: 1;
-  transition: opacity 1.1s ease;
+  perspective: 1300px;
+  perspective-origin: 50% 46%;
+  transition: opacity 0.8s ease;
 }
 .preloader.is-done {
   opacity: 0;
@@ -36,13 +38,147 @@ html.pl-lock {
 
 .pl-sheet {
   position: relative;
-  width: min(92vw, 1060px);
+  z-index: 1;
+  width: min(68vw, 760px);
 }
 .pl-plan {
   display: block;
   width: 100%;
   height: auto;
   overflow: visible;
+}
+
+/* ghost "21" del fondo — mismo lenguaje que el hero (.lbg-ghost): quedan detrás
+   del plano mientras se dibuja y empalman con los del hero al hacer fade. */
+.pl-ghost {
+  position: absolute;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.8;
+  user-select: none;
+  pointer-events: none;
+}
+.pl-ghost-1 {
+  font-size: min(52vw, 46rem);
+  top: -8vh;
+  right: -4vw;
+  color: var(--paper-deep);
+}
+.pl-ghost-2 {
+  font-size: min(24vw, 18rem);
+  bottom: -6vh;
+  left: -3vw;
+  color: var(--line);
+}
+
+/* ---- transición plano → 21 (opción "swap en Z") ---- */
+/* el plano (la lámina) retrocede en Z y se desvanece */
+.preloader.is-transition .pl-sheet {
+  animation: pl-recede 0.9s cubic-bezier(0.5, 0, 0.2, 1) forwards;
+}
+@keyframes pl-recede {
+  to {
+    transform: translateZ(-520px) scale(0.72);
+    opacity: 0;
+  }
+}
+/* "Estudio 21" centrado como en el hero (mismo tamaño/posición), llega girando */
+.pl-brand {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
+  text-align: center;
+  pointer-events: none;
+  perspective: 1000px;
+}
+.pb-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  opacity: 0;
+}
+.pb-eyebrow::before {
+  content: '';
+  width: 1.6rem;
+  height: 1px;
+  background: var(--petrol);
+}
+.pb-wm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.06em;
+  transform-style: preserve-3d;
+  opacity: 0;
+}
+.pb-word {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.55rem, 5vw, 3.3rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--ink);
+}
+.pb-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(7.7rem, 28.5vw, 22rem);
+  line-height: 0.82;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+.pb-dim {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  opacity: 0;
+}
+.preloader.is-transition .pb-wm {
+  animation:
+    pl-arrive 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+    pl-spin 18s linear 0.9s infinite;
+}
+.preloader.is-transition .pb-eyebrow,
+.preloader.is-transition .pb-dim {
+  animation: pl-fadein 0.6s ease 0.55s forwards;
+}
+@keyframes pl-arrive {
+  0% {
+    opacity: 0;
+    transform: translateZ(-460px) rotateY(80deg);
+    filter: blur(3px);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateZ(0) rotateY(0deg);
+    filter: blur(0);
+  }
+}
+@keyframes pl-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(-360deg);
+  }
 }
 
 /* HUD mono arriba de la hoja (marca + contador) */
@@ -96,40 +232,40 @@ html.pl-lock {
 /* ---- pesos de línea (jerarquía de dibujo arquitectónico) ---- */
 .pl-wall {
   fill: none;
-  stroke: var(--ink);
-  stroke-width: 2.4;
+  stroke: var(--ink-soft);
+  stroke-width: 1.6;
   stroke-linejoin: round;
   stroke-linecap: butt;
 }
 .pl-part {
   fill: none;
-  stroke: var(--ink);
-  stroke-width: 2;
+  stroke: var(--ink-soft);
+  stroke-width: 1.2;
   stroke-linecap: butt;
 }
 .pl-thin {
   fill: none;
-  stroke: var(--ink-soft);
-  stroke-width: 1.1;
+  stroke: var(--concrete);
+  stroke-width: 0.8;
   stroke-linecap: butt;
 }
 .pl-fur {
   fill: none;
   stroke: var(--concrete);
-  stroke-width: 1.1;
+  stroke-width: 0.8;
   stroke-linejoin: round;
   stroke-linecap: butt;
 }
 .pl-door {
   fill: none;
   stroke: var(--petrol);
-  stroke-width: 1.3;
+  stroke-width: 1;
   stroke-linecap: butt;
 }
 .pl-dim {
   fill: none;
   stroke: var(--petrol);
-  stroke-width: 0.9;
+  stroke-width: 0.7;
   stroke-linecap: butt;
 }
 .pl-fillink {

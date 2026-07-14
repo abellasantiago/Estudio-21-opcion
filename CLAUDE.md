@@ -86,9 +86,11 @@ sólo cuando `immersive` (la home), como primer hijo del `<body>`.
 - El "Estudio 21" gira en 3D (rotateY continuo + extra atado al scroll del hero,
   retrocede en Z y se desvanece integrándose al fondo), parallax de mouse en las capas
   `[data-depth]`, corredor de marcos que avanza en Z, rail de progreso.
-- Easter egg de blueprint "linterna" (`HeroBlueprints.astro`): **un solo plano**, a la
-  izquierda del "21" (PLANTA); se descubre pasando el mouse (dibujo tipo lápiz por
-  segmentos) y al salir queda "durmiendo" tenue. El de la fachada (derecha) se sacó.
+- Easter egg de blueprint "linterna" (`HeroBlueprints.astro`): **desactivado por ahora**
+  (import y uso comentados en `Hero.astro`, el componente y su CSS quedan intactos para
+  retomarlo). Cuando esté activo: un solo plano a la izquierda del "21" (PLANTA); se
+  descubre pasando el mouse (dibujo tipo lápiz por segmentos) y al salir queda
+  "durmiendo" tenue. El de la fachada (derecha) se sacó.
 - **`--hero-fade`** (seteado por `immersive.ts` según el scroll) desvanece al dejar el
   hero y trae de vuelta al subir: las notas mono del fondo vivo, el blueprint izquierdo,
   el eyebrow **"Arquitectura que trasciende"** (combinado con su reveal-on-scroll inicial

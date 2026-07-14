@@ -1,8 +1,9 @@
 ---
 /*
  * HeroBlueprints — easter egg: "plano" oculto que flanquea el "21" (zona
- * izquierda, PLANTA: rectángulo cerrado con ambientes, puerta con barrido,
- * baño, cocina, escalera, cota y norte). Decoración pura (aria-hidden).
+ * izquierda, PLANTA: rectángulo cerrado con ambientes, entrada con barrido,
+ * baño, cocina, living (sillón + TV), cota y norte). Decoración pura
+ * (aria-hidden).
  *
  * Se descubre TIPO LÁPIZ: sólo se dibuja la PORCIÓN de línea por la que el
  * cursor pasa por encima (cobertura por segmentos). Lo que no recorrés no
@@ -18,23 +19,28 @@ import '../styles/hero-blueprints.css';
 <!-- ZONA IZQUIERDA — planta -->
 <div class="hero-zone hero-zone-left" aria-hidden="true" data-blueprint>
   <svg class="bp-svg" viewBox="0 0 210 214" fill="none">
-    <path class="bp-draw" d="M24 24 H186 V186 H24 Z" />
+    <!-- envolvente exterior, con vano de entrada en el muro sur -->
+    <path class="bp-draw" d="M24 24 H186" />
+    <path class="bp-draw" d="M186 24 V186" />
+    <path class="bp-draw" d="M186 186 H84" />
+    <path class="bp-draw" d="M60 186 H24" />
+    <path class="bp-draw" d="M24 186 V24" />
+    <!-- entrada: hoja (recta) + barrido (arco) -->
+    <path class="bp-draw" d="M60 186 V162" />
+    <path class="bp-draw" d="M60 162 A24 24 0 0 1 84 186" />
     <!-- muro interior con vano de puerta (hueco y58–84) -->
     <path class="bp-draw" d="M116 24 V58" />
     <path class="bp-draw" d="M116 84 V104" />
     <path class="bp-draw" d="M116 104 H186" />
-    <path class="bp-draw" d="M24 128 H78 V186" />
     <!-- puerta: hoja (recta) + barrido (arco), mismo trazo que el resto -->
     <path class="bp-draw" d="M116 84 H90" />
     <path class="bp-draw" d="M116 58 A26 26 0 0 0 90 84" />
-    <!-- baño -->
-    <path class="bp-draw" d="M150 138 H178 V178 H150 Z" />
-    <path class="bp-draw" d="M150 156 H178" />
+    <!-- living: sillón + TV -->
+    <path class="bp-draw" d="M146 154 H180 V180 H146 Z" />
+    <path class="bp-draw" d="M146 172 H180" />
+    <path class="bp-draw" d="M150 106 H178 V110 H150 Z" />
     <!-- cocina (mesada en L) -->
     <path class="bp-draw" d="M32 32 H72 M32 32 V66" />
-    <!-- escalera -->
-    <path class="bp-draw" d="M88 128 V186 M108 128 V186" />
-    <path class="bp-draw" d="M88 142 H108 M88 156 H108 M88 170 H108" />
     <!-- cota inferior + norte -->
     <path class="bp-draw" d="M24 198 H186 M24 194 V202 M186 194 V202" />
     <path class="bp-draw" d="M196 30 V54 M196 30 l-4 8 M196 30 l4 8" />

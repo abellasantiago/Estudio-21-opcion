@@ -132,17 +132,20 @@ html.pl-lock {
   stroke-width: 1;
   stroke-linecap: butt;
 }
-/* grafismo de plano: cota / escala / norte (mismo acento petróleo que las puertas) */
+/* grafismo de plano: cota / escala (mismo acento petróleo que las puertas, pero
+   más claro/traslúcido para que no compita en jerarquía con el trazo de los muros) */
 .pl-dim {
   fill: none;
   stroke: var(--petrol);
   stroke-width: 0.7;
   stroke-linecap: butt;
+  opacity: 0.62;
 }
 .pl-t {
   font-family: var(--font-mono);
   fill: var(--concrete);
   letter-spacing: 0.06em;
+  opacity: 0.62;
 }
 .pl-t-ink {
   fill: var(--ink);

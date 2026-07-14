@@ -54,12 +54,18 @@ sólo cuando `immersive` (la home), como primer hijo del `<body>`.
   por elemento con `pathLength=1`, **trazo pausado** — `STROKE` 0,7 s con easing tipo lápiz):
   fase 1 contorno (envolvente a doble línea), fase 2 tabiques/aberturas (puertas con barrido,
   ventanas), fase 3 mobiliario (aparece con **fade**, evita los puntitos que dejan las formas
-  cerradas al dibujarse), fase 4 **grafismo mínimo** (cotas generales de ancho y alto, y
-  escala gráfica — acento petróleo, números mono con fade). El dibujo se percibe **capa por capa**
-  (`step`/`gap` por fase, más deliberado en contorno y grafismo; ~4 s en total).
-  Minimalista igual: **sin carátula ni rótulos de ambiente**, sin marcas de esquina, sin HUD;
-  muros a doble línea con cap `butt`. Al completar el dibujo se mantiene **~0,85 s** y hace la
-  **transición "barrida hacia arriba"** (lenta, ~1,2 s): **TODO el overlay** (papel + plano)
+  cerradas al dibujarse), fase 4 **grafismo mínimo** (cota general de ancho y de alto —
+  **en paralelo, mismo delay por índice vía `data-step`, se dibujan a la vez** — y recién
+  al terminar ambas entra la escala gráfica; acento petróleo con **opacity 0.62** para no
+  competir en jerarquía con el trazo de los muros, números mono con fade). El dibujo se
+  percibe **capa por capa** (`step`/`gap` por fase, más deliberado en contorno y grafismo;
+  ~4 s en total). Minimalista igual: **sin carátula ni rótulos de ambiente**, sin marcas de
+  esquina, sin HUD; muros a doble línea con cap `butt`. En las uniones tabique↔muro y
+  tabique↔tabique, la línea **exterior/lejana** del elemento atravesado queda continua y
+  la línea **interior/cercana** se abre justo en el ancho del tabique que entra — así no
+  hay ninguna raya cruzando entre las dos líneas del tabique y la unión se lee fundida en
+  una sola pieza, no como dos muros que se cruzan. Al completar el dibujo se mantiene
+  **~0,35 s** y hace la **transición "barrida hacia arriba"** (lenta, ~1,2 s): **TODO el overlay** (papel + plano)
   se barre subiendo como un telón (`.preloader.is-transition` con `pl-wipe-up` — `clip-path`
   `inset` que sube + leve empuje en Y) y deja ver **directamente el hero real**: el "21" que
   **ya viene girando en 3D detrás** (`immersive.ts` lo gira desde el load) **junto con sus

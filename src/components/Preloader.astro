@@ -34,16 +34,22 @@ import '../styles/preloader.css';
     >
       <!-- ===================== FASE 1 · CONTORNO ===================== -->
       <g data-ph="1">
-        <!-- envolvente: muro exterior a doble línea, con hueco de acceso al sur -->
+        <!-- envolvente: muro exterior a doble línea, con hueco de acceso al sur.
+             La línea INTERIOR queda hueca justo donde entra cada tabique (arriba,
+             a la derecha y abajo) — sin ese tramo no hay una raya cruzando entre
+             las dos líneas del tabique: el muro se lee de una sola pieza y el
+             tabique queda fundido en él, no "pegado" por encima. -->
         <path class="pl-wall pl-draw" pathLength="1" d="M162 138 H638 V412 H252 M210 412 H162 V138" />
-        <path class="pl-wall pl-draw" pathLength="1" d="M174 150 H626 V400 H252 M210 400 H174 V150" />
+        <path class="pl-wall pl-draw" pathLength="1" d="M174 150 H425 M435 150 H626 V303 M626 313 V400 H435 M425 400 H252 M210 400 H174 V150" />
       </g>
 
       <!-- ===================== FASE 2 · TABIQUES + ABERTURAS ===================== -->
       <g data-ph="2">
-        <!-- tabique vertical (social | privado), con huecos de puertas -->
+        <!-- tabique vertical (social | privado), con huecos de puertas. La línea
+             izquierda (425) es continua de punta a punta; la derecha (435) se abre
+             donde entra el tabique horizontal (303-313), por la misma razón. -->
         <path class="pl-part pl-draw" pathLength="1" d="M425 150 V165 M425 205 V320 M425 356 V400" />
-        <path class="pl-part pl-draw" pathLength="1" d="M435 150 V165 M435 205 V320 M435 356 V400" />
+        <path class="pl-part pl-draw" pathLength="1" d="M435 150 V165 M435 205 V303 M435 313 V320 M435 356 V400" />
         <!-- tabique horizontal (dormitorio | baño): corrido hacia abajo → dormitorio más amplio, baño más compacto -->
         <path class="pl-part pl-draw" pathLength="1" d="M435 303 H626" />
         <path class="pl-part pl-draw" pathLength="1" d="M435 313 H626" />
@@ -107,21 +113,23 @@ import '../styles/preloader.css';
 
       <!-- ===================== FASE 4 · GRAFISMO (COTA · ESCALA) ===================== -->
       <g data-ph="4">
-        <!-- cota general de ancho: líneas de referencia → línea de cota → marcas → número -->
-        <path class="pl-dim pl-draw" pathLength="1" d="M162 136 V104" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M638 136 V104" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M162 110 H638" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M158 114 l8 -8" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M634 114 l8 -8" />
-        <text class="pl-t pl-fade" x="400" y="105" font-size="12" text-anchor="middle">8.80</text>
+        <!-- cota general de ancho y de alto: se dibujan EN PARALELO (mismo delay
+             por índice vía data-step, ver script) — referencias → línea → marcas
+             → número, y recién cuando terminan ambas entra la escala -->
+        <path class="pl-dim pl-draw" data-step="0" pathLength="1" d="M162 136 V104" />
+        <path class="pl-dim pl-draw" data-step="1" pathLength="1" d="M638 136 V104" />
+        <path class="pl-dim pl-draw" data-step="2" pathLength="1" d="M162 110 H638" />
+        <path class="pl-dim pl-draw" data-step="3" pathLength="1" d="M158 114 l8 -8" />
+        <path class="pl-dim pl-draw" data-step="4" pathLength="1" d="M634 114 l8 -8" />
+        <text class="pl-t pl-fade" data-step="5" x="400" y="105" font-size="12" text-anchor="middle">8.80</text>
 
-        <!-- cota general de alto (izquierda): referencias → línea → marcas → número -->
-        <path class="pl-dim pl-draw" pathLength="1" d="M160 138 H140" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M160 412 H140" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M146 138 V412" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M142 142 l8 -8" />
-        <path class="pl-dim pl-draw" pathLength="1" d="M142 416 l8 -8" />
-        <text class="pl-t pl-fade" x="139" y="275" font-size="11" text-anchor="middle" transform="rotate(-90 139 275)">5.10</text>
+        <!-- cota general de alto (izquierda) -->
+        <path class="pl-dim pl-draw" data-step="0" pathLength="1" d="M160 138 H140" />
+        <path class="pl-dim pl-draw" data-step="1" pathLength="1" d="M160 412 H140" />
+        <path class="pl-dim pl-draw" data-step="2" pathLength="1" d="M146 138 V412" />
+        <path class="pl-dim pl-draw" data-step="3" pathLength="1" d="M142 142 l8 -8" />
+        <path class="pl-dim pl-draw" data-step="4" pathLength="1" d="M142 416 l8 -8" />
+        <text class="pl-t pl-fade" data-step="5" x="139" y="275" font-size="11" text-anchor="middle" transform="rotate(-90 139 275)">5.10</text>
 
         <!-- escala gráfica (abajo izquierda) -->
         <path class="pl-dim pl-draw" pathLength="1" d="M162 442 H250" />
@@ -167,7 +175,7 @@ import '../styles/preloader.css';
       pre.remove();
     } else {
       const STROKE = 0.7; // duración de cada trazo (debe coincidir con --pl-dur del CSS)
-      const HOLD = 0.85; // pausa con el plano completo antes de la barrida
+      const HOLD = 0.35; // pausa con el plano completo antes de la barrida
       const TRANS = 1.25; // duración de la barrida hacia arriba (revela el hero)
 
       // delays por fase (stagger entre trazos): dibujo pausado, más deliberado en
@@ -175,17 +183,36 @@ import '../styles/preloader.css';
       const step: Record<string, number> = { '1': 0.22, '2': 0.042, '3': 0.026, '4': 0.075 };
       const gap = 0.22; // pausa entre fases (se percibe capa por capa)
 
+      // Elementos con el mismo data-step (dentro de la misma fase) se agrupan y
+      // comparten delay: así la cota de ancho y la de alto se dibujan en paralelo
+      // (índice a índice) y recién al terminar ambas entra la escala.
       const els = Array.from(pre.querySelectorAll<SVGElement>('.pl-draw, .pl-fade'));
+      type Grupo = { ph: string; els: SVGElement[] };
+      const grupos: Grupo[] = [];
+      const indice = new Map<string, number>();
+      let uid = 0;
+      for (const el of els) {
+        const ph = el.closest('[data-ph]')?.getAttribute('data-ph') ?? '1';
+        const sync = el.getAttribute('data-step');
+        const key = ph + (sync !== null ? ':s' + sync : ':u' + uid++);
+        let idx = indice.get(key);
+        if (idx === undefined) {
+          idx = grupos.length;
+          indice.set(key, idx);
+          grupos.push({ ph, els: [] });
+        }
+        grupos[idx].els.push(el);
+      }
+
       let t = 0.06;
       let prev = '';
       let maxDelay = 0;
-      for (const el of els) {
-        const ph = el.closest('[data-ph]')?.getAttribute('data-ph') ?? '1';
-        if (prev && ph !== prev) t += gap;
-        prev = ph;
-        el.style.animationDelay = t.toFixed(3) + 's';
+      for (const g of grupos) {
+        if (prev && g.ph !== prev) t += gap;
+        prev = g.ph;
+        for (const el of g.els) el.style.animationDelay = t.toFixed(3) + 's';
         maxDelay = t;
-        t += step[ph] ?? 0.02;
+        t += step[g.ph] ?? 0.02;
       }
 
       const drawEnd = maxDelay + STROKE;

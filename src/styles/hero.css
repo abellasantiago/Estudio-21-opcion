@@ -183,21 +183,24 @@
 .ht-shadow {
   position: absolute;
   left: 50%;
-  /* la BASELINE de los dígitos cae al ~96% de la caja (line-height 0.82 deja
-     aire de descender abajo): el plano va apenas debajo de ese 96%, no del
-     borde de la caja — si no, queda un gap y el "21" parece flotar. */
-  top: 96.4%;
+  /* la BASELINE de los dígitos cae al 91,9% de la caja (medido: métricas de
+     Space Grotesk × line-height 0.82 — los dígitos no tienen descender): el
+     plano va EXACTO en esa línea, no en el borde de la caja — si no, queda un
+     gap y el "21" parece flotar en vez de apoyar. */
+  top: 92%;
   width: 185%;
   height: 62%;
   transform: translate(-50%, -50%) rotateX(90deg);
   /* el centro vertical del plano (50%) ES la línea de contacto con los dígitos:
-     banda de oclusión angosta y bien oscura justo ahí (el "21" apoya en el
-     piso) + núcleo y halo corridos hacia cámara-izquierda (luz alta desde la
-     derecha, como en la referencia: la sombra estira hacia la izquierda). */
+     oclusión de contacto MUY angosta y casi negra justo ahí (el "21" apoya en
+     el piso, sin aire entre glifo y sombra) + núcleo + halo corridos hacia
+     cámara-izquierda (luz alta desde la derecha, como en la referencia: la
+     sombra estira hacia la izquierda). */
   background:
-    radial-gradient(ellipse 48% 12% at 49% 50%, rgba(8, 7, 6, 0.68), rgba(8, 7, 6, 0) 74%),
-    radial-gradient(ellipse 40% 34% at 45% 53%, rgba(12, 11, 9, 0.5), rgba(12, 11, 9, 0) 70%),
-    radial-gradient(ellipse 70% 58% at 45% 55%, rgba(20, 19, 16, 0.38), rgba(20, 19, 16, 0) 74%);
+    radial-gradient(ellipse 46% 7% at 49.5% 50%, rgba(5, 4, 3, 0.85), rgba(5, 4, 3, 0) 68%),
+    radial-gradient(ellipse 48% 14% at 49% 50.5%, rgba(8, 7, 6, 0.6), rgba(8, 7, 6, 0) 74%),
+    radial-gradient(ellipse 40% 34% at 45% 53%, rgba(12, 11, 9, 0.48), rgba(12, 11, 9, 0) 70%),
+    radial-gradient(ellipse 70% 58% at 45% 55%, rgba(20, 19, 16, 0.36), rgba(20, 19, 16, 0) 74%);
   opacity: var(--shadow-pulse, 0.92);
   pointer-events: none;
 }

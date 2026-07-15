@@ -1,9 +1,11 @@
 /* ============================================================
-   HERO WIREFRAME — pabellón a un punto de fuga detrás del "21"
+   HERO WIREFRAME — pabellón a dos fugas detrás del "21"
    ------------------------------------------------------------
    Capa decorativa tenue (color --concrete, trazos con su propia
-   stroke-opacity por grupo). Se funde en los bordes con una máscara
-   radial para acoplarse al papel del hero.
+   stroke-opacity por grupo) — fondo, sin protagonismo. Se funde en
+   los bordes con una máscara radial para acoplarse al papel del
+   hero; la dispersión contra la fuga derecha la hace el propio SVG
+   (máscara con degradé horizontal, ver HeroWireframe.astro).
 
    Opacidad:
    · inmersivo → --wf-reveal (0→1, la escribe immersive.ts según el
@@ -17,13 +19,14 @@
   z-index: 0;
   pointer-events: none;
   color: var(--concrete);
-  opacity: calc(var(--wf-reveal, 0.85) * var(--hero-fade, 1));
-  -webkit-mask-image: radial-gradient(ellipse 74% 70% at 52% 50%, #000 40%, transparent 78%);
-  mask-image: radial-gradient(ellipse 74% 70% at 52% 50%, #000 40%, transparent 78%);
+  opacity: calc(var(--wf-reveal, 0.65) * var(--hero-fade, 1));
+  -webkit-mask-image: radial-gradient(ellipse 82% 74% at 47% 52%, #000 42%, transparent 82%);
+  mask-image: radial-gradient(ellipse 82% 74% at 47% 52%, #000 42%, transparent 82%);
 }
-/* con la capa inmersiva activa arranca oculto: lo revela el mouse */
+/* con la capa inmersiva activa arranca oculto: lo revela el mouse.
+   Tope 0.8 → aún revelado del todo queda de fondo, sin protagonismo. */
 html.is-immersive .hero-wireframe {
-  opacity: calc(var(--wf-reveal, 0) * var(--hero-fade, 1));
+  opacity: calc(var(--wf-reveal, 0) * var(--hero-fade, 1) * 0.8);
   will-change: transform, opacity;
 }
 

@@ -4,23 +4,21 @@
  * puntos de fuga, fondo del "21".
  *
  * En vez de dibujar "a ojo", acá hay una escena de verdad: una cámara pinhole
- * (focal F, altura de ojo EYE) y una nave modernista girada ~32° respecto del
- * plano de cuadro. De ese giro salen los DOS puntos de fuga francos:
- *   · VPR (eje longitudinal de la nave) cae EN CUADRO a la derecha del "21",
- *     sobre el horizonte bajo (tercio inferior de los dígitos);
- *   · VPL (profundidad de la nave) cae fuera de cuadro a la izquierda, cerca
- *     (≈ −650), así las cerchas de cubierta, el testero y las baldosas
- *     transversales convergen con pendiente bien visible → la segunda fuga
- *     se LEE, no es teórica.
+ * (focal F, altura de ojo EYE) y una nave girada 38° respecto del plano de
+ * cuadro. La ESQUINA de la nave (el vértice) queda detrás del "2": de ahí las
+ * líneas fugan hacia los dos lados —
+ *   · a la DERECHA la fachada larga (eje u → VPR ≈ (1500, HOR), casi en el
+ *     borde del cuadro): mucho más recorrido, y el dibujo se DISPERSA contra
+ *     la fuga con un fade propio del SVG (máscara con degradé horizontal);
+ *   · a la IZQUIERDA la fachada corta / testero (eje v → VPL ≈ (−350, HOR),
+ *     fuera de cuadro pero cerca → pendiente bien visible), recorrido corto.
  *
- * La nave corre de u=−19 m (viene hacia cámara: el tramo cercano se agranda y
- * sube saliendo por arriba-izquierda, detrás de "ESTUDIO") a u=+140 m (se
- * comprime contra VPR). El "21" tapa el tramo central. Detalle arquitectónico:
- * columnata a paso real (opacidad según distancia), segunda fila de columnas,
- * cubierta con borde + fascia, PARRILLA de techo (cerchas transversales a VPL
- * + correas longitudinales a VPR), carpinterías del vidriado (dos rieles +
- * montantes a medio vano en los tramos cercanos), zócalo, testero, baldosado
- * de piso en LAS DOS direcciones y prolongaciones tenues de boceto.
+ * Trazo arquitectónico denso pero tenue: columnata a paso real (opacidad según
+ * distancia), rieles y montantes del vidriado, cubierta con fascia, cerchas a
+ * dos cordones con montantes en los tramos cercanos, correas longitudinales,
+ * segunda fila de columnas, testero lejano, baldosado de piso en las dos
+ * direcciones y prolongaciones de boceto más allá de la esquina (salen hacia
+ * arriba-izquierda, detrás de "ESTUDIO") y de los extremos.
  *
  * En modo inmersivo aparece suavemente con el movimiento del mouse
  * (--wf-reveal, lo escribe immersive.ts) y se va con --hero-fade. Sin JS /
@@ -32,20 +30,23 @@ import '../styles/hero-wireframe.css';
 // ---- cámara y escena (unidades en metros; pantalla = viewBox 1600×900) ----
 const F = 900; // focal en px
 const CX = 800; // eje óptico (el "21" está centrado)
-const HOR = 512; // horizonte: tercio inferior de los dígitos
+const HOR = 510; // horizonte bajo: tercio inferior de los dígitos
 const EYE = 1.65; // altura del ojo
-const ALPHA = (31.9 * Math.PI) / 180; // giro de la nave → fija ambos VPs
+const ALPHA = (38 * Math.PI) / 180; // giro de la nave → fija ambos VPs
 const AX = Math.sin(ALPHA);
-const AZ = Math.cos(ALPHA); // eje longitudinal (u) → VPR ≈ (1360, HOR)
+const AZ = Math.cos(ALPHA); // fachada larga (u) → VPR ≈ (1503, HOR)
 const BX = -Math.cos(ALPHA);
-const BZ = Math.sin(ALPHA); // profundidad (v) → VPL ≈ (−647, HOR)
-const O = { x: 4.67, z: 30 }; // esquina u=0,v=0: frente de la nave, detrás del "21"
+const BZ = Math.sin(ALPHA); // fachada corta (v) → VPL ≈ (−352, HOR)
+// esquina u=0,v=0: el vértice, detrás del "2" (a 20 m → la nave queda BAJA
+// respecto de los dígitos y su línea de piso sube hacia el horizonte: mismo
+// plano de suelo que el "21", pero más atrás — fondo, sin protagonismo)
+const O = { x: -2.11, z: 20 };
 
-const H = 5.2; // altura de la nave
-const D = 7; // profundidad de la nave
+const H = 4.6; // altura de la nave
+const FASCIA = H - 0.45; // cordón inferior de fascia/cercha
 const BAY = 3.2; // paso de columnas
-const U0 = -19.2; // extremo cercano (sale de cuadro arriba-izquierda)
-const U1 = 140; // extremo lejano (testero, comprimido contra VPR)
+const UB = 36 * BAY; // largo de la fachada derecha (115,2 m → contra VPR)
+const LV = 5 * BAY; // fondo de la fachada izquierda (16 m, recorrido corto)
 
 type Sp = { x: number; y: number; z: number };
 // proyecta el punto (u,v,h) de coordenadas de la nave a pantalla
@@ -60,75 +61,110 @@ const lines: Line[] = [];
 const L = (a: Sp, b: Sp, o: number) =>
   lines.push({ d: `M${a.x} ${a.y} L${b.x} ${b.y}`, o: +o.toFixed(2) });
 
-// ---- horizontales del plano frontal (recorren toda la nave → fugan a VPR) ----
-L(pt(U0, 0, H), pt(U1, 0, H), 0.34); // borde de cubierta
-L(pt(U0, 0, H - 0.55), pt(U1, 0, H - 0.55), 0.2); // fascia
-L(pt(U0, 0, 3.35), pt(U1, 0, 3.35), 0.15); // riel alto del vidriado
-L(pt(U0, 0, 2.05), pt(U1, 0, 2.05), 0.16); // riel bajo
-L(pt(U0, 0, 0.45), pt(U1, 0, 0.45), 0.15); // zócalo
-L(pt(U0, 0, 0), pt(U1, 0, 0), 0.32); // línea de piso
+// ---- horizontales de las dos fachadas (nacen en el vértice) ----
+const RAILS: [number, number][] = [
+  [H, 0.3], // borde de cubierta
+  [FASCIA, 0.16], // fascia
+  [3.1, 0.14], // riel alto del vidriado
+  [1.95, 0.14], // riel bajo
+  [0.45, 0.13], // zócalo
+  [0, 0.28], // línea de piso
+];
+for (const [h, o] of RAILS) L(pt(0, 0, h), pt(UB, 0, h), o); // → derecha (VPR)
+for (const [h, o] of RAILS) L(pt(0, LV, h), pt(0, 0, h), o * 0.85); // → izquierda (VPL)
 
-// ---- plano de fondo ----
-L(pt(U0, D, H), pt(U1, D, H), 0.16); // cubierta de atrás
-L(pt(-6.4, D, 0), pt(U1, D, 0), 0.12); // piso de atrás
-
-// ---- parrilla de cubierta: correas longitudinales (→ VPR) ----
-L(pt(U0, D / 3, H), pt(U1, D / 3, H), 0.12);
-L(pt(U0, (2 * D) / 3, H), pt(U1, (2 * D) / 3, H), 0.12);
-
-// ---- columnata frontal (paso real; opacidad según distancia) ----
-for (let i = -6; i <= 43; i++) {
-  const u = i * BAY;
-  const a = pt(u, 0, 0);
-  const b = pt(u, 0, H);
-  L(a, b, Math.min(0.3, 0.07 + 4.5 / a.z));
+// ---- columnata de la fachada larga (paso real; opacidad según distancia) ----
+for (let i = 0; i <= 36; i++) {
+  const a = pt(i * BAY, 0, 0);
+  L(a, pt(i * BAY, 0, H), Math.min(0.26, 0.05 + 3.2 / a.z));
 }
-// segunda fila de columnas (atrás, cada tres vanos)
-for (let i = -6; i <= 43; i += 3) {
-  const u = i * BAY;
-  const a = pt(u, D, 0);
-  const b = pt(u, D, H);
-  L(a, b, Math.min(0.14, 0.04 + 2 / a.z));
-}
-
-// ---- cerchas transversales de cubierta (→ VPL: la segunda fuga se lee acá) ----
-for (let i = -6; i <= 16; i++) {
-  const u = i * BAY;
-  const a = pt(u, 0, H);
-  L(a, pt(u, D, H), Math.min(0.16, 0.05 + 2.2 / a.z));
-}
-for (let i = 18; i <= 42; i += 3) {
-  const u = i * BAY;
-  L(pt(u, 0, H), pt(u, D, H), 0.09);
-}
-
-// ---- montantes del vidriado a medio vano (sólo tramos cercanos) ----
-for (let i = -5; i <= 7; i++) {
+// montantes del vidriado a medio vano (se van rarificando con la distancia)
+for (let i = 0; i <= 24; i++) {
   const u = (i + 0.5) * BAY;
-  L(pt(u, 0, 0.45), pt(u, 0, 3.35), 0.09);
+  const a = pt(u, 0, 0.45);
+  L(a, pt(u, 0, 3.1), Math.min(0.08, 0.015 + 0.8 / a.z));
 }
 
-// ---- testero (extremo lejano) ----
-L(pt(U1, 0, 0), pt(U1, D, 0), 0.14);
-L(pt(U1, 0, H), pt(U1, D, H), 0.14);
-L(pt(U1, D, 0), pt(U1, D, H), 0.14);
+// ---- columnata de la fachada corta (izquierda) + sus montantes ----
+for (let j = 1; j <= 5; j++) {
+  const a = pt(0, j * BAY, 0);
+  L(a, pt(0, j * BAY, H), Math.min(0.2, 0.04 + 2.4 / a.z));
+}
+for (let j = 0; j <= 4; j++) {
+  const v = (j + 0.5) * BAY;
+  L(pt(0, v, 0.45), pt(0, v, 3.1), 0.07);
+}
+
+// ---- plano de fondo (lado lejano de la nave, v=LV) ----
+L(pt(0, LV, H), pt(UB, LV, H), 0.12); // cubierta de atrás
+L(pt(0, LV, 3.1), pt(UB, LV, 3.1), 0.07); // riel alto de atrás
+L(pt(0, LV, 0), pt(UB, LV, 0), 0.09); // piso de atrás
+for (let i = 0; i <= 36; i += 3) {
+  const a = pt(i * BAY, LV, 0);
+  L(a, pt(i * BAY, LV, H), Math.min(0.09, 0.02 + 1.2 / a.z));
+}
+
+// ---- cubierta: cerchas transversales (→ VPL) + correas longitudinales (→ VPR) ----
+for (let i = 0; i <= 36; i++) {
+  if (i > 18 && i % 2 === 1) continue; // contra la fuga se rarifican
+  const a = pt(i * BAY, 0, H);
+  L(a, pt(i * BAY, LV, H), Math.min(0.13, 0.035 + 1.5 / a.z));
+}
+for (let k = 1; k <= 3; k++) {
+  L(pt(0, (k * LV) / 4, H), pt(UB, (k * LV) / 4, H), 0.1);
+}
+// cerchas cercanas a dos cordones: cordón inferior + montantes de alma
+for (let i = 1; i <= 6; i++) {
+  const u = i * BAY;
+  L(pt(u, 0, FASCIA), pt(u, LV, FASCIA), 0.06);
+  for (let k = 1; k <= 3; k++) {
+    const v = (k * LV) / 4;
+    L(pt(u, v, FASCIA), pt(u, v, H), 0.06);
+  }
+}
+
+// ---- testero lejano (u=UB; la máscara lo termina de dispersar) ----
+L(pt(UB, 0, H), pt(UB, LV, H), 0.1);
+L(pt(UB, 0, 0), pt(UB, LV, 0), 0.09);
+L(pt(UB, LV, 0), pt(UB, LV, H), 0.08);
 
 // ---- baldosado de piso delante de la nave (dos direcciones = dos fugas) ----
-for (let j = 1; j <= 4; j++) {
-  L(pt(U0, -2 * j, 0), pt(U1 * 0.75, -2 * j, 0), 0.15 - j * 0.02);
+for (let j = 1; j <= 3; j++) {
+  L(pt(-6, -2 * j, 0), pt(90, -2 * j, 0), 0.13 - j * 0.03);
 }
-for (let i = -2; i <= 7; i++) {
-  const u = i * 6.4;
-  L(pt(u, -8, 0), pt(u, 0, 0), 0.1);
+for (let i = -1; i <= 10; i++) {
+  const a = pt(i * 6.4, -6, 0);
+  L(a, pt(i * 6.4, 0, 0), Math.min(0.09, 0.02 + 0.9 / a.z));
 }
 
-// ---- prolongaciones de boceto más allá del testero ----
-L(pt(U1, 0, H), pt(U1 + 70, 0, H), 0.09);
-L(pt(U1, 0, 0), pt(U1 + 70, 0, 0), 0.08);
+// ---- prolongaciones de boceto ----
+// hacia atrás de la esquina (vienen hacia cámara: salen arriba-izquierda,
+// detrás de "ESTUDIO" — como trazos de construcción del dibujo)
+for (const h of [H, 3.1, 0]) L(pt(-12, 0, h), pt(0, 0, h), 0.08);
+// más allá del testero derecho (la fuga sigue y se dispersa con el fade)
+L(pt(UB, 0, H), pt(UB + 70, 0, H), 0.07);
+L(pt(UB, 0, 0), pt(UB + 70, 0, 0), 0.07);
+// más allá del fondo izquierdo
+L(pt(0, LV + 8, H), pt(0, LV, H), 0.06);
+L(pt(0, LV + 8, 0), pt(0, LV, 0), 0.06);
 ---
 
 <div class="hero-wireframe" aria-hidden="true" data-wireframe data-depth="0.07">
   <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {lines.map((l) => <path d={l.d} stroke-opacity={l.o} />)}
+    <defs>
+      <!-- dispersión contra la fuga derecha: el dibujo se apaga de a poco
+           mucho antes del VPR (≈1503) → fade out bien lejano -->
+      <linearGradient id="wf-fade-vpr" gradientUnits="userSpaceOnUse" x1="1000" y1="0" x2="1400" y2="0">
+        <stop offset="0" stop-color="#fff" />
+        <stop offset="0.55" stop-color="#777" />
+        <stop offset="1" stop-color="#000" />
+      </linearGradient>
+      <mask id="wf-fade">
+        <rect x="0" y="0" width="1600" height="900" fill="url(#wf-fade-vpr)" />
+      </mask>
+    </defs>
+    <g mask="url(#wf-fade)">
+      {lines.map((l) => <path d={l.d} stroke-opacity={l.o} />)}
+    </g>
   </svg>
 </div>

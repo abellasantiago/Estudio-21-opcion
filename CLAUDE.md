@@ -94,31 +94,38 @@ sólo cuando `immersive` (la home), como primer hijo del `<body>`.
   `--ink` plano). Dígitos casi tocándose (letter-spacing −0.045em), extrusión 38px /
   16 capas. "Estudio" en peso 700, mismo material.
 - **Sombra proyectada** (`.ht-shadow`): plano acostado (`rotateX(90°)`) **sobre la
-  baseline real de los dígitos** (cae al ~96% de la caja — line-height 0.82 deja aire
-  de descender abajo; anclar el plano al borde de la caja dejaba un gap y el "21"
-  parecía flotar), **dentro del bloque preserve-3d** → gira en el piso junto con el
-  "21", se acorta/alarga con la perspectiva y retrocede/desvanece con él. Triple degradé
-  radial: **banda de oclusión angosta y oscura sobre la línea de contacto** (el "21" se
-  lee apoyado en el piso) + núcleo + halo corridos hacia cámara-izquierda.
-  `--shadow-pulse` (motor) la respira según el ángulo (de canto proyecta menos).
-  Funciona también en el fallback (la rota la animación CSS `hero-spin-y`).
+  baseline real de los dígitos** (cae al **91,9% de la caja, medido** — métricas de
+  Space Grotesk × line-height 0.82, los dígitos no tienen descender; el plano va en
+  `top: 92%`: cualquier valor más abajo deja un gap y el "21" parece flotar),
+  **dentro del bloque preserve-3d** → gira en el piso junto con el "21", se
+  acorta/alarga con la perspectiva y retrocede/desvanece con él. Cuádruple degradé
+  radial: **oclusión de contacto muy angosta y casi negra pegada a la línea de
+  apoyo** (el "21" se lee APOYADO, sin aire entre glifo y sombra) + banda de
+  oclusión + núcleo + halo corridos hacia cámara-izquierda. `--shadow-pulse` (motor)
+  la respira según el ángulo (de canto proyecta menos). Funciona también en el
+  fallback (la rota la animación CSS `hero-spin-y`).
 - **Nave wireframe** (`HeroWireframe.astro` + `hero-wireframe.css`): pabellón vidriado
   en wireframe de fondo del "21", con **proyección 3D real** calculada en build (cámara
-  pinhole — focal, altura de ojo — y nave girada ~32° respecto del plano de cuadro → dos
-  puntos de fuga francos): VPR (eje longitudinal) en cuadro a la derecha sobre un
-  **horizonte bajo** (tercio inferior de los dígitos); VPL (profundidad) fuera de cuadro
-  cerca (≈ −650), así cerchas, testero y baldosas transversales convergen con pendiente
-  bien visible. La nave corre de u=−19 m (viene hacia cámara: el tramo cercano se
-  agranda y sube saliendo por arriba-izquierda, detrás de "ESTUDIO") a u=+140 m
-  (comprimida contra VPR); el "21" tapa el tramo central. Detalle: columnata a paso real
-  con opacidad según distancia, segunda fila de columnas, borde de cubierta + fascia,
-  parrilla de techo (cerchas a VPL + correas a VPR), dos rieles de vidriado + montantes
-  a medio vano en tramos cercanos, zócalo, testero, baldosado de piso en las dos
-  direcciones y prolongaciones de boceto. Tenue (`--concrete`, máscara radial en
-  bordes). En inmersivo **se revela con el recorrido acumulado del mouse**
-  (`--wf-reveal`, smoothstep + lerp, lo escribe el motor) y se va con `--hero-fade`; en
-  fallback queda visible estático; **oculto en <900px** (el recorte lo magnificaba
-  sobre los textos).
+  pinhole — focal, altura de ojo — y nave girada 38° respecto del plano de cuadro → dos
+  puntos de fuga francos). **La ESQUINA de la nave (el vértice) queda detrás del "2"**
+  (viewBox ≈ x 705) y de ahí fuga hacia los dos lados: a la **derecha** la fachada
+  larga (36 vanos → VPR ≈ (1503, HOR), casi en el borde) con **mucho más recorrido**,
+  que se **dispersa con un fade propio del SVG** (máscara `wf-fade` con degradé
+  horizontal 1000→1400, se traga el testero — fade out bien lejano); a la
+  **izquierda** la fachada corta (5 vanos → VPL ≈ (−352, HOR), fuera de cuadro pero
+  cerca → pendiente visible), recorrido ~mitad. La nave está a **20 m** (esquina) →
+  queda **baja, en la banda media de los dígitos**, y su línea de piso sube hacia el
+  **horizonte bajo** (≈60% de la altura de los dígitos): mismo plano de suelo que el
+  "21", más atrás — fondo, sin protagonismo. Trazo denso: columnata a paso real con
+  opacidad según distancia, segunda fila de columnas, cubierta + fascia, cerchas a dos
+  cordones con montantes de alma en tramos cercanos, correas, rieles + montantes de
+  vidriado (se rarifican con la distancia), rieles del plano de fondo, zócalo,
+  baldosado de piso en las dos direcciones y prolongaciones de boceto (hacia
+  arriba-izquierda detrás de "ESTUDIO", y más allá de ambos extremos). Tenue
+  (`--concrete`, máscara radial en bordes; fallback 0.65, inmersivo tope 0.8). En
+  inmersivo **se revela con el recorrido acumulado del mouse** (`--wf-reveal`,
+  smoothstep + lerp, lo escribe el motor) y se va con `--hero-fade`; en fallback queda
+  visible estático; **oculto en <900px** (el recorte lo magnificaba sobre los textos).
 - **Textura técnica**: grano de papel (feTurbulence en data-URI, multiply, opacidad
   0.07, `.lbg-grain`) en el fondo vivo. Luz de estudio en el stage
   (`.hero-stage::before`: centro apenas más claro + viñeta sutil). Los parches de

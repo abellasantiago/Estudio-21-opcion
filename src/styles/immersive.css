@@ -105,6 +105,17 @@
   transform: scale(-1);
 }
 
+/* ---------- grano de papel (ruido fractal, multiplicado sobre el papel) ---------- */
+.lbg-grain {
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='260'%20height='260'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.8'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3CfeColorMatrix%20values='0%200%200%200%200%200%200%200%200%200%200%200%200%200%200%200%200%200%200.65%200'/%3E%3C/filter%3E%3Crect%20width='260'%20height='260'%20filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 260px 260px;
+  mix-blend-mode: multiply;
+  opacity: 0.07;
+  /* capa estática: no participa del paralaje, no necesita layer propio */
+  will-change: auto;
+}
+
 /* ---------- profundidad 3D del fondo (sólo inmersivo) ---------- */
 /* la perspectiva habilita el giro del "21" de fondo y el corredor de marcos */
 html.is-immersive .living-bg {

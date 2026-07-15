@@ -86,6 +86,43 @@ sólo cuando `immersive` (la home), como primer hijo del `<body>`.
 - El "Estudio 21" gira en 3D (rotateY continuo + extra atado al scroll del hero,
   retrocede en Z y se desvanece integrándose al fondo), parallax de mouse en las capas
   `[data-depth]`, corredor de marcos que avanza en Z, rail de progreso.
+- **Material grafito** (referencia: render de producto sobre papel): las capas del
+  extruido van de un gris cálido iluminado al fondo a casi negro al frente con
+  **oscurecimiento cuadrático** (la mayor parte del canto queda en el gris iluminado y
+  recién se funde a negro contra la cara → lateral liso y claro); la cara frontal
+  (`.ht-face`) lleva un degradé "sheen" cenital vía `background-clip:text` (fallback:
+  `--ink` plano). Dígitos casi tocándose (letter-spacing −0.045em), extrusión 38px /
+  16 capas. "Estudio" en peso 700, mismo material.
+- **Sombra proyectada** (`.ht-shadow`): plano acostado (`rotateX(90°)`) **sobre la
+  baseline real de los dígitos** (cae al ~96% de la caja — line-height 0.82 deja aire
+  de descender abajo; anclar el plano al borde de la caja dejaba un gap y el "21"
+  parecía flotar), **dentro del bloque preserve-3d** → gira en el piso junto con el
+  "21", se acorta/alarga con la perspectiva y retrocede/desvanece con él. Triple degradé
+  radial: **banda de oclusión angosta y oscura sobre la línea de contacto** (el "21" se
+  lee apoyado en el piso) + núcleo + halo corridos hacia cámara-izquierda.
+  `--shadow-pulse` (motor) la respira según el ángulo (de canto proyecta menos).
+  Funciona también en el fallback (la rota la animación CSS `hero-spin-y`).
+- **Nave wireframe** (`HeroWireframe.astro` + `hero-wireframe.css`): pabellón vidriado
+  en wireframe de fondo del "21", con **proyección 3D real** calculada en build (cámara
+  pinhole — focal, altura de ojo — y nave girada ~32° respecto del plano de cuadro → dos
+  puntos de fuga francos): VPR (eje longitudinal) en cuadro a la derecha sobre un
+  **horizonte bajo** (tercio inferior de los dígitos); VPL (profundidad) fuera de cuadro
+  cerca (≈ −650), así cerchas, testero y baldosas transversales convergen con pendiente
+  bien visible. La nave corre de u=−19 m (viene hacia cámara: el tramo cercano se
+  agranda y sube saliendo por arriba-izquierda, detrás de "ESTUDIO") a u=+140 m
+  (comprimida contra VPR); el "21" tapa el tramo central. Detalle: columnata a paso real
+  con opacidad según distancia, segunda fila de columnas, borde de cubierta + fascia,
+  parrilla de techo (cerchas a VPL + correas a VPR), dos rieles de vidriado + montantes
+  a medio vano en tramos cercanos, zócalo, testero, baldosado de piso en las dos
+  direcciones y prolongaciones de boceto. Tenue (`--concrete`, máscara radial en
+  bordes). En inmersivo **se revela con el recorrido acumulado del mouse**
+  (`--wf-reveal`, smoothstep + lerp, lo escribe el motor) y se va con `--hero-fade`; en
+  fallback queda visible estático; **oculto en <900px** (el recorte lo magnificaba
+  sobre los textos).
+- **Textura técnica**: grano de papel (feTurbulence en data-URI, multiply, opacidad
+  0.07, `.lbg-grain`) en el fondo vivo. Luz de estudio en el stage
+  (`.hero-stage::before`: centro apenas más claro + viñeta sutil). Los parches de
+  puntos matriz que hubo acá se sacaron (no gustaron).
 - Easter egg de blueprint "linterna" (`HeroBlueprints.astro`): **desactivado por ahora**
   (import y uso comentados en `Hero.astro`, el componente y su CSS quedan intactos para
   retomarlo). Cuando esté activo: un solo plano a la izquierda del "21" (PLANTA); se

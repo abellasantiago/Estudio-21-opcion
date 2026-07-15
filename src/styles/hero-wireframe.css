@@ -1,0 +1,48 @@
+/* ============================================================
+   HERO WIREFRAME — pabellón a un punto de fuga detrás del "21"
+   ------------------------------------------------------------
+   Capa decorativa tenue (color --concrete, trazos con su propia
+   stroke-opacity por grupo). Se funde en los bordes con una máscara
+   radial para acoplarse al papel del hero.
+
+   Opacidad:
+   · inmersivo → --wf-reveal (0→1, la escribe immersive.ts según el
+     recorrido del mouse) × --hero-fade (se va al scrollear);
+   · fallback / reduced-motion / sin JS → visible estático y tenue.
+   ============================================================ */
+
+.hero-wireframe {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  color: var(--concrete);
+  opacity: calc(var(--wf-reveal, 0.85) * var(--hero-fade, 1));
+  -webkit-mask-image: radial-gradient(ellipse 74% 70% at 52% 50%, #000 40%, transparent 78%);
+  mask-image: radial-gradient(ellipse 74% 70% at 52% 50%, #000 40%, transparent 78%);
+}
+/* con la capa inmersiva activa arranca oculto: lo revela el mouse */
+html.is-immersive .hero-wireframe {
+  opacity: calc(var(--wf-reveal, 0) * var(--hero-fade, 1));
+  will-change: transform, opacity;
+}
+
+.hero-wireframe svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.hero-wireframe path {
+  stroke: currentColor;
+  stroke-width: 1;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* en pantallas chicas el recorte (slice) magnifica el centro del dibujo y las
+   líneas invaden los textos → el hero mobile queda limpio, sin wireframe */
+@media (max-width: 900px) {
+  .hero-wireframe {
+    display: none;
+  }
+}

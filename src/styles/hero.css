@@ -33,6 +33,27 @@
   perspective: 1200px;
   perspective-origin: 50% 50%;
 }
+/* luz de estudio: centro apenas más claro detrás del "21" + viñeta sutil en
+   los bordes → el objeto "apoya" en un espacio con iluminación, como en foto
+   de producto. Se va con --hero-fade al scrollear. */
+.hero-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--hero-fade, 1);
+  background:
+    radial-gradient(ellipse 48% 40% at 50% 52%, rgba(252, 251, 248, 0.6), transparent 72%),
+    radial-gradient(ellipse 120% 100% at 50% 44%, transparent 58%, rgba(26, 25, 22, 0.05) 100%);
+}
+/* el wireframe (z:0) es una capa posicionada: el resto del stage se apila
+   por encima para que sus líneas no crucen los textos. */
+.hero-stage > .hero-eyebrow,
+.hero-stage > .hero-title-wrap,
+.hero-stage > .hero-dim {
+  position: relative;
+  z-index: 1;
+}
 
 .hero-eyebrow {
   justify-content: center;
@@ -94,7 +115,7 @@
 .ht-word-layer {
   display: block;
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 700;
   font-size: clamp(1.55rem, 5vw, 3.3rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -122,13 +143,63 @@
   font-weight: 700;
   font-size: clamp(7.7rem, 28.5vw, 22rem);
   line-height: 0.82;
-  letter-spacing: -0.03em;
+  /* dígitos casi tocándose, como el objeto de la referencia */
+  letter-spacing: -0.045em;
   transform: translateZ(var(--z, 0));
 }
-/* la cara del frente (última en el DOM) sostiene la caja; el resto van detrás */
-.ht-num-layer:not(:last-child) {
+/* la cara del frente (.ht-face) sostiene la caja; el resto van detrás.
+   (:not(.ht-face) y no :last-child: después de las capas viene .ht-shadow) */
+.ht-num-layer:not(.ht-face) {
   position: absolute;
   inset: 0;
+}
+
+/* ---- material de la cara frontal (grafito mate con sheen cenital) ---- */
+.ht-face {
+  color: var(--ink);
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .ht-face {
+    background-image: linear-gradient(
+      178deg,
+      #47443d 0%,
+      #23211d 30%,
+      #14130f 66%,
+      #1b1a15 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+/* ---- sombra proyectada del "21" ----
+   Plano acostado (rotateX 90°) apenas por debajo de la base de los dígitos,
+   dentro del mismo contexto preserve-3d que rota → la sombra gira en el piso
+   junto con el bloque, se acorta/alarga con la perspectiva y retrocede y se
+   desvanece con él. El degradé va corrido hacia cámara-izquierda (luz alta
+   desde atrás-derecha, como en la referencia). --shadow-pulse (immersive.ts)
+   la respira según el ángulo: de canto el volumen proyecta menos. */
+.ht-shadow {
+  position: absolute;
+  left: 50%;
+  /* la BASELINE de los dígitos cae al ~96% de la caja (line-height 0.82 deja
+     aire de descender abajo): el plano va apenas debajo de ese 96%, no del
+     borde de la caja — si no, queda un gap y el "21" parece flotar. */
+  top: 96.4%;
+  width: 185%;
+  height: 62%;
+  transform: translate(-50%, -50%) rotateX(90deg);
+  /* el centro vertical del plano (50%) ES la línea de contacto con los dígitos:
+     banda de oclusión angosta y bien oscura justo ahí (el "21" apoya en el
+     piso) + núcleo y halo corridos hacia cámara-izquierda (luz alta desde la
+     derecha, como en la referencia: la sombra estira hacia la izquierda). */
+  background:
+    radial-gradient(ellipse 48% 12% at 49% 50%, rgba(8, 7, 6, 0.68), rgba(8, 7, 6, 0) 74%),
+    radial-gradient(ellipse 40% 34% at 45% 53%, rgba(12, 11, 9, 0.5), rgba(12, 11, 9, 0) 70%),
+    radial-gradient(ellipse 70% 58% at 45% 55%, rgba(20, 19, 16, 0.38), rgba(20, 19, 16, 0) 74%);
+  opacity: var(--shadow-pulse, 0.92);
+  pointer-events: none;
 }
 
 /* sólo para lectores de pantalla (el "21" visible está aria-hidden) */

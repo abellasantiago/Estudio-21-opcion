@@ -1,32 +1,40 @@
 ---
 import '../../styles/hero.css';
 // import HeroBlueprints from '../HeroBlueprints.astro'; // easter egg oculto por ahora
+import HeroWireframe from '../HeroWireframe.astro';
 import { site } from '../../data/site';
 
 // "21" extruido: capas apiladas en Z (de lejos → al frente). El giro (rotateY)
-// las muestra como un bloque con grosor en vez de texto plano. Se generan del
-// fondo (claro) al frente (tinta) para que la cara oscura quede arriba también
-// en fallback (sin perspectiva las capas se superponen y manda el DOM order).
-const NUM_LAYERS = 12;
+// las muestra como un bloque con grosor en vez de texto plano. Material grafito
+// mate: el canto (las capas de atrás, visibles al girar) va de un gris cálido
+// iluminado en el fondo a casi negro contra la cara frontal → lee como un
+// lateral sombreado con luz cenital. La cara del frente (`face`) no lleva color
+// inline: lo pone el CSS (.ht-face), con un degradé tipo sheen si el navegador
+// soporta background-clip:text.
+const NUM_LAYERS = 16;
 const numLayers = Array.from({ length: NUM_LAYERS }, (_, i) => {
   const t = i / (NUM_LAYERS - 1); // 0 = capa más lejana, 1 = cara al frente
-  const z = -(1 - t) * 26; // px de profundidad (lejos: -26 → frente: 0)
-  const mix = (a: number, b: number) => Math.round(a + (b - a) * t);
-  // interpolar var(--line) (211,208,200) lejos → var(--ink) (26,25,22) al frente
-  const col = `rgb(${mix(211, 26)}, ${mix(208, 25)}, ${mix(200, 22)})`;
-  return { z, col };
+  const z = -(1 - t) * 38; // px de profundidad (lejos: -38 → frente: 0)
+  // oscurecimiento CUADRÁTICO (t²): la mayor parte del canto queda en el gris
+  // iluminado y recién se funde a negro contra la cara → lateral liso y claro
+  // como en la referencia, no un degradé parejo.
+  const tt = t * t;
+  const mix = (a: number, b: number) => Math.round(a + (b - a) * tt);
+  // canto: rgb(122,118,109) (grafito iluminado) lejos → rgb(30,29,25) al frente
+  const col = `rgb(${mix(122, 30)}, ${mix(118, 29)}, ${mix(109, 25)})`;
+  return { z, col, face: i === NUM_LAYERS - 1 };
 });
 
 // "Estudio" también extruido (mismo efecto que el "21", pero más chato porque
-// la palabra es más pequeña): capas apiladas en Z, de var(--line) al frente
-// var(--ink-soft) (59,57,51).
-const WORD_LAYERS = 8;
+// la palabra es más pequeña): mismo material grafito.
+const WORD_LAYERS = 9;
 const wordLayers = Array.from({ length: WORD_LAYERS }, (_, i) => {
   const t = i / (WORD_LAYERS - 1);
-  const z = -(1 - t) * 11; // menos profundidad que el "21"
-  const mix = (a: number, b: number) => Math.round(a + (b - a) * t);
-  const col = `rgb(${mix(211, 59)}, ${mix(208, 57)}, ${mix(200, 51)})`;
-  return { z, col };
+  const z = -(1 - t) * 14; // menos profundidad que el "21"
+  const tt = t * t; // mismo material grafito que el "21"
+  const mix = (a: number, b: number) => Math.round(a + (b - a) * tt);
+  const col = `rgb(${mix(122, 34)}, ${mix(118, 33)}, ${mix(109, 28)})`;
+  return { z, col, face: i === WORD_LAYERS - 1 };
 });
 ---
 
@@ -37,22 +45,36 @@ const wordLayers = Array.from({ length: WORD_LAYERS }, (_, i) => {
     <div class="hero-stage">
       {/* <HeroBlueprints /> easter egg oculto por ahora */}
 
+      <!-- pabellón wireframe a un punto de fuga, detrás del título -->
+      <HeroWireframe />
+
       <span class="eyebrow hero-eyebrow reveal">Arquitectura que trasciende</span>
 
       <div class="hero-title-wrap" data-depth="0.12">
         <h1 class="hero-title" data-immersive-title>
           <span class="ht-word" aria-hidden="true">
             <span class="ht-word-3d">
-              {wordLayers.map((l) => (
-                <span class="ht-word-layer" style={`--z:${l.z}px; color:${l.col}`}>Estudio</span>
-              ))}
+              {wordLayers.map((l) =>
+                l.face ? (
+                  <span class="ht-word-layer ht-face" style={`--z:${l.z}px`}>Estudio</span>
+                ) : (
+                  <span class="ht-word-layer" style={`--z:${l.z}px; color:${l.col}`}>Estudio</span>
+                ),
+              )}
             </span>
           </span>
           <span class="ht-num" aria-hidden="true">
             <span class="ht-num-3d">
-              {numLayers.map((l) => (
-                <span class="ht-num-layer" style={`--z:${l.z}px; color:${l.col}`}>21</span>
-              ))}
+              {numLayers.map((l) =>
+                l.face ? (
+                  <span class="ht-num-layer ht-face" style={`--z:${l.z}px`}>21</span>
+                ) : (
+                  <span class="ht-num-layer" style={`--z:${l.z}px; color:${l.col}`}>21</span>
+                ),
+              )}
+              <!-- sombra proyectada: plano horizontal bajo los dígitos, DENTRO
+                   del bloque preserve-3d → rota en el piso junto con el "21" -->
+              <span class="ht-shadow"></span>
             </span>
           </span>
           <span class="sr-only">Estudio 21</span>

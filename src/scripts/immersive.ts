@@ -50,6 +50,8 @@ export function initImmersive(): void {
   // (clase `past-hero`), no este motor → aparece aunque esta capa no arrancara.
   const railFill = document.querySelector<HTMLElement>('[data-rail-fill]');
   const scrollHint = document.querySelector<HTMLElement>('[data-scroll-hint]');
+  // pabellón wireframe del hero: se revela con el recorrido del mouse
+  const wireframe = document.querySelector<HTMLElement>('[data-wireframe]');
 
   const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)');
   const fineMq = window.matchMedia('(pointer: fine)');
@@ -63,6 +65,7 @@ export function initImmersive(): void {
   const CORRIDOR_DEPTH = 720; // px que avanza el corredor de marcos en el descenso
   const MOUSE_RANGE = 26; // px máx de desplazamiento por paralaje de mouse
   const DRIFT_SPEED = 0.00016; // velocidad de la deriva autónoma del fondo vivo
+  const WF_TRAVEL = 1300; // px de recorrido de mouse para revelar el wireframe del todo
 
   let parallax: Parallax[] = [];
   let raf = 0;
@@ -75,6 +78,13 @@ export function initImmersive(): void {
   let tmx = 0;
   let tmy = 0;
   let angle = 0;
+
+  // revelado del wireframe: recorrido acumulado del cursor → opacidad
+  let wfTravel = 0;
+  let wfReveal = 0;
+  let wfApplied = -1;
+  let lastClientX: number | null = null;
+  let lastClientY = 0;
 
   function collect(): void {
     parallax = Array.from(document.querySelectorAll<HTMLElement>('[data-depth]')).map((el) => ({
@@ -90,6 +100,12 @@ export function initImmersive(): void {
   function onMouse(e: MouseEvent): void {
     tmx = (e.clientX / window.innerWidth) * 2 - 1;
     tmy = (e.clientY / window.innerHeight) * 2 - 1;
+    // acumular el recorrido (revela el wireframe de a poco, ver frame())
+    if (lastClientX !== null) {
+      wfTravel += Math.hypot(e.clientX - lastClientX, e.clientY - lastClientY);
+    }
+    lastClientX = e.clientX;
+    lastClientY = e.clientY;
   }
 
   function frame(now: number): void {
@@ -134,6 +150,13 @@ export function initImmersive(): void {
           `translateZ(${(-recede).toFixed(1)}px) ` +
           `rotateX(${(swayX + tiltX).toFixed(2)}deg) ` +
           `rotateY(${(angle + tiltY).toFixed(2)}deg)`;
+        // sombra: respira con el ángulo — de frente el bloque proyecta su
+        // huella completa, de canto (90°/270°) proyecta menos → más tenue.
+        const rad = (angle * Math.PI) / 180;
+        title.style.setProperty(
+          '--shadow-pulse',
+          (0.72 + 0.28 * Math.abs(Math.cos(rad))).toFixed(3),
+        );
         // el fade va en el padre (no en el nodo preserve-3d) — ver `titleFade`.
         // se mantiene bien visible girando y recién se desvanece al final del
         // tramo (introProgress 0.65 → 1), cuando se integra al fondo/espacio.
@@ -152,6 +175,20 @@ export function initImmersive(): void {
       // por --hero-fade desde CSS (ver .lbg-note en immersive.css).
       const heroFade = clamp(1 - scrollY / (window.innerHeight * 0.7), 0, 1);
       root.style.setProperty('--hero-fade', heroFade.toFixed(3));
+
+      // wireframe del hero: aparece suavemente con el movimiento del mouse
+      // (recorrido acumulado → smoothstep → lerp). Una vez revelado, queda.
+      if (wireframe) {
+        const t = clamp(wfTravel / WF_TRAVEL, 0, 1);
+        const target = t * t * (3 - 2 * t);
+        wfReveal = lerp(wfReveal, target, 0.035);
+        if (target - wfReveal < 0.0005) wfReveal = target;
+        const v = +wfReveal.toFixed(3);
+        if (v !== wfApplied) {
+          wfApplied = v;
+          wireframe.style.setProperty('--wf-reveal', String(v));
+        }
+      }
 
       // capas del fondo: mouse (todas) + scroll + deriva + rotateY (data-rotate)
       for (const p of parallax) {
@@ -182,6 +219,12 @@ export function initImmersive(): void {
     enabled = true;
     root.classList.add('is-immersive');
     collect();
+    // el wireframe arranca oculto: lo revela el recorrido del mouse
+    wfTravel = 0;
+    wfReveal = 0;
+    wfApplied = -1;
+    lastClientX = null;
+    wireframe?.style.setProperty('--wf-reveal', '0');
     window.addEventListener('mousemove', onMouse, { passive: true });
     running = true;
     raf = requestAnimationFrame(frame);
@@ -195,8 +238,12 @@ export function initImmersive(): void {
     window.removeEventListener('mousemove', onMouse);
     root.classList.remove('is-immersive');
     // limpiar todos los transforms/opacidades inline → fallback estático
-    if (title) title.style.transform = '';
+    if (title) {
+      title.style.transform = '';
+      title.style.removeProperty('--shadow-pulse');
+    }
     if (titleFade) titleFade.style.opacity = '';
+    wireframe?.style.removeProperty('--wf-reveal');
     if (corridor) corridor.style.transform = '';
     for (const p of parallax) p.el.style.transform = '';
     if (scrollHint) scrollHint.style.opacity = '';

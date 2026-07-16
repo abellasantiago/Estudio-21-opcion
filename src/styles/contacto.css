@@ -8,7 +8,9 @@
 .contact-rows{margin-top:clamp(2.6rem,5vw,4rem);border-top:1px solid rgba(255,255,255,.16);position:relative;z-index:2}
 .crow{display:grid;grid-template-columns:11rem 1fr auto;gap:1rem;align-items:center;padding:1.4rem 0;border-bottom:1px solid rgba(255,255,255,.12)}
 .crow .ck{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--concrete-soft)}
-.crow .cv{font-family:var(--font-display);font-size:clamp(1.1rem,2vw,1.5rem);font-weight:500;letter-spacing:-.01em}
+/* min-width:0 evita que el track 1fr de la grilla se estire con el mail/dirección;
+   overflow-wrap parte esos textos largos antes que desbordar en pantallas chicas. */
+.crow .cv{font-family:var(--font-display);font-size:clamp(1.1rem,2vw,1.5rem);font-weight:500;letter-spacing:-.01em;min-width:0;overflow-wrap:anywhere}
 .crow .cv a{transition:color .25s}
 .crow .cv a:hover{color:var(--petrol-bright)}
 .crow .arrow{font-family:var(--font-mono);color:var(--concrete-soft);font-size:1.1rem;transition:transform .3s}

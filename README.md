@@ -15,9 +15,8 @@ CSS propio. Sin frameworks de UI, con JavaScript mínimo.
 
 ## Requisitos
 
-- **Node.js 20 LTS o superior** y **npm** (vienen juntos).
-  > Hoy esta máquina no tiene Node instalado. Bajalo de <https://nodejs.org>
-  > (versión LTS) y reiniciá la terminal antes de seguir.
+- **Node.js 20 LTS o superior** y **npm** (vienen juntos). Si no lo tenés,
+  bajalo de <https://nodejs.org> (versión LTS) y reiniciá la terminal.
 
 Para verificar que quedó instalado:
 
@@ -52,9 +51,10 @@ src/
 │  └─ equipo/<slug>.jpg                              (ver LEEME.md)
 ├─ components/
 │  ├─ BaseHead.astro     SEO: title/description, canonical, OG/Twitter, JSON-LD
-│  ├─ Header.astro · Footer.astro
-│  ├─ ProjectCard.astro · TeamMember.astro
-│  └─ sections/          Hero · Modelo · Proyectos · Estudio · Contacto
+│  ├─ Header.astro · Footer.astro · FloatingWhatsApp.astro · Preloader.astro
+│  ├─ ProyectosHelicoidal.astro · TeamMember.astro
+│  ├─ LivingBackground.astro · HeroWireframe.astro · ProgressRail.astro
+│  └─ sections/          Hero · Nosotros · Proyectos · Estudio · Contacto
 ├─ content/proyectos/    un .md por proyecto (datos + descripción)
 ├─ content.config.ts     colección "proyectos" + schema Zod
 ├─ data/
@@ -69,7 +69,7 @@ src/
 │  ├─ proyectos/[slug].astro detalle por proyecto (getStaticPaths)
 │  └─ 404.astro
 └─ styles/               global.css (tokens) + un .css por componente
-public/                  robots.txt, favicon.svg, og-default.svg
+public/                  robots.txt, favicon.png, apple-touch-icon.png, og-default.png
 design/estudio21-home.html   diseño original (fuente de verdad visual)
 ```
 
@@ -86,7 +86,7 @@ design/estudio21-home.html   diseño original (fuente de verdad visual)
    nombre: Terrazas de Italia
    codigo: "E21·14"
    slug: terrazas-de-italia
-   estado: en-proceso        # en-proceso | terminado
+   estado: en-proceso        # en-proceso | terminado | proximamente
    ubicacion: Montevideo
    barrio: Pocitos           # opcional
    anio: 2025
@@ -136,9 +136,9 @@ Hasta que cargues la foto, se muestra un placeholder con las iniciales.
       línea `Sitemap:` en [`public/robots.txt`](public/robots.txt) por el dominio real.
 - [ ] **Datos de proyectos:** barrio, unidades, m² y descripción de cada uno.
 - [ ] **Fotos:** portadas/galerías de proyectos y retratos del equipo.
-- [ ] **Imagen para compartir:** reemplazar `public/og-default.svg` por un
-      **PNG/JPG de 1200×630** (algunos servicios, incluido WhatsApp, no renderizan
-      SVG) y actualizar `ogImage` en [`src/data/site.ts`](src/data/site.ts).
+- [ ] **Imagen para compartir:** ya existe `public/og-default.png`; verificá que
+      sea **1200×630** y que se vea bien en WhatsApp/redes (`ogImage` en
+      [`src/data/site.ts`](src/data/site.ts) ya apunta ahí).
 - [ ] **Contacto opcional:** teléfono / WhatsApp / Instagram en `src/data/site.ts`
       (si los completás, aparecen solos en la sección de contacto).
 

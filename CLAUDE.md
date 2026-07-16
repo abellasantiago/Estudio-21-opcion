@@ -49,15 +49,19 @@ no CTA con recuadro).
 sólo cuando `immersive` (la home), como primer hijo del `<body>`.
 - Overlay a pantalla completa (fondo `--paper` **limpio** mientras se arma — sin ghosts
   propios) donde una **planta arquitectónica minimalista** en hardline
-  (trazos finos y suaves en tono `--ink-soft`, lámina contenida — `.pl-sheet` `min(56vw,
-  600px)`, `viewBox` ajustado al edificio) se **dibuja trazo por trazo** (stroke-dashoffset
+  (trazos finos y suaves en tono `--ink-soft`, lámina **chica y tenue** — `.pl-sheet`
+  `min(42vw, 430px)` con `opacity: 0.7`, para que quede como un símbolo de carga sin
+  protagonismo, `viewBox` ajustado al edificio) se **dibuja trazo por trazo** (stroke-dashoffset
   por elemento con `pathLength=1`, **trazo pausado** — `STROKE` 0,7 s con easing tipo lápiz):
   fase 1 contorno (envolvente a doble línea), fase 2 tabiques/aberturas (puertas con barrido,
   ventanas), fase 3 mobiliario (aparece con **fade**, evita los puntitos que dejan las formas
   cerradas al dibujarse), fase 4 **grafismo mínimo** (cota general de ancho y de alto —
   **en paralelo, mismo delay por índice vía `data-step`, se dibujan a la vez** — y recién
-  al terminar ambas entra la escala gráfica; acento petróleo con **opacity 0.62** para no
-  competir en jerarquía con el trazo de los muros, números mono con fade). El dibujo se
+  al terminar ambas entra la escala gráfica; **la opacidad tenue va en el grupo `.pl-graf`,
+  no en cada elemento**, para que `.pl-fade` oculte los números hasta su turno y no
+  aparezcan un instante al inicio; números mono con fade). Abajo, un **indicador de carga**
+  (`.pl-loader`): barra que se completa (`.pl-bar-fill`, `scaleX` en `--pl-load` = duración
+  del trazado, seteada por el script) + **porcentaje mono 0→100** (rAF en `run()`). El dibujo se
   percibe **capa por capa** (`step`/`gap` por fase, más deliberado en contorno y grafismo;
   ~4 s en total). Minimalista igual: **sin carátula ni rótulos de ambiente**, sin marcas de
   esquina, sin HUD; muros a doble línea con cap `butt`. En las uniones tabique↔muro y

@@ -23,6 +23,11 @@ const equipoFiles = import.meta.glob<{ default: ImageMetadata }>(
 );
 
 const isPortada = (path: string) => /\/portada\.[^/]+$/i.test(path);
+// Sólo se considera "galería" lo que respeta la convención `galeria-NN.ext`
+// (ver LEEME.md). Así, si en la carpeta queda un archivo suelto o mal nombrado
+// (ej. `interior-V2-600x400.jpg`, un duplicado `galeria-01 (2).jpg`), no se cuela
+// como foto de la galería ni ensucia el orden.
+const isGaleria = (path: string) => /\/galeria-\d+\.[^/]+$/i.test(path);
 
 function filesDeProyecto(slug: string): [string, ImageMetadata][] {
   return Object.entries(proyectoFiles)
@@ -31,18 +36,22 @@ function filesDeProyecto(slug: string): [string, ImageMetadata][] {
     .map(([path, mod]) => [path, mod.default]);
 }
 
-/** Portada del proyecto: `portada.*` si existe, si no la primera imagen de la carpeta. */
+/**
+ * Portada del proyecto: `portada.*` si existe; si no, la primera `galeria-NN.*`;
+ * y como último recurso, la primera imagen de la carpeta.
+ */
 export function getPortada(slug: string): ImageMetadata | undefined {
   const files = filesDeProyecto(slug);
   if (files.length === 0) return undefined;
   const portada = files.find(([path]) => isPortada(path));
-  return (portada ?? files[0])[1];
+  const primeraGaleria = files.find(([path]) => isGaleria(path));
+  return (portada ?? primeraGaleria ?? files[0])[1];
 }
 
-/** Galería del proyecto: todas las imágenes menos la portada, ordenadas por nombre. */
+/** Galería del proyecto: las imágenes `galeria-NN.*`, ordenadas por nombre. */
 export function getGaleria(slug: string): ImageMetadata[] {
   return filesDeProyecto(slug)
-    .filter(([path]) => !isPortada(path))
+    .filter(([path]) => isGaleria(path) && !isPortada(path))
     .map(([, img]) => img);
 }
 

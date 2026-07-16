@@ -17,3 +17,4 @@ npm-debug.log*
 # sistema / editor
 .DS_Store
 Thumbs.db
+desktop.ini

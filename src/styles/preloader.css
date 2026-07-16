@@ -37,7 +37,8 @@ html.pl-lock {
 .pl-sheet {
   position: relative;
   z-index: 1;
-  width: min(56vw, 600px);
+  width: min(42vw, 430px);
+  opacity: 0.7;
 }
 .pl-plan {
   display: block;
@@ -78,9 +79,10 @@ html.pl-lock {
   opacity: 0;
 }
 /* trazo pausado, con arranque suave y asentado al final (sensación de lápiz
-   que apoya, recorre y levanta) — coincide con STROKE del componente */
+   que apoya, recorre y levanta) — la duración debe coincidir con STROKE en
+   el script del componente */
 .is-drawing .pl-draw {
-  animation: pl-stroke var(--pl-dur, 0.7s) cubic-bezier(0.45, 0.05, 0.2, 1) both;
+  animation: pl-stroke 0.7s cubic-bezier(0.45, 0.05, 0.2, 1) both;
 }
 .is-drawing .pl-fade {
   animation: pl-fadein 0.55s ease both;
@@ -132,23 +134,76 @@ html.pl-lock {
   stroke-width: 1;
   stroke-linecap: butt;
 }
-/* grafismo de plano: cota / escala (mismo acento petróleo que las puertas, pero
-   más claro/traslúcido para que no compita en jerarquía con el trazo de los muros) */
+/* grafismo de plano: cota / escala (mismo acento petróleo que las puertas). La
+   opacidad tenue va en el GRUPO (.pl-graf), no en cada elemento: así el número
+   (`.pl-fade`) queda oculto hasta su turno y no aparece un instante al inicio. */
+.pl-graf {
+  opacity: 0.68;
+}
 .pl-dim {
   fill: none;
   stroke: var(--petrol);
   stroke-width: 0.7;
   stroke-linecap: butt;
-  opacity: 0.62;
 }
 .pl-t {
   font-family: var(--font-mono);
   fill: var(--concrete);
   letter-spacing: 0.06em;
-  opacity: 0.62;
 }
-.pl-t-ink {
-  fill: var(--ink);
+
+/* ---- indicador de carga: barra inferior que se completa + porcentaje mono ---- */
+.pl-loader {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(2.2rem, 9vh, 5rem);
+  transform: translateX(-50%);
+  width: min(62vw, 320px);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  opacity: 0; /* aparece cuando arranca el dibujo */
+}
+.is-drawing .pl-loader {
+  animation: pl-fadein 0.6s ease 0.1s both;
+}
+.pl-loader-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--concrete);
+}
+.pl-loader-pct {
+  letter-spacing: 0.1em;
+  color: var(--petrol);
+  font-variant-numeric: tabular-nums;
+}
+.pl-bar {
+  height: 2px;
+  border-radius: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+.pl-bar-fill {
+  display: block;
+  height: 100%;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: var(--petrol);
+}
+/* la barra se llena en `--pl-load` (= duración del trazado, la setea el script) */
+.is-drawing .pl-bar-fill {
+  animation: pl-fill var(--pl-load, 4s) cubic-bezier(0.35, 0, 0.25, 1) forwards;
+}
+@keyframes pl-fill {
+  to {
+    transform: scaleX(1);
+  }
 }
 
 /* accesibilidad: si se prefiere menos movimiento, no se muestra el preloader */

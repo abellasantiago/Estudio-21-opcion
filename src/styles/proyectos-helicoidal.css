@@ -276,10 +276,11 @@
   .ph.is-3d .ph-card{--cw:300px;--ch:420px}
   .ph.is-3d .ph-name{font-size:1.48rem}
   .ph.is-3d .ph-head{padding-top:calc(64px + clamp(.8rem,3vh,1.6rem))}
-  /* en mobile la barra de filtros ocupa el tope: el toggle baja a la esquina
-     inferior derecha para no pisarla (queda sobre el hint, que va centrado) */
+  /* en mobile la barra de filtros ocupa el tope: el toggle baja a una esquina
+     inferior (queda sobre el hint, que va centrado). Va a la IZQUIERDA para no
+     chocar con el botón flotante de WhatsApp (fijo abajo a la derecha). */
   .ph.is-3d .ph-sticky > .ph-viewtoggle{
-    top:auto;bottom:clamp(1rem,4vh,1.8rem);right:1rem;
+    top:auto;bottom:clamp(1rem,4vh,1.8rem);right:auto;left:1rem;
     font-size:.68rem;padding:.5rem .75rem;
   }
 }

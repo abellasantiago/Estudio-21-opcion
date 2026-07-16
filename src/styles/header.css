@@ -33,7 +33,10 @@ body.menu-open .burger span:nth-child(1){top:11px;transform:rotate(45deg)}
 body.menu-open .burger span:nth-child(2){opacity:0}
 body.menu-open .burger span:nth-child(3){top:11px;transform:rotate(-45deg)}
 
-@media(max-width:600px){
+/* El wordmark (~111px) + los 5 links (~446px) necesitan ~557px de contenido;
+   por debajo de ~760px el nav horizontal se apretuja o se solapa con el logo, así
+   que se pasa al menú hamburguesa antes de llegar a esa zona (antes: 600px). */
+@media(max-width:760px){
   .nav-links{
     position:fixed;inset:58px 0 auto 0;flex-direction:column;align-items:flex-start;
     gap:0;background:var(--paper);border-bottom:1px solid var(--line);padding:1rem var(--gutter) 1.6rem;

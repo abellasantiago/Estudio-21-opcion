@@ -8,17 +8,24 @@
  * cuadro. La ESQUINA de la nave (el vértice) queda detrás del "2": de ahí las
  * líneas fugan hacia los dos lados —
  *   · a la DERECHA la fachada larga (eje u → VPR ≈ (1500, HOR), casi en el
- *     borde del cuadro): mucho más recorrido, y el dibujo se DISPERSA contra
- *     la fuga con un fade propio del SVG (máscara con degradé horizontal);
+ *     borde del cuadro): mucho más recorrido;
  *   · a la IZQUIERDA la fachada corta / testero (eje v → VPL ≈ (−350, HOR),
  *     fuera de cuadro pero cerca → pendiente bien visible), recorrido corto.
+ * El dibujo se DISPERSA contra AMBAS fugas con un fade propio del SVG (máscara
+ * con degradé horizontal que se apaga hacia los dos extremos → ninguna
+ * terminación seca: a la derecha mucho antes del VPR, a la izquierda se traga
+ * el testero y las prolongaciones).
  *
- * Trazo arquitectónico denso pero tenue: columnata a paso real (opacidad según
- * distancia), rieles y montantes del vidriado, cubierta con fascia, cerchas a
- * dos cordones con montantes en los tramos cercanos, correas longitudinales,
- * segunda fila de columnas, testero lejano, baldosado de piso en las dos
- * direcciones y prolongaciones de boceto más allá de la esquina (salen hacia
- * arriba-izquierda, detrás de "ESTUDIO") y de los extremos.
+ * No es una jaula de alambre: el trazo lleva recursos de BOCETO de edificio —
+ *   · estructura leve: columnas cercanas a doble línea (cuerpo) con arranque
+ *     marcado en el pie;
+ *   · sombreado a lápiz (hatching, trazo 0.8): banda de fascia en ambas
+ *     fachadas, sombra de la cubierta sobre el piso interior y diagonales de
+ *     "vidrio" en algunos paños;
+ *   · marcas de terreno al pie de las fachadas.
+ * Hacia el VPL la fachada corta se ALARGA más allá del testero (todos los
+ * rieles siguen en dos tramos decrecientes + columnas extra desvaneciéndose):
+ * el dibujo nunca termina en seco a la izquierda — se disuelve en el fade.
  *
  * En modo inmersivo aparece suavemente con el movimiento del mouse
  * (--wf-reveal, lo escribe immersive.ts) y se va con --hero-fade. Sin JS /
@@ -49,17 +56,18 @@ const UB = 36 * BAY; // largo de la fachada derecha (115,2 m → contra VPR)
 const LV = 5 * BAY; // fondo de la fachada izquierda (16 m, recorrido corto)
 
 type Sp = { x: number; y: number; z: number };
+const wzOf = (u: number, v: number) => O.z + u * AZ + v * BZ;
 // proyecta el punto (u,v,h) de coordenadas de la nave a pantalla
 const pt = (u: number, v: number, h: number): Sp => {
   const wx = O.x + u * AX + v * BX;
-  const wz = O.z + u * AZ + v * BZ;
+  const wz = wzOf(u, v);
   return { x: +(CX + (F * wx) / wz).toFixed(1), y: +(HOR + (F * (EYE - h)) / wz).toFixed(1), z: wz };
 };
 
-type Line = { d: string; o: number };
+type Line = { d: string; o: number; w: number };
 const lines: Line[] = [];
-const L = (a: Sp, b: Sp, o: number) =>
-  lines.push({ d: `M${a.x} ${a.y} L${b.x} ${b.y}`, o: +o.toFixed(2) });
+const L = (a: Sp, b: Sp, o: number, w = 1) =>
+  lines.push({ d: `M${a.x} ${a.y} L${b.x} ${b.y}`, o: +o.toFixed(2), w });
 
 // ---- horizontales de las dos fachadas (nacen en el vértice) ----
 const RAILS: [number, number][] = [
@@ -95,6 +103,20 @@ for (let j = 0; j <= 4; j++) {
   L(pt(0, v, 0.45), pt(0, v, 3.1), 0.07);
 }
 
+// ---- estructura leve (boceto de edificio, no jaula de alambre) ----
+// las columnas cercanas tienen CUERPO: doble línea + arranque marcado al pie
+for (let i = 0; i <= 6; i++) {
+  const u = i * BAY;
+  const a = pt(u + 0.16, 0, 0);
+  L(a, pt(u + 0.16, 0, H), Math.min(0.15, 0.03 + 1.8 / a.z));
+  L(pt(u - 0.22, 0, 0.14), pt(u + 0.38, 0, 0.14), Math.min(0.12, 0.02 + 1.4 / a.z));
+}
+for (let j = 1; j <= 3; j++) {
+  const v = j * BAY;
+  L(pt(0, v + 0.16, 0), pt(0, v + 0.16, H), 0.1);
+  L(pt(0, v - 0.22, 0.14), pt(0, v + 0.38, 0.14), 0.08);
+}
+
 // ---- plano de fondo (lado lejano de la nave, v=LV) ----
 L(pt(0, LV, H), pt(UB, LV, H), 0.12); // cubierta de atrás
 L(pt(0, LV, 3.1), pt(UB, LV, 3.1), 0.07); // riel alto de atrás
@@ -123,6 +145,35 @@ for (let i = 1; i <= 6; i++) {
   }
 }
 
+// ---- sombreado a lápiz (hatching) ----
+// banda de fascia de la fachada larga: rayado diagonal que se rarifica y se
+// apaga con la distancia (la viga de borde se lee con materia, no hueca)
+for (let u = 0.4; u < 42; u += 0.55 * (1 + u / 16)) {
+  const a = pt(u, 0, FASCIA + 0.05);
+  L(a, pt(u + 0.34, 0, H - 0.05), Math.min(0.1, 0.02 + 1.2 / a.z), 0.8);
+}
+// banda de fascia de la fachada corta
+for (let v = 0.4; v < LV - 0.2; v += 0.55) {
+  L(pt(0, v + 0.34, FASCIA + 0.05), pt(0, v, H - 0.05), 0.07, 0.8);
+}
+// sombra que la cubierta tira sobre el piso interior, pegada a la fachada larga
+for (let u = 0.6; u < 17; u += 1.15) {
+  const a = pt(u, 0.35, 0);
+  L(a, pt(u + 0.75, 2.6, 0), Math.min(0.06, 0.012 + 0.6 / a.z), 0.8);
+}
+// diagonales de "vidrio" (convención de boceto) en algunos paños cercanos
+for (const u0 of [1.3, 4.9, 8.7, 13.2]) {
+  for (let k = 0; k < 2; k++) {
+    const a = pt(u0 + k * 0.55, 0, 1.95);
+    L(a, pt(u0 + k * 0.55 + 1.15, 0, 3.1), Math.min(0.07, 0.015 + 0.7 / a.z), 0.8);
+  }
+}
+for (const v0 of [1.6, 5.4, 9.2]) {
+  for (let k = 0; k < 2; k++) {
+    L(pt(0, v0 + k * 0.55 + 1.15, 1.95), pt(0, v0 + k * 0.55, 3.1), 0.05, 0.8);
+  }
+}
+
 // ---- testero lejano (u=UB; la máscara lo termina de dispersar) ----
 L(pt(UB, 0, H), pt(UB, LV, H), 0.1);
 L(pt(UB, 0, 0), pt(UB, LV, 0), 0.09);
@@ -137,6 +188,15 @@ for (let i = -1; i <= 10; i++) {
   L(a, pt(i * 6.4, 0, 0), Math.min(0.09, 0.02 + 0.9 / a.z));
 }
 
+// ---- marcas de terreno al pie de las fachadas (boceto) ----
+for (let u = 0.9; u < 26; u += 1.7) {
+  const a = pt(u, -0.25, 0);
+  L(a, pt(u - 0.65, -0.85, 0), Math.min(0.09, 0.018 + 0.8 / a.z), 0.8);
+}
+for (let v = 1.2; v < LV; v += 1.7) {
+  L(pt(-0.25, v, 0), pt(-0.85, v - 0.4, 0), 0.06, 0.8);
+}
+
 // ---- prolongaciones de boceto ----
 // hacia atrás de la esquina (vienen hacia cámara: salen arriba-izquierda,
 // detrás de "ESTUDIO" — como trazos de construcción del dibujo)
@@ -144,27 +204,38 @@ for (const h of [H, 3.1, 0]) L(pt(-12, 0, h), pt(0, 0, h), 0.08);
 // más allá del testero derecho (la fuga sigue y se dispersa con el fade)
 L(pt(UB, 0, H), pt(UB + 70, 0, H), 0.07);
 L(pt(UB, 0, 0), pt(UB + 70, 0, 0), 0.07);
-// más allá del fondo izquierdo
-L(pt(0, LV + 8, H), pt(0, LV, H), 0.06);
-L(pt(0, LV + 8, 0), pt(0, LV, 0), 0.06);
+// hacia el VPL el dibujo se ALARGA y se disuelve: TODOS los rieles siguen más
+// allá del testero en dos tramos cada vez más tenues, y un par de columnas
+// extra se desvanecen — el final no se ve nunca: lo termina de tragar el fade
+// izquierdo de la máscara
+for (const [h, o] of RAILS) {
+  L(pt(0, LV + 4.5, h), pt(0, LV, h), o * 0.5);
+  L(pt(0, LV + 9, h), pt(0, LV + 4.5, h), o * 0.28);
+}
+for (let j = 6; j <= 8; j++) {
+  L(pt(0, j * BAY, 0), pt(0, j * BAY, H), 0.16 - (j - 5) * 0.04);
+}
 ---
 
 <div class="hero-wireframe" aria-hidden="true" data-wireframe data-depth="0.07">
   <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <!-- dispersión contra la fuga derecha: el dibujo se apaga de a poco
-           mucho antes del VPR (≈1503) → fade out bien lejano -->
-      <linearGradient id="wf-fade-vpr" gradientUnits="userSpaceOnUse" x1="1000" y1="0" x2="1400" y2="0">
-        <stop offset="0" stop-color="#fff" />
-        <stop offset="0.55" stop-color="#777" />
-        <stop offset="1" stop-color="#000" />
+      <!-- dispersión contra las DOS fugas: a la derecha el dibujo se apaga de
+           a poco mucho antes del VPR (≈1503); a la izquierda se desvanece a lo
+           lejos igual (se traga el testero y las prolongaciones) → ningún
+           extremo termina seco -->
+      <linearGradient id="wf-fade-x" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1600" y2="0">
+        <stop offset="0.145" stop-color="#000" />
+        <stop offset="0.31" stop-color="#fff" />
+        <stop offset="0.625" stop-color="#fff" />
+        <stop offset="0.875" stop-color="#000" />
       </linearGradient>
       <mask id="wf-fade">
-        <rect x="0" y="0" width="1600" height="900" fill="url(#wf-fade-vpr)" />
+        <rect x="0" y="0" width="1600" height="900" fill="url(#wf-fade-x)" />
       </mask>
     </defs>
     <g mask="url(#wf-fade)">
-      {lines.map((l) => <path d={l.d} stroke-opacity={l.o} />)}
+      {lines.map((l) => <path d={l.d} stroke-opacity={l.o} stroke-width={l.w} />)}
     </g>
   </svg>
 </div>

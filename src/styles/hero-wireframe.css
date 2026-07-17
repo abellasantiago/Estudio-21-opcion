@@ -2,10 +2,11 @@
    HERO WIREFRAME — pabellón a dos fugas detrás del "21"
    ------------------------------------------------------------
    Capa decorativa tenue (color --concrete, trazos con su propia
-   stroke-opacity por grupo) — fondo, sin protagonismo. Se funde en
-   los bordes con una máscara radial para acoplarse al papel del
-   hero; la dispersión contra la fuga derecha la hace el propio SVG
-   (máscara con degradé horizontal, ver HeroWireframe.astro).
+   stroke-opacity y stroke-width por path) — fondo, sin protagonismo.
+   Se funde en los bordes con una máscara radial para acoplarse al
+   papel del hero; la dispersión contra AMBAS fugas (derecha e
+   izquierda) la hace el propio SVG (máscara con degradé horizontal
+   simétrico, ver HeroWireframe.astro).
 
    Opacidad:
    · inmersivo → --wf-reveal (0→1, la escribe immersive.ts según el
@@ -37,7 +38,8 @@ html.is-immersive .hero-wireframe {
 }
 .hero-wireframe path {
   stroke: currentColor;
-  stroke-width: 1;
+  /* el grosor va por atributo en cada path (jerarquía de boceto: 1 la
+     geometría, 0.8 el rayado) — no setearlo acá: la CSS pisaría el atributo */
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
 }

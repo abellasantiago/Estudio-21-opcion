@@ -105,27 +105,44 @@ sólo cuando `immersive` (la home), como primer hijo del `<body>`.
   acorta/alarga con la perspectiva y retrocede/desvanece con él. Cuádruple degradé
   radial: **oclusión de contacto muy angosta y casi negra pegada a la línea de
   apoyo** (el "21" se lee APOYADO, sin aire entre glifo y sombra) + banda de
-  oclusión + núcleo + halo corridos hacia cámara-izquierda. `--shadow-pulse` (motor)
-  la respira según el ángulo (de canto proyecta menos). Funciona también en el
-  fallback (la rota la animación CSS `hero-spin-y`).
+  oclusión + núcleo + halo corridos **SÓLO hacia atrás: la sombra se proyecta
+  DETRÁS del "21"** (luz alta desde adelante; tras el `rotateX(90°)` la mitad
+  superior del plano es el lado lejano). Todos los degradés van **centrados en
+  x = 50%** (no se derraman a los costados de los dígitos) y **angostos** (anchos
+  ~44–52%); los centros en y < 50% (50/47,5/45/43,5%) los estiran hacia atrás.
+  Tupida: alfas altas (~0,9/0,74/0,62/0,5) y caída tardía a transparente.
+  `--shadow-pulse` (motor) la respira según el ángulo (de
+  canto proyecta menos). Funciona también en el fallback (la rota la animación CSS
+  `hero-spin-y`). El bloque `.hero-title` entero lleva `user-select: none` (el
+  "Estudio 21" visible es decorativo, `aria-hidden`; el texto real va en
+  `.sr-only`): no se puede seleccionar ni arrastrar.
 - **Nave wireframe** (`HeroWireframe.astro` + `hero-wireframe.css`): pabellón vidriado
   en wireframe de fondo del "21", con **proyección 3D real** calculada en build (cámara
   pinhole — focal, altura de ojo — y nave girada 38° respecto del plano de cuadro → dos
   puntos de fuga francos). **La ESQUINA de la nave (el vértice) queda detrás del "2"**
   (viewBox ≈ x 705) y de ahí fuga hacia los dos lados: a la **derecha** la fachada
-  larga (36 vanos → VPR ≈ (1503, HOR), casi en el borde) con **mucho más recorrido**,
-  que se **dispersa con un fade propio del SVG** (máscara `wf-fade` con degradé
-  horizontal 1000→1400, se traga el testero — fade out bien lejano); a la
-  **izquierda** la fachada corta (5 vanos → VPL ≈ (−352, HOR), fuera de cuadro pero
-  cerca → pendiente visible), recorrido ~mitad. La nave está a **20 m** (esquina) →
-  queda **baja, en la banda media de los dígitos**, y su línea de piso sube hacia el
-  **horizonte bajo** (≈60% de la altura de los dígitos): mismo plano de suelo que el
-  "21", más atrás — fondo, sin protagonismo. Trazo denso: columnata a paso real con
-  opacidad según distancia, segunda fila de columnas, cubierta + fascia, cerchas a dos
-  cordones con montantes de alma en tramos cercanos, correas, rieles + montantes de
-  vidriado (se rarifican con la distancia), rieles del plano de fondo, zócalo,
-  baldosado de piso en las dos direcciones y prolongaciones de boceto (hacia
-  arriba-izquierda detrás de "ESTUDIO", y más allá de ambos extremos). Tenue
+  larga (36 vanos → VPR ≈ (1503, HOR), casi en el borde) con **mucho más recorrido**;
+  a la **izquierda** la fachada corta (5 vanos → VPL ≈ (−352, HOR), fuera de cuadro
+  pero cerca → pendiente visible), recorrido ~mitad. El dibujo se **dispersa contra
+  AMBAS fugas** con un fade propio del SVG (máscara `wf-fade` con degradé horizontal
+  simétrico: blanco entre x 496–1000, negro en ≤232 y ≥1400 — ningún extremo termina
+  seco). La nave está a **20 m** (esquina) → queda **baja, en la banda media de los
+  dígitos**, y su línea de piso sube hacia el **horizonte bajo** (≈60% de la altura
+  de los dígitos): mismo plano de suelo que el "21", más atrás — fondo, sin
+  protagonismo. Trazo denso: columnata a paso real con opacidad según distancia,
+  segunda fila de columnas, cubierta + fascia, cerchas a dos cordones con montantes
+  de alma en tramos cercanos, correas, rieles + montantes de vidriado (se rarifican
+  con la distancia), rieles del plano de fondo, zócalo, baldosado de piso delante
+  de la nave en las dos direcciones y prolongaciones de boceto (hacia
+  arriba-izquierda detrás de "ESTUDIO", y más allá del testero derecho). Hacia el
+  **VPL la fachada corta se alarga** más allá del testero (todos los rieles siguen
+  en dos tramos decrecientes + columnas extra desvaneciéndose): el dibujo **no
+  termina en seco a la izquierda — se disuelve** contra el fade.
+  Recursos de **boceto de edificio** (trazo 0.8 el rayado; el `stroke-width` va por
+  atributo en cada path — no ponerlo en la CSS, lo pisaría): columnas cercanas a
+  **doble línea** con arranque marcado al pie, **hatching** a lápiz en la banda de
+  fascia de ambas fachadas, sombra de la cubierta rayada sobre el piso interior,
+  diagonales de "vidrio" en paños cercanos y marcas de terreno al pie. Tenue
   (`--concrete`, máscara radial en bordes; fallback 0.65, inmersivo tope 0.8). En
   inmersivo **se revela con el recorrido acumulado del mouse** (`--wf-reveal`,
   smoothstep + lerp, lo escribe el motor) y se va con `--hero-fade`; en fallback queda

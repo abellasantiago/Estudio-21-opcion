@@ -87,6 +87,10 @@
   transform-style: preserve-3d;
   transform-origin: center center;
   backface-visibility: visible;
+  /* el "Estudio 21" visible es puramente decorativo (aria-hidden; el texto real
+     para lectores/copia va en .sr-only): imposible de seleccionar o arrastrar */
+  -webkit-user-select: none;
+  user-select: none;
   /* Modo base (mobile / sin-JS): el "Estudio 21" gira horizontalmente
      de forma constante e infinita. En modo inmersivo lo maneja el motor
      JS (rotateY por scroll + este mismo giro continuo); ver override abajo. */
@@ -177,9 +181,10 @@
    Plano acostado (rotateX 90°) apenas por debajo de la base de los dígitos,
    dentro del mismo contexto preserve-3d que rota → la sombra gira en el piso
    junto con el bloque, se acorta/alarga con la perspectiva y retrocede y se
-   desvanece con él. El degradé va corrido hacia cámara-izquierda (luz alta
-   desde atrás-derecha, como en la referencia). --shadow-pulse (immersive.ts)
-   la respira según el ángulo: de canto el volumen proyecta menos. */
+   desvanece con él. El degradé va corrido hacia ATRÁS-izquierda (luz alta
+   desde adelante-derecha): la sombra se proyecta DETRÁS del "21" y asoma por
+   los costados de los dígitos. --shadow-pulse (immersive.ts) la respira según
+   el ángulo: de canto el volumen proyecta menos. */
 .ht-shadow {
   position: absolute;
   left: 50%;
@@ -191,16 +196,18 @@
   width: 185%;
   height: 62%;
   transform: translate(-50%, -50%) rotateX(90deg);
-  /* el centro vertical del plano (50%) ES la línea de contacto con los dígitos:
-     oclusión de contacto MUY angosta y casi negra justo ahí (el "21" apoya en
-     el piso, sin aire entre glifo y sombra) + núcleo + halo corridos hacia
-     cámara-izquierda (luz alta desde la derecha, como en la referencia: la
-     sombra estira hacia la izquierda). */
+  /* el centro vertical del plano (50%) ES la línea de contacto con los dígitos;
+     tras el rotateX(90°) la mitad SUPERIOR del plano queda del lado LEJANO.
+     Oclusión de contacto MUY angosta y casi negra justo en la línea de apoyo
+     (el "21" apoya en el piso, sin aire entre glifo y sombra) + núcleo + halo
+     corridos SÓLO hacia atrás (centrados en x = 50% → no se derrama a los
+     costados del "21"; los centros en y < 50% la estiran hacia atrás). Angosta
+     y tupida: alfas altas y caída tardía a transparente. */
   background:
-    radial-gradient(ellipse 46% 7% at 49.5% 50%, rgba(5, 4, 3, 0.85), rgba(5, 4, 3, 0) 68%),
-    radial-gradient(ellipse 48% 14% at 49% 50.5%, rgba(8, 7, 6, 0.6), rgba(8, 7, 6, 0) 74%),
-    radial-gradient(ellipse 40% 34% at 45% 53%, rgba(12, 11, 9, 0.48), rgba(12, 11, 9, 0) 70%),
-    radial-gradient(ellipse 70% 58% at 45% 55%, rgba(20, 19, 16, 0.36), rgba(20, 19, 16, 0) 74%);
+    radial-gradient(ellipse 44% 7% at 50% 50%, rgba(5, 4, 3, 0.9), rgba(5, 4, 3, 0) 66%),
+    radial-gradient(ellipse 45% 17% at 50% 47.5%, rgba(8, 7, 6, 0.74), rgba(8, 7, 6, 0) 70%),
+    radial-gradient(ellipse 43% 32% at 50% 45%, rgba(12, 11, 9, 0.62), rgba(12, 11, 9, 0) 68%),
+    radial-gradient(ellipse 52% 48% at 50% 43.5%, rgba(20, 19, 16, 0.5), rgba(20, 19, 16, 0) 71%);
   opacity: var(--shadow-pulse, 0.92);
   pointer-events: none;
 }

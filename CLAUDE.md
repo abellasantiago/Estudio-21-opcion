@@ -47,6 +47,13 @@ no CTA con recuadro).
 ### Preloader (sólo home)
 `src/components/Preloader.astro` + `src/styles/preloader.css`, montado en `BaseLayout`
 sólo cuando `immersive` (la home), como primer hijo del `<body>`.
+**Se muestra UNA vez por sesión del navegador** (flag `e21-preloaded` en
+`sessionStorage`): la primera carga lo dibuja; los reloads y el link "Inicio"
+(→ recarga `/`) dentro de esa sesión lo saltean y van **directo al hero**. En una
+pestaña/sesión nueva vuelve a aparecer. El **inline boot** SÓLO lee el flag (si ya
+está, oculta el overlay antes del paint — sin flash ni `pl-lock`); el flag lo
+**escribe el módulo** al arrancar el dibujo (si se seteara en el boot, el módulo lo
+leería como "ya visto" y nunca dibujaría en la primera carga).
 - Overlay a pantalla completa (fondo `--paper` **limpio** mientras se arma — sin ghosts
   propios) donde una **planta arquitectónica minimalista** en hardline
   (trazos finos y suaves en tono `--ink-soft`, lámina **chica y tenue** — `.pl-sheet`

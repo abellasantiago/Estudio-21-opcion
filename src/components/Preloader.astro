@@ -5,8 +5,11 @@
  * TODO el overlay (papel + plano) se barre HACIA ARRIBA como un telón y deja
  * ver directamente el hero real: el "21" que ya viene girando en 3D detrás
  * (con sus "21" fantasma de fondo, que aparecen recién ahí). No hay "21"
- * intermedio — no se percibe ningún cambio de un 21 a otro. Se muestra en cada
- * carga de la home.
+ * intermedio — no se percibe ningún cambio de un 21 a otro. Se muestra UNA vez
+ * por sesión del navegador (flag `e21-preloaded` en sessionStorage): la primera
+ * carga lo dibuja; los reloads y el link "Inicio" (→ recarga `/`) dentro de esa
+ * sesión lo saltean y van directo al hero. En una pestaña/sesión nueva vuelve a
+ * aparecer como "primera vez".
  *
  * El plano es tenue y contenido (no protagonista): abajo, una barra de carga que
  * se completa + un porcentaje mono dejan claro que el sitio está "cargando".
@@ -163,6 +166,17 @@ import '../styles/preloader.css';
   (function () {
     try {
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      // ¿ya se mostró en esta sesión? → saltar directo al hero, sin flash ni
+      // lock. El flag lo escribe el módulo de abajo cuando arranca el dibujo,
+      // así que acá SÓLO se lee (si lo seteáramos acá, el módulo lo leería
+      // como "ya visto" y nunca se dibujaría en la primera carga).
+      var seen = false;
+      try { seen = sessionStorage.getItem('e21-preloaded') === '1'; } catch (e) {}
+      var p0 = document.getElementById('preloader');
+      if (seen) {
+        if (p0) p0.style.display = 'none';
+        return;
+      }
       var r = document.documentElement;
       r.classList.add('pl-lock');
       // salvavidas: si el módulo no corriera (error de bundle), nunca dejar
@@ -183,11 +197,28 @@ import '../styles/preloader.css';
   const root = document.documentElement;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // ¿ya se mostró en esta sesión del navegador? (el inline boot de arriba ya lo
+  // ocultó sin flash; acá lo confirmamos para no correr el dibujo).
+  let seen = false;
+  try {
+    seen = sessionStorage.getItem('e21-preloaded') === '1';
+  } catch (e) {
+    /* storage no disponible → mostrar igual */
+  }
+
   if (pre) {
-    if (reduce) {
+    if (reduce || seen) {
       root.classList.remove('pl-lock');
       pre.remove();
     } else {
+      // marcar que ya se mostró: los reloads y el link "Inicio" (→ recarga `/`)
+      // dentro de esta sesión lo saltean y van directo al hero.
+      try {
+        sessionStorage.setItem('e21-preloaded', '1');
+      } catch (e) {
+        /* ignore */
+      }
+
       const STROKE = 0.7; // duración de cada trazo (debe coincidir con pl-stroke en preloader.css)
       const HOLD = 0.35; // pausa con el plano completo antes de la barrida
       const TRANS = 1.25; // duración de la barrida hacia arriba (revela el hero)

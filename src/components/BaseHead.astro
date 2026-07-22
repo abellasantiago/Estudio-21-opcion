@@ -1,8 +1,7 @@
 ---
 import { site } from '../data/site';
-// Preload del peso principal de Space Grotesk (titulares). El import devuelve
-// la URL con hash del .woff2 servido localmente por Fontsource.
-import sgWoff2 from '@fontsource/space-grotesk/files/space-grotesk-latin-500-normal.woff2';
+// (El preload de fuentes vive en BaseLayout: TODOS los woff2 se precargan ahí,
+// junto a sus @font-face con font-display:block — sin frame de fuente fallback.)
 
 interface Props {
   title: string;
@@ -71,8 +70,6 @@ const jsonLdBlocks = [business, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [
 <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-<!-- Fuentes: preload del titular principal + sitemap -->
-<link rel="preload" href={sgWoff2} as="font" type="font/woff2" crossorigin />
 <link rel="sitemap" href="/sitemap-index.xml" />
 
 <!-- JSON-LD -->

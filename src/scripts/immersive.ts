@@ -66,6 +66,7 @@ export function initImmersive(): void {
   const MOUSE_RANGE = 26; // px máx de desplazamiento por paralaje de mouse
   const DRIFT_SPEED = 0.00016; // velocidad de la deriva autónoma del fondo vivo
   const WF_TRAVEL = 1300; // px de recorrido de mouse para revelar el wireframe del todo
+  const RAMP_MS = 1100; // rampa de arranque: deriva/cabeceo entran de a poco (ver t0)
 
   let parallax: Parallax[] = [];
   let raf = 0;
@@ -78,6 +79,11 @@ export function initImmersive(): void {
   let tmx = 0;
   let tmy = 0;
   let angle = 0;
+  // t0 = timestamp del primer frame visible. El giro y la deriva se calculan
+  // RELATIVOS a t0 (no al reloj absoluto de la página): así el primer frame del
+  // motor coincide EXACTO con el estado que ya pintó el CSS (rotateY 0°, fondo
+  // en reposo) y no hay salto/flash al cargar — el movimiento arranca desde ahí.
+  let t0 = -1;
 
   // revelado del wireframe: recorrido acumulado del cursor → opacidad
   let wfTravel = 0;
@@ -111,6 +117,13 @@ export function initImmersive(): void {
   function frame(now: number): void {
     if (!running) return;
     if (!document.hidden) {
+      // reloj relativo + rampa de arranque (smoothstep 0→1 en RAMP_MS): la
+      // deriva del fondo y el cabeceo parten de 0 (= estado pintado por CSS)
+      // y toman su amplitud de a poco — sin "pantallazo" en el primer frame.
+      if (t0 < 0) t0 = now;
+      const t = now - t0;
+      const r = clamp(t / RAMP_MS, 0, 1);
+      const ramp = r * r * (3 - 2 * r);
       mx = lerp(mx, tmx, 0.06);
       my = lerp(my, tmy, 0.06);
       const scrollY = window.scrollY;
@@ -131,9 +144,10 @@ export function initImmersive(): void {
       }
 
       // "Estudio 21": gira horizontalmente de forma constante e infinita
-      // (giro continuo por tiempo) + un giro extra atado al scroll del hero;
-      // además retrocede en Z y se desvanece integrándose al fondo.
-      const spin = (now / SPIN_PERIOD) * 360;
+      // (giro continuo por tiempo, desde 0° — reloj relativo a t0) + un giro
+      // extra atado al scroll del hero; además retrocede en Z y se desvanece
+      // integrándose al fondo.
+      const spin = (t / SPIN_PERIOD) * 360;
       angle = spin + introProgress * TOTAL_ROTATION;
       if (title) {
         const recede = introProgress * TITLE_RECEDE;
@@ -143,7 +157,7 @@ export function initImmersive(): void {
         const idle = clamp(1 - introProgress * 2.5, 0, 1);
         // el giro horizontal ya es continuo (angle); acá sólo un cabeceo vertical
         // leve + la inclinación hacia el mouse para reforzar la profundidad.
-        const swayX = Math.sin(now * 0.0008 + 1.3) * 2.4 * idle;
+        const swayX = Math.sin(now * 0.0008 + 1.3) * 2.4 * idle * ramp;
         const tiltY = mx * 5 * idle;
         const tiltX = -my * 4 * idle;
         title.style.transform =
@@ -191,8 +205,9 @@ export function initImmersive(): void {
       }
 
       // capas del fondo: mouse (todas) + scroll + deriva + rotateY (data-rotate)
+      // (la deriva entra con la rampa: en el primer frame es 0 = posición CSS)
       for (const p of parallax) {
-        const drift = p.drift ? Math.sin(now * DRIFT_SPEED + p.phase) * p.drift : 0;
+        const drift = p.drift ? Math.sin(now * DRIFT_SPEED + p.phase) * p.drift * ramp : 0;
         const tx = mx * p.depth * MOUSE_RANGE + drift * 0.6;
         const ty = my * p.depth * MOUSE_RANGE + scrollY * p.scroll + drift;
         let t = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0)`;
@@ -219,6 +234,8 @@ export function initImmersive(): void {
     enabled = true;
     root.classList.add('is-immersive');
     collect();
+    // reloj/rampa de arranque: se re-arma en cada enable (ver frame())
+    t0 = -1;
     // el wireframe arranca oculto: lo revela el recorrido del mouse
     wfTravel = 0;
     wfReveal = 0;

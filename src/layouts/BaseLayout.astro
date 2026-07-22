@@ -1,13 +1,39 @@
 ---
-// Fuentes servidas localmente con Fontsource (sólo los pesos que usa el diseño).
-import '@fontsource/space-grotesk/400.css';
-import '@fontsource/space-grotesk/500.css';
-import '@fontsource/space-grotesk/700.css';
-import '@fontsource/inter/400.css';
-import '@fontsource/inter/500.css';
-import '@fontsource/ibm-plex-mono/400.css';
-import '@fontsource/ibm-plex-mono/500.css';
+// Fuentes servidas localmente (archivos woff2 de Fontsource, subset latin —
+// cubre todo el español), pero con las @font-face declaradas ACÁ y no vía los
+// .css del paquete. Motivo: los .css de Fontsource usan `font-display: swap` y
+// el navegador recién pide la fuente después de parsear CSS + layout → en un
+// refresh el primer paint corría con la fuente fallback del sistema y un frame
+// después entraba Space Grotesk = "pantallazo" de un 21 distinto (y fantasmas
+// distintos). Acá: `<link rel="preload">` de cada woff2 (misma URL que el
+// @font-face, arranca a bajar a los ~0 ms) + `font-display: block` (si aun así
+// no llegara al primer paint, el texto espera invisible — NUNCA pinta glifos
+// de otra fuente).
+import sg400 from '@fontsource/space-grotesk/files/space-grotesk-latin-400-normal.woff2?url';
+import sg500 from '@fontsource/space-grotesk/files/space-grotesk-latin-500-normal.woff2?url';
+import sg700 from '@fontsource/space-grotesk/files/space-grotesk-latin-700-normal.woff2?url';
+import inter400 from '@fontsource/inter/files/inter-latin-400-normal.woff2?url';
+import inter500 from '@fontsource/inter/files/inter-latin-500-normal.woff2?url';
+import mono400 from '@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2?url';
+import mono500 from '@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2?url';
 import '../styles/global.css';
+
+const fontFaces = [
+  { family: 'Space Grotesk', weight: 400, url: sg400 },
+  { family: 'Space Grotesk', weight: 500, url: sg500 },
+  { family: 'Space Grotesk', weight: 700, url: sg700 },
+  { family: 'Inter', weight: 400, url: inter400 },
+  { family: 'Inter', weight: 500, url: inter500 },
+  { family: 'IBM Plex Mono', weight: 400, url: mono400 },
+  { family: 'IBM Plex Mono', weight: 500, url: mono500 },
+];
+const fontFaceCss = fontFaces
+  .map(
+    (f) =>
+      `@font-face{font-family:'${f.family}';font-style:normal;font-weight:${f.weight};` +
+      `font-display:block;src:url(${f.url}) format('woff2')}`,
+  )
+  .join('');
 
 import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
@@ -34,6 +60,14 @@ const immersiveBoot = `(function(){try{var m=window.matchMedia;if(m&&!m('(prefer
 <!doctype html>
 <html lang="es" data-immersive-page={immersive ? '' : undefined}>
   <head>
+    <!-- fuentes: preload de cada woff2 (misma URL que su @font-face de abajo —
+         el `crossorigin` es obligatorio en preloads de fuentes, aun same-origin,
+         si no el navegador la baja DOS veces) + @font-face con font-display:block
+         → el "21" pinta directo con Space Grotesk, sin frame de fuente fallback. -->
+    {fontFaces.map((f) => (
+      <link rel="preload" as="font" type="font/woff2" href={f.url} crossorigin="anonymous" />
+    ))}
+    <style is:inline set:html={fontFaceCss} />
     <BaseHead title={title} description={description} image={image} jsonLd={jsonLd} />
     {immersive && <script is:inline set:html={immersiveBoot} />}
     <slot name="head" />

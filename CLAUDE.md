@@ -20,7 +20,15 @@ registro), no rediseñar. Todo el copy va en **español rioplatense**.
 
 - **Astro** (estático) + **TypeScript**, sin frameworks de UI, JS mínimo.
 - **CSS propio** (sin Tailwind): `src/styles/global.css` con tokens + un `.css` por componente.
-- **Fontsource** (fuentes locales woff2, sin Google Fonts CDN), `@astrojs/sitemap`, `sharp`.
+- **Fuentes locales** (archivos woff2 de Fontsource, subset latin, sin Google Fonts CDN),
+  pero con las `@font-face` declaradas a mano en `BaseLayout.astro` (NO importar los
+  `.css` de `@fontsource/*`): cada woff2 se importa con `?url` y se usa la MISMA URL en
+  un `<link rel="preload">` (con `crossorigin`, obligatorio en fuentes) y en su
+  `@font-face` con **`font-display: block`**. Motivo: con los `.css` del paquete
+  (`swap` + fetch perezoso post-layout) el primer paint de un refresh podía salir con la
+  fuente fallback → "pantallazo" de un 21 distinto. Así las fuentes arrancan a bajar
+  a ~0 ms y nunca se pinta un glifo de otra fuente.
+- `@astrojs/sitemap`, `sharp`.
 - Imágenes con `<Image>/<Picture>` de Astro (AVIF + WebP + srcset).
 - Comandos: `npm install`, `npm run dev` (→ `http://localhost:4321`), `npm run build`
   (→ `dist/`), `npm run preview`, `npm run check` (astro check).
@@ -97,6 +105,18 @@ leería como "ya visto" y nunca dibujaría en la primera carga).
 - El "Estudio 21" gira en 3D (rotateY continuo + extra atado al scroll del hero,
   retrocede en Z y se desvanece integrándose al fondo), parallax de mouse en las capas
   `[data-depth]`, corredor de marcos que avanza en Z, rail de progreso.
+- **Arranque en continuidad (sin flash al cargar/recargar):** dos causas cubiertas.
+  (a) Fuentes: preload + `font-display: block` en `BaseLayout` (ver Stack) — el primer
+  paint nunca muestra un "21" en fuente fallback. (b) Motor: el primer frame del motor
+  es IDÉNTICO al estado que pinta el CSS antes de que corra el JS. El giro usa un
+  **reloj relativo** a `t0` (primer frame visible, no el reloj absoluto de la página →
+  arranca exacto en 0°) y una **rampa smoothstep** (`RAMP_MS` 1,1 s) hace entrar de a
+  poco el cabeceo del título y la deriva de las capas de fondo (los "21" fantasma parten
+  de su posición CSS de reposo). La sombra arranca igualada: `--shadow-pulse: 1` inicial
+  bajo `html.is-immersive` en `hero.css` (= 0,72 + 0,28·|cos 0°|, lo que escribe el
+  motor a 0°; el inline del motor lo pisa después). `t0` se resetea en cada `enable()` y
+  se fija dentro del guard `!document.hidden` (una pestaña que carga en background
+  arranca limpio al hacerse visible).
 - **Material grafito** (referencia: render de producto sobre papel): las capas del
   extruido van de un gris cálido iluminado al fondo a casi negro al frente con
   **oscurecimiento cuadrático** (la mayor parte del canto queda en el gris iluminado y

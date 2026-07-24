@@ -23,9 +23,6 @@
   --font-mono:"IBM Plex Mono", ui-monospace, monospace;
   --maxw:1240px;
   --gutter:clamp(1.25rem, 4vw, 3.5rem);
-  /* desplazamiento del hero/marca hacia la izquierda: usa parte del margen
-     vacío disponible (centrado) sin invadir el gutter en pantallas chicas. */
-  --hero-shift:clamp(0px, calc((100vw - var(--maxw)) / 2 * 0.4), 4rem);
 }
 
 *{box-sizing:border-box;margin:0;padding:0}

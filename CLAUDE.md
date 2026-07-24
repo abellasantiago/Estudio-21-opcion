@@ -50,7 +50,21 @@ registro), no rediseñar. Todo el copy va en **español rioplatense**.
 Orden: **Hero · Nosotros · Proyectos · Equipo · Contacto** (`src/pages/index.astro`).
 Navbar fina (58px) con el logo `banner_negro.png` ("ESTUDIO 21 ARQUITECTOS"); links
 **Inicio · Nosotros · Proyectos · Equipo · Contacto** ("Contacto" es un link normal,
-no CTA con recuadro).
+no CTA con recuadro). El `.nav` **no** usa `.wrap` (el contenedor centrado a `--maxw`
+del resto del sitio): con esa centrado el margen crece mucho más rápido que el ancho
+de pantalla y en monitores anchos (1920+) el logo quedaba lejos del borde. En su
+lugar `padding-inline: 7vw 6vw` — mismo tipo de unidad que las anotaciones mono del
+fondo vivo (`.lbg-note-1`, home inmersiva) — para que el logo quede alineado con
+"Montevideo" a cualquier resolución y los links un poco más cerca del borde derecho.
+En la home inmersiva el header es progresivo (`immersive.css`): **sobre el hero va
+"desnudo"** — SIN panel (fondo/blur/borde) ni logo, pero con los **links visibles y
+clickeables** (color `--ink-soft`, un toque más marcados) flotando arriba para
+orientar a un visitante despistado antes de scrollear, sin entorpecer; el panel
+transparente no capta clics (`pointer-events` sólo en los links). Al **pasar el hero**
+(`#header.past-hero`, ~0,7·vh) no se overridea nada → vuelve la **navbar final** tal
+cual (base + `.scrolled`: panel `--paper` 94% + blur + borde `--line`, logo visible,
+links `--concrete`). En fallback/mobile (sin `is-immersive`) es la navbar sticky normal
+de siempre.
 
 ### Preloader (sólo home)
 `src/components/Preloader.astro` + `src/styles/preloader.css`, montado en `BaseLayout`
@@ -171,9 +185,16 @@ leería como "ya visto" y nunca dibujaría en la primera carga).
   fascia de ambas fachadas, sombra de la cubierta rayada sobre el piso interior,
   diagonales de "vidrio" en paños cercanos y marcas de terreno al pie. Tenue
   (`--concrete`, máscara radial en bordes; fallback 0.65, inmersivo tope 0.8). En
-  inmersivo **se revela con el recorrido acumulado del mouse** (`--wf-reveal`,
-  smoothstep + lerp, lo escribe el motor) y se va con `--hero-fade`; en fallback queda
-  visible estático; **oculto en <900px** (el recorte lo magnificaba sobre los textos).
+  inmersivo **aparece SOLO, temporizado (no con el mouse)**: arranca a revelarse
+  `WF_DELAY` (~1 s) **después de que el hero queda a la vista** y sube de a poco
+  (smoothstep, `--wf-reveal`, ~1,6 s) — lo escribe el motor. El "hero a la vista"
+  lo dispara el **Preloader** con el evento `e21:hero-ready` (al levantar el telón
+  en la primera carga, o directo en reload/sin preloader) + un flag global
+  `window.__e21HeroReady` por si el evento se adelanta al listener; el motor ancla
+  el revelado en `max(heroReadyAt, t0)` (si la pestaña cargó en background, el
+  gradual empieza recién al hacerse visible). Se va con `--hero-fade`; en fallback
+  queda visible estático; **oculto en <900px** (el recorte lo magnificaba sobre los
+  textos).
 - **Textura técnica**: grano de papel (feTurbulence en data-URI, multiply, opacidad
   0.07, `.lbg-grain`) en el fondo vivo. Luz de estudio en el stage
   (`.hero-stage::before`: centro apenas más claro + viñeta sutil). Los parches de

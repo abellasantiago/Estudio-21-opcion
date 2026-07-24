@@ -197,6 +197,17 @@ import '../styles/preloader.css';
   const root = document.documentElement;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // avisar "hero a la vista" (una sola vez): lo escucha immersive.ts para
+  // arrancar, un ratito después, la aparición del wireframe. El flag global
+  // cubre el caso en que este evento se dispare antes de que el motor registre
+  // el listener (los dos scripts son módulos y el orden no está garantizado).
+  const heroReady = () => {
+    const w = window as unknown as { __e21HeroReady?: boolean };
+    if (w.__e21HeroReady) return;
+    w.__e21HeroReady = true;
+    document.dispatchEvent(new Event('e21:hero-ready'));
+  };
+
   // ¿ya se mostró en esta sesión del navegador? (el inline boot de arriba ya lo
   // ocultó sin flash; acá lo confirmamos para no correr el dibujo).
   let seen = false;
@@ -210,6 +221,7 @@ import '../styles/preloader.css';
     if (reduce || seen) {
       root.classList.remove('pl-lock');
       pre.remove();
+      heroReady(); // el hero ya está a la vista (sin telón)
     } else {
       // marcar que ya se mostró: los reloads y el link "Inicio" (→ recarga `/`)
       // dentro de esta sesión lo saltean y van directo al hero.
@@ -273,6 +285,7 @@ import '../styles/preloader.css';
       const finish = () => {
         if (done) return;
         done = true;
+        heroReady(); // telón levantado: el hero real ya quedó en cuadro
         clearTimeout(dismissTimer);
         clearTimeout(transTimer);
         clearTimeout(safetyTimer);

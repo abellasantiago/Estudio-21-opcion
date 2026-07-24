@@ -7,8 +7,15 @@ header{
   transition:border-color .35s ease, background .35s ease;
 }
 header.scrolled{border-bottom-color:var(--line);background:color-mix(in srgb, var(--paper) 94%, transparent)}
-.nav{display:flex;align-items:center;justify-content:space-between;height:58px}
-.brand{display:flex;align-items:center;transform:translateX(calc(-1 * var(--hero-shift)))}
+/* el nav NO usa `.wrap` (centrado a --maxw con margin:auto): ese centrado deja
+   un margen que crece mucho más rápido que el ancho de pantalla, así que en
+   monitores anchos (1920+) el logo terminaba muy lejos del borde. Con
+   padding-inline en vw (misma unidad que las anotaciones mono del fondo vivo,
+   ver .lbg-note-1 en immersive.css) el nav escala igual que ellas a cualquier
+   ancho: el logo queda alineado con "Montevideo" (7vw = mismo valor que
+   .lbg-note-1) y los links quedan un poco más cerca del borde derecho (6vw). */
+.nav{display:flex;align-items:center;justify-content:space-between;height:58px;padding-inline:7vw 6vw}
+.brand{display:flex;align-items:center}
 .brand .mark{
   font-family:var(--font-mono);font-weight:500;font-size:.78rem;
   border:1px solid var(--ink);border-radius:2px;padding:.18rem .42rem;line-height:1;

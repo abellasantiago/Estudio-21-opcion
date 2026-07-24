@@ -194,26 +194,44 @@ html.is-immersive .progress-rail {
   display: block;
 }
 
-/* ---------- header: oculto sobre el hero, aparece al pasarlo ---------- */
-/* fixed (fuera de flujo) → el hero arranca full-bleed sin reservar la banda. */
+/* ---------- header: sobre el hero sólo los links; navbar final al pasarlo ----------
+   fixed (fuera de flujo) → el hero arranca full-bleed sin reservar la banda.
+   Sobre el hero el header va "desnudo": SIN panel (fondo/blur/borde) ni logo,
+   sólo los links flotando arriba para orientar a un visitante despistado (sin
+   entorpecer). Con el scroll (past-hero) NO se overridea nada → vuelve la navbar
+   final tal cual (base header + .scrolled: panel paper + blur + borde). */
 html.is-immersive #header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  opacity: 0;
-  transform: translateY(-12px);
-  pointer-events: none;
   transition:
-    opacity 0.5s ease,
-    transform 0.5s ease,
-    border-color 0.35s ease,
-    background 0.35s ease;
+    background 0.45s ease,
+    backdrop-filter 0.45s ease,
+    border-color 0.35s ease;
 }
-html.is-immersive #header.past-hero {
-  opacity: 1;
-  transform: none;
+/* estado "desnudo" sobre el hero (mientras no se pasó el hero) */
+html.is-immersive #header:not(.past-hero) {
+  background: transparent;
+  backdrop-filter: none;
+  border-bottom-color: transparent;
+  /* el panel transparente no capta clics (pasan al hero); los links sí (abajo) */
+  pointer-events: none;
+}
+/* logo oculto sobre el hero (el "ESTUDIO 21" gigante ya es la marca); conserva
+   su lugar (opacity, no display) → los links no saltan al aparecer la navbar */
+html.is-immersive #header:not(.past-hero) .brand {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+/* links clickeables sobre el hero, un toque más marcados que en la navbar para
+   que se noten, pero discretos (mono, chicos) */
+html.is-immersive #header:not(.past-hero) .nav-links {
   pointer-events: auto;
+}
+html.is-immersive #header:not(.past-hero) .nav-links a {
+  color: var(--ink-soft);
 }
 
 /* ---------- secciones del inicio transparentes → fondo continuo ---------- */

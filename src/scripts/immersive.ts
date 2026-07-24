@@ -50,8 +50,22 @@ export function initImmersive(): void {
   // (clase `past-hero`), no este motor → aparece aunque esta capa no arrancara.
   const railFill = document.querySelector<HTMLElement>('[data-rail-fill]');
   const scrollHint = document.querySelector<HTMLElement>('[data-scroll-hint]');
-  // pabellón wireframe del hero: se revela con el recorrido del mouse
+  // pabellón wireframe del hero: se revela SOLO (temporizado), no con el mouse
   const wireframe = document.querySelector<HTMLElement>('[data-wireframe]');
+
+  // "hero a la vista": lo dispara el preloader al levantar el telón (primera
+  // carga) o al arranque directo (reload/sin preloader). Desde ese instante se
+  // cuenta el delay del wireframe. Se captura una sola vez por carga de página
+  // (independiente del ciclo enable/disable del motor), con salvavidas por si el
+  // evento no llegara. El flag global cubre el caso en que el preloader dispare
+  // el evento ANTES de que este módulo registre el listener.
+  let heroReadyAt = -1;
+  const markHeroReady = () => {
+    if (heroReadyAt < 0) heroReadyAt = performance.now();
+  };
+  if ((window as unknown as { __e21HeroReady?: boolean }).__e21HeroReady) markHeroReady();
+  else document.addEventListener('e21:hero-ready', markHeroReady, { once: true });
+  window.setTimeout(markHeroReady, 9000);
 
   const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)');
   const fineMq = window.matchMedia('(pointer: fine)');
@@ -65,7 +79,8 @@ export function initImmersive(): void {
   const CORRIDOR_DEPTH = 720; // px que avanza el corredor de marcos en el descenso
   const MOUSE_RANGE = 26; // px máx de desplazamiento por paralaje de mouse
   const DRIFT_SPEED = 0.00016; // velocidad de la deriva autónoma del fondo vivo
-  const WF_TRAVEL = 1300; // px de recorrido de mouse para revelar el wireframe del todo
+  const WF_DELAY = 1000; // ms de espera tras el hero antes de empezar a revelar el wireframe
+  const WF_REVEAL_MS = 1600; // ms en que el wireframe sube de 0 a 1 (aparición gradual)
   const RAMP_MS = 1100; // rampa de arranque: deriva/cabeceo entran de a poco (ver t0)
 
   let parallax: Parallax[] = [];
@@ -85,12 +100,8 @@ export function initImmersive(): void {
   // en reposo) y no hay salto/flash al cargar — el movimiento arranca desde ahí.
   let t0 = -1;
 
-  // revelado del wireframe: recorrido acumulado del cursor → opacidad
-  let wfTravel = 0;
-  let wfReveal = 0;
+  // revelado del wireframe: temporizado desde heroReadyAt (no depende del mouse)
   let wfApplied = -1;
-  let lastClientX: number | null = null;
-  let lastClientY = 0;
 
   function collect(): void {
     parallax = Array.from(document.querySelectorAll<HTMLElement>('[data-depth]')).map((el) => ({
@@ -106,12 +117,6 @@ export function initImmersive(): void {
   function onMouse(e: MouseEvent): void {
     tmx = (e.clientX / window.innerWidth) * 2 - 1;
     tmy = (e.clientY / window.innerHeight) * 2 - 1;
-    // acumular el recorrido (revela el wireframe de a poco, ver frame())
-    if (lastClientX !== null) {
-      wfTravel += Math.hypot(e.clientX - lastClientX, e.clientY - lastClientY);
-    }
-    lastClientX = e.clientX;
-    lastClientY = e.clientY;
   }
 
   function frame(now: number): void {
@@ -190,14 +195,17 @@ export function initImmersive(): void {
       const heroFade = clamp(1 - scrollY / (window.innerHeight * 0.7), 0, 1);
       root.style.setProperty('--hero-fade', heroFade.toFixed(3));
 
-      // wireframe del hero: aparece suavemente con el movimiento del mouse
-      // (recorrido acumulado → smoothstep → lerp). Una vez revelado, queda.
-      if (wireframe) {
-        const t = clamp(wfTravel / WF_TRAVEL, 0, 1);
-        const target = t * t * (3 - 2 * t);
-        wfReveal = lerp(wfReveal, target, 0.035);
-        if (target - wfReveal < 0.0005) wfReveal = target;
-        const v = +wfReveal.toFixed(3);
+      // wireframe del hero: aparece SOLO (sin el mouse). Arranca a revelarse
+      // WF_DELAY después de que el hero queda a la vista (fin del preloader, o
+      // load directo en reload) y sube de a poco (smoothstep) en WF_REVEAL_MS.
+      // Una vez revelado, queda. El anclaje es max(heroReadyAt, t0): si la
+      // pestaña cargó en background, t0 (primer frame VISIBLE) manda → el
+      // revelado gradual empieza recién al hacerse visible, no ya consumido.
+      if (wireframe && heroReadyAt >= 0) {
+        const wfAnchor = Math.max(heroReadyAt, t0);
+        const wp = clamp((now - wfAnchor - WF_DELAY) / WF_REVEAL_MS, 0, 1);
+        const target = wp * wp * (3 - 2 * wp);
+        const v = +target.toFixed(3);
         if (v !== wfApplied) {
           wfApplied = v;
           wireframe.style.setProperty('--wf-reveal', String(v));
@@ -236,12 +244,11 @@ export function initImmersive(): void {
     collect();
     // reloj/rampa de arranque: se re-arma en cada enable (ver frame())
     t0 = -1;
-    // el wireframe arranca oculto: lo revela el recorrido del mouse
-    wfTravel = 0;
-    wfReveal = 0;
+    // el wireframe arranca oculto y lo revela el reloj (heroReadyAt). Sólo se
+    // fuerza a 0 si el hero todavía no está a la vista: en un re-enable posterior
+    // (resize) heroReadyAt ya pasó → el próximo frame calcula el valor sin flash.
     wfApplied = -1;
-    lastClientX = null;
-    wireframe?.style.setProperty('--wf-reveal', '0');
+    if (heroReadyAt < 0) wireframe?.style.setProperty('--wf-reveal', '0');
     window.addEventListener('mousemove', onMouse, { passive: true });
     running = true;
     raf = requestAnimationFrame(frame);
@@ -260,7 +267,8 @@ export function initImmersive(): void {
       title.style.removeProperty('--shadow-pulse');
     }
     if (titleFade) titleFade.style.opacity = '';
-    wireframe?.style.removeProperty('--wf-reveal');
+    // no se limpia --wf-reveal: si el motor se re-habilita (resize) el wireframe
+    // debe seguir revelado, no volver a 0.
     if (corridor) corridor.style.transform = '';
     for (const p of parallax) p.el.style.transform = '';
     if (scrollHint) scrollHint.style.opacity = '';

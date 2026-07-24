@@ -53,9 +53,10 @@ Navbar fina (58px) con el logo `banner_negro.png` ("ESTUDIO 21 ARQUITECTOS"); li
 no CTA con recuadro). El `.nav` **no** usa `.wrap` (el contenedor centrado a `--maxw`
 del resto del sitio): con esa centrado el margen crece mucho más rápido que el ancho
 de pantalla y en monitores anchos (1920+) el logo quedaba lejos del borde. En su
-lugar `padding-inline: 7vw 6vw` — mismo tipo de unidad que las anotaciones mono del
-fondo vivo (`.lbg-note-1`, home inmersiva) — para que el logo quede alineado con
-"Montevideo" a cualquier resolución y los links un poco más cerca del borde derecho.
+lugar `padding-inline: 9vw 8vw` — mismo tipo de unidad que las anotaciones mono del
+fondo vivo (`.lbg-note-1`, home inmersiva), corrido 2vw hacia el centro desde el 7vw/6vw
+inicial (que dejaba el logo pegado a "Montevideo") — para que el logo quede a la
+derecha de esa nota y los links más adentro del borde derecho.
 En la home inmersiva el header es progresivo (`immersive.css`): **sobre el hero va
 "desnudo"** — SIN panel (fondo/blur/borde) ni logo, pero con los **links visibles y
 clickeables** (color `--ink-soft`, un toque más marcados) flotando arriba para

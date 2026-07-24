@@ -12,9 +12,10 @@ header.scrolled{border-bottom-color:var(--line);background:color-mix(in srgb, va
    monitores anchos (1920+) el logo terminaba muy lejos del borde. Con
    padding-inline en vw (misma unidad que las anotaciones mono del fondo vivo,
    ver .lbg-note-1 en immersive.css) el nav escala igual que ellas a cualquier
-   ancho: el logo queda alineado con "Montevideo" (7vw = mismo valor que
-   .lbg-note-1) y los links quedan un poco más cerca del borde derecho (6vw). */
-.nav{display:flex;align-items:center;justify-content:space-between;height:58px;padding-inline:7vw 6vw}
+   ancho. Partía de 7vw/6vw (logo pegado a "Montevideo"); se corrió 2vw hacia
+   el centro de cada lado — logo más adentro, links más cerca del borde — para
+   que no se sientan tan pegados a los bordes. */
+.nav{display:flex;align-items:center;justify-content:space-between;height:58px;padding-inline:9vw 8vw}
 .brand{display:flex;align-items:center}
 .brand .mark{
   font-family:var(--font-mono);font-weight:500;font-size:.78rem;
